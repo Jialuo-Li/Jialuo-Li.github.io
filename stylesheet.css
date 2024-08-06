@@ -90,10 +90,13 @@ strong {
 }
 
 h2 {
-  margin: 0;
-  font-weight: normal;
   font-family: 'Lato', Verdana, Helvetica, sans-serif;
-  font-size: 22px;
+  font-size: 25px;
+  /*color: #313164;*/
+  text-decoration: underline;
+  text-decoration-style: solid;
+  -webkit-text-decoration-color: #ad7020;
+  text-decoration-color: #fba524; /* #ac715b; */
 }
 
 .papertitle {
@@ -134,12 +137,3 @@ span.highlight {
   background-color: #ffffd0;
 }
 
-heading {
-  font-family: 'Lato', Verdana, Helvetica, sans-serif;
-  font-size: 25px;
-  /*color: #313164;*/
-  text-decoration: underline;
-  text-decoration-style: solid;
-  -webkit-text-decoration-color: #ad7020;
-  text-decoration-color: #fba524; /* #ac715b; */
-}
