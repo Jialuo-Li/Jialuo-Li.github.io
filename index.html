@@ -40,6 +40,7 @@
               </td>
             </tr>
           </tbody></table>
+
           <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
               <tr>
               <td style="padding:20px;width:100%;vertical-align:middle">
@@ -50,208 +51,104 @@
               </td>
             </tr>
           </tbody></table>
+
           <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
 
+            <tr onmouseout="nuvo_stop()" onmouseover="nuvo_start()">
+              <td style="padding:20px;width:25%;vertical-align:middle">
+                <div class="one">
+                  <div class="two" id='nuvo_image'><video  width=100% muted autoplay loop>
+                  <source src="images/nuvo.mp4" type="video/mp4">
+                  Your browser does not support the video tag.
+                  </video></div>
+                  <img src='images/nuvo.jpg' width=100%>
+                </div>
+                <script type="text/javascript">
+                  function nuvo_start() {
+                    document.getElementById('nuvo_image').style.opacity = "1";
+                  }
 
-    <tr onmouseout="nuvo_stop()" onmouseover="nuvo_start()">
-      <td style="padding:20px;width:25%;vertical-align:middle">
-        <div class="one">
-          <div class="two" id='nuvo_image'><video  width=100% muted autoplay loop>
-          <source src="images/nuvo.mp4" type="video/mp4">
-          Your browser does not support the video tag.
-          </video></div>
-          <img src='images/nuvo.jpg' width=100%>
-        </div>
-        <script type="text/javascript">
-          function nuvo_start() {
-            document.getElementById('nuvo_image').style.opacity = "1";
-          }
-
-          function nuvo_stop() {
-            document.getElementById('nuvo_image').style.opacity = "0";
-          }
-          nuvo_stop()
-        </script>
-      </td>
-      <td style="padding:20px;width:75%;vertical-align:middle">
-        <a href="https://pratulsrinivasan.github.io/nuvo/">
-          <span class="papertitle">Nuvo: Neural UV Mapping for Unruly 3D Representations</span>
-        </a>
-        <br>
-        <a href="https://pratulsrinivasan.github.io/">Pratul Srinivasan</a>,
-        <a href="http://stephangarbin.com/">Stephan J. Garbin</a>,
-        <a href="https://dorverbin.github.io/">Dor Verbin</a>,
-		<strong>Jonathan T. Barron</strong>,
-        <a href="https://bmild.github.io/">Ben Mildenhall</a>
-        <br>
-        <em>ECCV</em>, 2024
-        <br>
-        <a href="https://pratulsrinivasan.github.io/nuvo/">project page</a>
-        /
-        <a href="https://www.youtube.com/watch?v=hmJiOSTDQZI">video</a>
-        /
-        <a href="http://arxiv.org/abs/2312.05283">arXiv</a>
-        <p></p>
-        <p>
-        Neural fields let you recover editable UV mappings for the challenging geometries produced by NeRF-like models.
-        </p>
-      </td>
-    </tr>
-
-
-    <tr onmouseout="cat3d_stop()" onmouseover="cat3d_start()" bgcolor="#ffffd0">
-      <td style="padding:20px;width:25%;vertical-align:middle">
-        <div class="one">
-          <div class="two" id='cat3d_image'><video  width=100% height=100% muted autoplay loop>
-          <source src="images/cat3d.mp4" type="video/mp4">
-          Your browser does not support the video tag.
-          </video></div>
-          <img src='images/cat3d.jpg' width="160">
-        </div>
-        <script type="text/javascript">
-          function cat3d_start() {
-            document.getElementById('cat3d_image').style.opacity = "1";
-          }
-
-          function cat3d_stop() {
-            document.getElementById('cat3d_image').style.opacity = "0";
-          }
-          cat3d_stop()
-        </script>
-      </td>
-      <td style="padding:20px;width:75%;vertical-align:middle">
-        <a href="https://cat3d.github.io/">
-			<span class="papertitle">CAT3D: Create Anything in 3D with Multi-View Diffusion Models
-</span>
-        </a>
-        <br>
-				<a href="https://ruiqigao.github.io/">Ruiqi Gao</a>*,
-        <a href="https://holynski.org/">Aleksander Holynski</a>*, 
-        <a href="https://henzler.github.io/">Philipp Henzler</a>,
-        <a href="https://github.com/ArthurBrussee">Arthur Brussee</a>, 
-				<a href="http://ricardomartinbrualla.com/">Ricardo Martin Brualla</a>, 
-        <a href="https://pratulsrinivasan.github.io/">Pratul P. Srinivasan</a>,
-				<strong>Jonathan T. Barron</strong>,
-        <a href="https://poolio.github.io/">Ben Poole</a>*
-
-        <br>
-        <em>arXiv</em>, 2024
-        <br>
-        <a href="https://cat3d.github.io/">project page</a>
-        /
-        <a href="https://arxiv.org/abs/2405.10314">arXiv</a>
-        <p></p>
-        <p>
-				A single model built around diffusion and NeRF that does text-to-3D, image-to-3D, and few-view reconstruction, trains in 1 minute, and renders at 60FPS in a browser.
-        </p>
-      </td>
-    </tr>
+                  function nuvo_stop() {
+                    document.getElementById('nuvo_image').style.opacity = "0";
+                  }
+                  nuvo_stop()
+                </script>
+              </td>
+              <td style="padding:20px;width:75%;vertical-align:middle">
+                <a href="https://pratulsrinivasan.github.io/nuvo/">
+                  <span class="papertitle">Nuvo: Neural UV Mapping for Unruly 3D Representations</span>
+                </a>
+                <br>
+                <a href="https://pratulsrinivasan.github.io/">Pratul Srinivasan</a>,
+                <a href="http://stephangarbin.com/">Stephan J. Garbin</a>,
+                <a href="https://dorverbin.github.io/">Dor Verbin</a>,
+                <strong>Jonathan T. Barron</strong>,
+                <a href="https://bmild.github.io/">Ben Mildenhall</a>
+                <br>
+                <em>ECCV</em>, 2024
+                <br>
+                <a href="https://pratulsrinivasan.github.io/nuvo/">project page</a>
+                /
+                <a href="https://www.youtube.com/watch?v=hmJiOSTDQZI">video</a>
+                /
+                <a href="http://arxiv.org/abs/2312.05283">arXiv</a>
+                <p></p>
+                <p>
+                Neural fields let you recover editable UV mappings for the challenging geometries produced by NeRF-like models.
+                </p>
+              </td>
+            </tr>
 
 
-    <tr onmouseout="bog_stop()" onmouseover="bog_start()">
-      <td style="padding:20px;width:25%;vertical-align:middle">
-        <div class="one">
-          <div class="two" id='bog_image'><video  width=100% muted autoplay loop>
-          <source src="images/bog.jpg" type="video/mp4">
-          Your browser does not support the video tag.
-          </video></div>
-          <img src='images/bog.jpg' width=100%>
-        </div>
-        <script type="text/javascript">
-          function bog_start() {
-            document.getElementById('bog_image').style.opacity = "1";
-          }
+            <tr onmouseout="cat3d_stop()" onmouseover="cat3d_start()" bgcolor="#ffffd0">
+              <td style="padding:20px;width:25%;vertical-align:middle">
+                <div class="one">
+                  <div class="two" id='cat3d_image'><video  width=100% height=100% muted autoplay loop>
+                  <source src="images/cat3d.mp4" type="video/mp4">
+                  Your browser does not support the video tag.
+                  </video></div>
+                  <img src='images/cat3d.jpg' width="160">
+                </div>
+                <script type="text/javascript">
+                  function cat3d_start() {
+                    document.getElementById('cat3d_image').style.opacity = "1";
+                  }
 
-          function bog_stop() {
-            document.getElementById('bog_image').style.opacity = "0";
-          }
-          bog_stop()
-        </script>
-      </td>
-      <td style="padding:20px;width:75%;vertical-align:middle">
-        <a href="https://creiser.github.io/binary_opacity_grid/">
-          <span class="papertitle">Binary Opacity Grids: Capturing Fine Geometric Detail for Mesh-Based View Synthesis
-</span>
-        </a>
-        <br>
-				<a href="https://creiser.github.io/">Christian Reiser</a>,
-				<a href="http://stephangarbin.com/">Stephan J. Garbin</a>,
-				<a href="https://pratulsrinivasan.github.io/">Pratul Srinivasan</a>,
-				<a href="https://dorverbin.github.io/">Dor Verbin</a>,
-				<a href="https://szeliski.org/RichardSzeliski.htm">Richard Szeliski</a>,
-				<a href="https://bmild.github.io/">Ben Mildenhall</a>,
-				<strong>Jonathan T. Barron</strong>,
-				<a href="https://phogzone.com/">Peter Hedman</a>*,
-				<a href="https://www.cvlibs.net/">Andreas Geiger</a>*		
-        <br>
-        <em>SIGGRAPH</em>, 2024
-        <br>
-        <a href="https://creiser.github.io/binary_opacity_grid/">project page</a>
-        /
-        <a href="https://www.youtube.com/watch?v=2TPUmGRg8bM">video</a>
-        /
-        <a href="https://arxiv.org/abs/2402.12377">arXiv</a>
-        <p></p>
-        <p>
-        Applying anti-aliasing to a discrete opacity grid lets you render a hard representation into a soft image, and this enables highly-detailed mesh recovery.
-        </p>
-      </td>
-    </tr>
+                  function cat3d_stop() {
+                    document.getElementById('cat3d_image').style.opacity = "0";
+                  }
+                  cat3d_stop()
+                </script>
+              </td>
+              <td style="padding:20px;width:75%;vertical-align:middle">
+                <a href="https://cat3d.github.io/">
+                <span class="papertitle">CAT3D: Create Anything in 3D with Multi-View Diffusion Models</span>
+                </a>
+                <br>
+                <a href="https://ruiqigao.github.io/">Ruiqi Gao</a>*,
+                <a href="https://holynski.org/">Aleksander Holynski</a>*, 
+                <a href="https://henzler.github.io/">Philipp Henzler</a>,
+                <a href="https://github.com/ArthurBrussee">Arthur Brussee</a>, 
+                <a href="http://ricardomartinbrualla.com/">Ricardo Martin Brualla</a>, 
+                <a href="https://pratulsrinivasan.github.io/">Pratul P. Srinivasan</a>,
+                <strong>Jonathan T. Barron</strong>,
+                <a href="https://poolio.github.io/">Ben Poole</a>*
 
-    <tr onmouseout="smerf_stop()" onmouseover="smerf_start()">
-      <td style="padding:20px;width:25%;vertical-align:middle">
-        <div class="one">
-          <div class="two" id='smerf_image'><video  width=100% muted autoplay loop>
-          <source src="images/smerf.mp4" type="video/mp4">
-          Your browser does not support the video tag.
-          </video></div>
-          <img src='images/smerf.jpg' width=100%>
-        </div>
-        <script type="text/javascript">
-          function smerf_start() {
-            document.getElementById('smerf_image').style.opacity = "1";
-          }
-
-          function smerf_stop() {
-            document.getElementById('smerf_image').style.opacity = "0";
-          }
-          smerf_stop()
-        </script>
-      </td>
-      <td style="padding:20px;width:75%;vertical-align:middle">
-        <a href="https://smerf-3d.github.io/">
-          <span class="papertitle">SMERF: Streamable Memory Efficient Radiance Fields for Real-Time Large-Scene Exploration</span>
-        </a>
-        <br>
-		<a href="http://www.stronglyconvex.com/about.html">Daniel Duckworth*</a>,
-		<a href="https://phogzone.com/">Peter Hedman*</a>,
-		<a href="https://creiser.github.io/">Christian Reiser</a>,
-		<a href="">Peter Zhizhin</a>,
-		<a href="">Jean-François Thibert</a>,
-        <a href="https://lucic.ai/">Mario Lučić</a>,
-        <a href="https://szeliski.org/">Richard Szeliski</a>,
-		<strong>Jonathan T. Barron</strong>
-        <br>
-        <em>SIGGRAPH</em>, 2024 &nbsp <font color="red"><strong>(Honorable Mention)</strong></font>
-        <br>
-        <a href="https://smerf-3d.github.io/">project page</a>
-        /
-        <a href="https://www.youtube.com/watch?v=zhO8iUBpnCc">video</a>
-        /
-        <a href="https://arxiv.org/abs/2312.07541">arXiv</a>
-        <p></p>
-        <p>
-        Distilling a Zip-NeRF into a tiled set of MERFs lets you fly through radiance fields on laptops and smartphones at 60 FPS.
-        </p>
-      </td>
-    </tr>
-	
-
-
+                <br>
+                <em>arXiv</em>, 2024
+                <br>
+                <a href="https://cat3d.github.io/">project page</a>
+                /
+                <a href="https://arxiv.org/abs/2405.10314">arXiv</a>
+                <p></p>
+                <p>
+                A single model built around diffusion and NeRF that does text-to-3D, image-to-3D, and few-view reconstruction, trains in 1 minute, and renders at 60FPS in a browser.
+                </p>
+              </td>
+            </tr>
 
           </tbody></table>
 
-          
           <table width="100%" align="center" border="0" cellspacing="0" cellpadding="20"><tbody>
             <tr>
               <td>
