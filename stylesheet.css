@@ -136,7 +136,11 @@
   --pearl-dot: var(--pearl-800);
   --header-bg: rgb(251 247 242 / 0.85);
   --footer-bg: #f2e8dd;
-  --shadow: 0 1px 2px rgb(42 31 26 / 0.05), 0 18px 36px -20px rgb(74 48 30 / 0.35);
+  --line-hover: #d9be9f;
+  --shadow-edge: rgb(42 31 26 / 0.05);
+  --shadow-tint: rgb(74 48 30 / 0.32);
+  --shadow: 0 1px 2px var(--shadow-edge), 0 18px 36px -20px var(--shadow-tint);
+  --shadow-soft: 0 1px 2px var(--shadow-edge), 0 10px 26px -16px var(--shadow-tint);
   --boba-ink: var(--pearl-900);
   --boba-tea: var(--tea-300);
   --boba-pearl: var(--pearl-800);
@@ -197,8 +201,10 @@
     --pearl-dot: light-dark(var(--pearl-800), var(--foam-300));
     --header-bg: light-dark(rgb(251 247 242 / 0.85), rgb(25 19 16 / 0.85));
     --footer-bg: light-dark(#f2e8dd, var(--night-950));
-    --shadow: light-dark(0 1px 2px rgb(42 31 26 / 0.05), 0 1px 2px rgb(0 0 0 / 0.3)),
-      light-dark(0 18px 36px -20px rgb(74 48 30 / 0.35), 0 18px 36px -18px rgb(0 0 0 / 0.65));
+    --line-hover: light-dark(#d9be9f, #5b473b);
+    /* light-dark() only takes colors, so the shadows switch through their colors. */
+    --shadow-edge: light-dark(rgb(42 31 26 / 0.05), rgb(0 0 0 / 0.3));
+    --shadow-tint: light-dark(rgb(74 48 30 / 0.32), rgb(0 0 0 / 0.6));
     --boba-ink: light-dark(var(--pearl-900), var(--foam-100));
     --boba-tea: light-dark(var(--tea-300), #8c6a4f);
     --boba-pearl: light-dark(var(--pearl-800), #1f1612);
@@ -571,7 +577,7 @@ button {
   font-weight: 500;
   line-height: 1.2;
   text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.25s var(--ease);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .link-chip .icon {
@@ -582,14 +588,13 @@ button {
 }
 
 .link-chip:hover {
-  border-color: var(--btn-bg);
-  background: var(--btn-bg);
-  color: var(--btn-ink);
-  transform: translateY(-1px);
+  border-color: var(--line-hover);
+  background: var(--tint);
+  color: var(--ink);
 }
 
 .link-chip:hover .icon {
-  color: inherit;
+  color: var(--straw);
 }
 
 /* ---------------------------------------------------------------- header */
@@ -760,7 +765,7 @@ button {
 
 .hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(15rem, 22.5rem);
+  grid-template-columns: minmax(0, 1fr) minmax(13rem, 18rem);
   align-items: center;
   gap: clamp(2.5rem, 6vw, 6rem);
 }
@@ -865,6 +870,11 @@ h1 {
   --brand-ink: #2a1f1a;
 }
 
+.social-linkedin {
+  --brand: #0a66c2;
+  --brand-ink: #fff;
+}
+
 /* Name tooltip on hover/focus (the accessible name comes from aria-label). */
 .social::after {
   content: attr(data-tip);
@@ -893,71 +903,21 @@ h1 {
   display: block;
 }
 
-/* The padding holds the tilt, sticker and pearls, so nothing spills outside the figure. */
+/* A plain rounded photo: no frame, tilt, decoration or hover effect. */
 .portrait {
-  position: relative;
   justify-self: end;
   width: 100%;
-  padding: 1.15rem 0.95rem;
-  isolation: isolate;
 }
 
-/* A few "tapioca pearls" scattered behind the photo. */
-.portrait::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(circle at 97% 3%, var(--tint) 0 9px, transparent 10px),
-    radial-gradient(circle at 86% 1.5%, var(--tint) 0 5px, transparent 6px),
-    radial-gradient(circle at 2% 32%, var(--tint) 0 7px, transparent 8px),
-    radial-gradient(circle at 99% 72%, var(--tint) 0 6px, transparent 7px);
-}
-
-.polaroid {
+.portrait a {
   display: block;
-  padding: 0.7rem 0.7rem 2.75rem;
-  border: 1px solid var(--line);
-  border-radius: 1rem;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  transform: rotate(2.5deg);
-  transition: transform 0.6s var(--ease), box-shadow 0.6s var(--ease);
+  border-radius: var(--radius-lg);
 }
 
-.polaroid img {
+.portrait img {
   width: 100%;
-  border-radius: 0.55rem;
-}
-
-.portrait:hover .polaroid {
-  transform: rotate(0deg) translateY(-3px);
-}
-
-.sticker {
-  position: absolute;
-  bottom: 2rem;
-  left: 0;
-  display: grid;
-  place-items: center;
-  width: 4.75rem;
-  height: 4.75rem;
   border: 1px solid var(--line);
-  border-radius: 50%;
-  background: var(--sticker-bg);
-  box-shadow: var(--shadow);
-  transform: rotate(-12deg);
-  transition: transform 0.5s var(--ease);
-}
-
-.sticker .boba {
-  width: 3rem;
-  height: 3rem;
-}
-
-.portrait:hover .sticker {
-  transform: rotate(8deg) scale(1.06);
+  border-radius: var(--radius-lg);
 }
 
 /* ---------------------------------------------------------------- sections */
@@ -1176,73 +1136,47 @@ h2 {
   transform: rotate(180deg);
 }
 
-/* Publications */
-
-.pub-year + .pub-year {
-  margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
-}
-
-.year {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-  color: var(--tea);
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
-  font-style: italic;
-  font-weight: 450;
-  line-height: 1.2;
-}
-
-.year::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--line);
-}
+/* Publications: one list in the original order; each venue chip carries the year. */
 
 .paper {
   display: grid;
   grid-template-columns: minmax(0, 19rem) minmax(0, 1fr);
   gap: clamp(1.25rem, 1rem + 1.5vw, 2.25rem);
-  padding: 1.1rem 1.5rem 1.2rem 1.1rem;
+  padding: 1.25rem 1.5rem 1.3rem 1.25rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .paper + .paper {
   margin-top: 1.25rem;
 }
 
+/* Hover keeps everything in place: the edge warms and a soft shadow settles under the card. */
 .paper:hover {
-  border-color: var(--line-strong);
-  box-shadow: var(--shadow);
-  transform: translateY(-3px);
+  border-color: var(--line-hover);
+  box-shadow: var(--shadow-soft);
 }
 
 .paper-figure {
   display: block;
   align-self: start;
-  aspect-ratio: 16 / 10;
-  padding: 0.7rem;
-  border-radius: var(--radius);
-  background: var(--tint);
+  border-radius: var(--radius-sm);
 }
 
-/* Figures are always shown whole: contained, never cropped. */
+/* Figures are shown whole at their own aspect ratio: no frame, cropping or zoom. */
 .paper-figure img {
   width: 100%;
-  height: 100%;
   object-fit: contain;
-  border-radius: 4px;
-  transition: transform 0.6s var(--ease);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  transition: border-color 0.3s ease;
 }
 
 .paper:hover .paper-figure img {
-  transform: scale(1.035);
+  border-color: var(--line-hover);
 }
 
 .paper-body {
@@ -1384,13 +1318,12 @@ h2 {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .tl-item:hover .tl-card {
-  border-color: var(--line-strong);
-  box-shadow: var(--shadow);
-  transform: translateX(4px);
+  border-color: var(--line-hover);
+  box-shadow: var(--shadow-soft);
 }
 
 .tl-head {
@@ -1510,6 +1443,35 @@ h2 {
 
 .footer-brand > p {
   margin-block: 0.75rem 1.25rem;
+}
+
+.footer-brand .brand {
+  gap: 0.85rem;
+}
+
+/* The boba sticker signs off the page: on hover it turns and the pearls bob (see the motion block). */
+.sticker {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--sticker-bg);
+  box-shadow: var(--shadow-soft);
+  transform: rotate(-10deg);
+  transition: transform 0.5s var(--ease);
+}
+
+.brand .sticker .boba {
+  width: 2.15rem;
+  height: 2.15rem;
+  margin-top: 0;
+}
+
+.brand:hover .sticker {
+  transform: rotate(6deg) scale(1.05);
 }
 
 .footer-label {
@@ -1651,23 +1613,19 @@ h2 {
     animation-delay: 0.15s;
   }
 
-  .brand:hover .boba-pearls circle,
-  .portrait:hover .boba-pearls circle {
+  .brand:hover .boba-pearls circle {
     animation: bob 0.45s ease-in-out infinite alternate;
   }
 
-  .brand:hover .boba-pearls circle:nth-child(2n),
-  .portrait:hover .boba-pearls circle:nth-child(2n) {
+  .brand:hover .boba-pearls circle:nth-child(2n) {
     animation-delay: 0.15s;
   }
 
-  .brand:hover .boba-pearls circle:nth-child(3n),
-  .portrait:hover .boba-pearls circle:nth-child(3n) {
+  .brand:hover .boba-pearls circle:nth-child(3n) {
     animation-delay: 0.3s;
   }
 
-  .brand:hover .boba-straw,
-  .portrait:hover .boba-straw {
+  .brand:hover .boba-straw {
     animation: stir 0.9s ease-in-out infinite alternate;
   }
 
@@ -1780,7 +1738,7 @@ h2 {
 
   .portrait {
     justify-self: start;
-    max-width: min(88vw, 20rem);
+    max-width: min(72vw, 16rem);
   }
 
   .paper {
