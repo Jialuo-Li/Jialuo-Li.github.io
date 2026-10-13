@@ -49,6 +49,36 @@
     });
   }
 
+  // Long lists (News, Honors): show the first `data-visible` items and a toggle for the rest.
+  document.querySelectorAll("[data-visible]").forEach(function (list) {
+    var limit = parseInt(list.getAttribute("data-visible"), 10);
+    var extra = Array.prototype.filter.call(list.children, function (item) {
+      return item.tagName === "LI";
+    }).slice(limit);
+    if (!list.id || !extra.length) return;
+
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "more-btn";
+    button.setAttribute("aria-controls", list.id);
+    button.innerHTML = '<span></span><svg class="icon" aria-hidden="true"><use href="#ph-caret-down"></use></svg>';
+    var label = button.querySelector("span");
+
+    function setExpanded(expanded) {
+      extra.forEach(function (item) {
+        item.hidden = !expanded;
+      });
+      button.setAttribute("aria-expanded", String(expanded));
+      label.textContent = expanded ? "Show fewer" : "Show " + extra.length + " more";
+    }
+
+    setExpanded(false);
+    button.addEventListener("click", function () {
+      setExpanded(button.getAttribute("aria-expanded") !== "true");
+    });
+    list.parentNode.insertBefore(button, list.nextSibling);
+  });
+
   // Mobile menu: close after choosing a section, on Escape, or on an outside click.
   var menu = document.querySelector(".mobile-menu");
   if (menu) {

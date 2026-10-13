@@ -7,11 +7,9 @@
   <meta name="author" content="Jialuo Li">
   <meta name="description" content="Jialuo Li (李佳烙), graduate student in Computer Science at the Georgia Institute of Technology, working on multimodal generative models.">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1f1e1d" media="(prefers-color-scheme: dark)">
-  <link rel="icon" href="images/favicon/favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="images/favicon/favicon-32.png" sizes="32x32" type="image/png">
-  <link rel="apple-touch-icon" href="images/favicon/apple-touch-icon.png">
+  <meta name="theme-color" content="#fbf7f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191310" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="images/favicon/icon.ico" type="image/x-icon">
   <link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="stylesheet.css">
@@ -26,44 +24,43 @@
 </head>
 <body id="top">
   <a class="skip-link" href="#main">Skip to content</a>
-  <!-- Icons: Lucide (ISC) and Simple Icons (CC0); licenses in assets/licenses/. -->
+  <!-- Icons: Phosphor (MIT) and Simple Icons (CC0); licenses in assets/licenses/. -->
   <svg class="sprite" aria-hidden="true" focusable="false">
-    <symbol id="i-mail" viewBox="0 0 24 24"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></symbol>
-    <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
-    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
-    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></symbol>
-    <symbol id="i-presentation" viewBox="0 0 24 24"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
-    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></symbol>
-    <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
-    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
-    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
-    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/></symbol>
-    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></symbol>
-    <symbol id="i-medal" viewBox="0 0 24 24"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/></symbol>
-    <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
-    <symbol id="i-terminal" viewBox="0 0 24 24"><path d="M12 19h8"/><path d="m4 17 6-6-6-6"/></symbol>
-    <symbol id="i-user-round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
-    <symbol id="i-flask-conical" viewBox="0 0 24 24"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/></symbol>
-    <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></symbol>
-    <symbol id="i-briefcase" viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></symbol>
-    <symbol id="i-award" viewBox="0 0 24 24"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></symbol>
-    <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
-    <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></symbol>
-    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></symbol>
+    <symbol id="ph-file-text" viewBox="0 0 256 256"><path d="M208,88H152V32Z" class="duo" opacity="0.2"/><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Zm-32-80a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,136Zm0,32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,168Z"/></symbol>
+    <symbol id="ph-envelope-simple" viewBox="0 0 256 256"><path d="M224,56l-96,88L32,56Z" class="duo" opacity="0.2"/><path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"/></symbol>
+    <symbol id="ph-copy" viewBox="0 0 256 256"><path d="M216,40V168H168V88H88V40Z" class="duo" opacity="0.2"/><path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"/></symbol>
+    <symbol id="ph-check" viewBox="0 0 256 256"><path d="M232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56Z" class="duo" opacity="0.2"/><path d="M205.66,85.66l-96,96a8,8,0,0,1-11.32,0l-40-40a8,8,0,0,1,11.32-11.32L104,164.69l90.34-90.35a8,8,0,0,1,11.32,11.32Z"/></symbol>
+    <symbol id="ph-arrow-up-right" viewBox="0 0 256 256"><path d="M192,64V168L88,64Z" class="duo" opacity="0.2"/><path d="M192,56H88a8,8,0,0,0-5.66,13.66L128.69,116,58.34,186.34a8,8,0,0,0,11.32,11.32L140,127.31l46.34,46.35A8,8,0,0,0,200,168V64A8,8,0,0,0,192,56Zm-8,92.69-38.34-38.34h0L107.31,72H184Z"/></symbol>
+    <symbol id="ph-arrow-up" viewBox="0 0 256 256"><path d="M200,112H56l72-72Z" class="duo" opacity="0.2"/><path d="M205.66,106.34l-72-72a8,8,0,0,0-11.32,0l-72,72A8,8,0,0,0,56,120h64v96a8,8,0,0,0,16,0V120h64a8,8,0,0,0,5.66-13.66ZM75.31,104,128,51.31,180.69,104Z"/></symbol>
+    <symbol id="ph-list" viewBox="0 0 256 256"><path d="M216,64V192H40V64Z" class="duo" opacity="0.2"/><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"/></symbol>
+    <symbol id="ph-x" viewBox="0 0 256 256"><path d="M216,56V200a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V56A16,16,0,0,1,56,40H200A16,16,0,0,1,216,56Z" class="duo" opacity="0.2"/><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></symbol>
+    <symbol id="ph-sun" viewBox="0 0 256 256"><path d="M184,128a56,56,0,1,1-56-56A56,56,0,0,1,184,128Z" class="duo" opacity="0.2"/><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></symbol>
+    <symbol id="ph-moon" viewBox="0 0 256 256"><path d="M227.89,147.89A96,96,0,1,1,108.11,28.11,96.09,96.09,0,0,0,227.89,147.89Z" class="duo" opacity="0.2"/><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></symbol>
+    <symbol id="ph-caret-down" viewBox="0 0 256 256"><path d="M208,96l-80,80L48,96Z" class="duo" opacity="0.2"/><path d="M215.39,92.94A8,8,0,0,0,208,88H48a8,8,0,0,0-5.66,13.66l80,80a8,8,0,0,0,11.32,0l80-80A8,8,0,0,0,215.39,92.94ZM128,164.69,67.31,104H188.69Z"/></symbol>
+    <symbol id="ph-flask" viewBox="0 0 256 256"><path d="M208,216H48a8,8,0,0,1-6.86-12.12l30.48-50.8h0c13.23-2.48,32-1.41,56.37,10.92,32.25,16.33,54.75,12.91,67.5,7.65h0l19.34,32.23A8,8,0,0,1,208,216Z" class="duo" opacity="0.2"/><path d="M221.69,199.77,160,96.92V40h8a8,8,0,0,0,0-16H88a8,8,0,0,0,0,16h8V96.92L34.31,199.77A16,16,0,0,0,48,224H208a16,16,0,0,0,13.72-24.23ZM110.86,103.25A7.93,7.93,0,0,0,112,99.14V40h32V99.14a7.93,7.93,0,0,0,1.14,4.11L183.36,167c-12,2.37-29.07,1.37-51.75-10.11-15.91-8.05-31.05-12.32-45.22-12.81ZM48,208l28.54-47.58c14.25-1.73,30.31,1.85,47.82,10.72,19,9.61,35,12.88,48,12.88a69.89,69.89,0,0,0,19.55-2.7L208,208Z"/></symbol>
+    <symbol id="ph-newspaper" viewBox="0 0 256 256"><path d="M224,64V184a16,16,0,0,1-16,16H32a16,16,0,0,0,16-16V64a8,8,0,0,1,8-8H216A8,8,0,0,1,224,64Z" class="duo" opacity="0.2"/><path d="M88,112a8,8,0,0,1,8-8h80a8,8,0,0,1,0,16H96A8,8,0,0,1,88,112Zm8,40h80a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16ZM232,64V184a24,24,0,0,1-24,24H32A24,24,0,0,1,8,184.11V88a8,8,0,0,1,16,0v96a8,8,0,0,0,16,0V64A16,16,0,0,1,56,48H216A16,16,0,0,1,232,64Zm-16,0H56V184a23.84,23.84,0,0,1-1.37,8H208a8,8,0,0,0,8-8Z"/></symbol>
+    <symbol id="ph-books" viewBox="0 0 256 256"><path d="M48,72h64V184H48ZM190.64,38.39a8,8,0,0,0-9.5-6.21l-46.81,10a8.07,8.07,0,0,0-6.15,9.57L139.79,107l62.46-13.42Z" class="duo" opacity="0.2"/><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"/></symbol>
+    <symbol id="ph-briefcase" viewBox="0 0 256 256"><path d="M224,118.31V200a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V118.31h0A191.14,191.14,0,0,0,128,144,191.08,191.08,0,0,0,224,118.31Z" class="duo" opacity="0.2"/><path d="M104,112a8,8,0,0,1,8-8h32a8,8,0,0,1,0,16H112A8,8,0,0,1,104,112ZM232,72V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V72A16,16,0,0,1,40,56H80V48a24,24,0,0,1,24-24h48a24,24,0,0,1,24,24v8h40A16,16,0,0,1,232,72ZM96,56h64V48a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8ZM40,72v41.62A184.07,184.07,0,0,0,128,136a184,184,0,0,0,88-22.39V72ZM216,200V131.63A200.25,200.25,0,0,1,128,152a200.19,200.19,0,0,1-88-20.36V200H216Z"/></symbol>
+    <symbol id="ph-trophy" viewBox="0 0 256 256"><path d="M200,48v63.1c0,39.7-31.75,72.6-71.45,72.9A72,72,0,0,1,56,112V48Z" class="duo" opacity="0.2"/><path d="M232,64H208V48a8,8,0,0,0-8-8H56a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80V96a40,40,0,0,0,40,40h3.65A80.13,80.13,0,0,0,120,191.61V216H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V191.58c31.94-3.23,58.44-25.64,68.08-55.58H208a40,40,0,0,0,40-40V80A16,16,0,0,0,232,64ZM48,120A24,24,0,0,1,24,96V80H48v32q0,4,.39,8Zm144-8.9c0,35.52-29,64.64-64,64.9a64,64,0,0,1-64-64V56H192ZM232,96a24,24,0,0,1-24,24h-.5a81.81,81.81,0,0,0,.5-8.9V80h24Z"/></symbol>
+    <symbol id="ph-image" viewBox="0 0 256 256"><path d="M224,56V178.06l-39.72-39.72a8,8,0,0,0-11.31,0L147.31,164,97.66,114.34a8,8,0,0,0-11.32,0L32,168.69V56a8,8,0,0,1,8-8H216A8,8,0,0,1,224,56Z" class="duo" opacity="0.2"/><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z"/></symbol>
+    <symbol id="ph-chat-centered-text" viewBox="0 0 256 256"><path d="M224,56V184a8,8,0,0,1-8,8H150.93l-16,28a8,8,0,0,1-13.9,0l-16-28H40a8,8,0,0,1-8-8V56a8,8,0,0,1,8-8H216A8,8,0,0,1,224,56Z" class="duo" opacity="0.2"/><path d="M88,104a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,104Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16ZM232,56V184a16,16,0,0,1-16,16H155.57l-13.68,23.94a16,16,0,0,1-27.78,0L100.43,200H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56Zm-16,0H40V184h65.07a8,8,0,0,1,7,4l16,28,16-28a8,8,0,0,1,7-4H216Z"/></symbol>
+    <symbol id="ph-intersect-three" viewBox="0 0 256 256"><path d="M104.64,147.28a60,60,0,0,1-36-46.56A60.06,60.06,0,0,1,128,108,59.94,59.94,0,0,0,104.64,147.28Zm0,0A60,60,0,0,0,128,204a60,60,0,0,0,23.36-56.72,60.17,60.17,0,0,1-46.72,0Zm82.72-46.56A60.06,60.06,0,0,0,128,108a59.94,59.94,0,0,1,23.36,39.28A60,60,0,0,0,187.36,100.72Z" class="duo" opacity="0.2"/><path d="M195.88,96c.07-1.31.12-2.63.12-4A68,68,0,0,0,60,92c0,1.33,0,2.65.12,4A68,68,0,1,0,128,213.65,68,68,0,1,0,195.88,96ZM128,193.47a51.89,51.89,0,0,1-16-35.38,67.55,67.55,0,0,0,31.9,0A51.89,51.89,0,0,1,128,193.47ZM128,144a51.93,51.93,0,0,1-14.08-1.95A52.06,52.06,0,0,1,128,118.53a52.06,52.06,0,0,1,14.08,23.52A51.93,51.93,0,0,1,128,144Zm-28.77-8.71A52.19,52.19,0,0,1,77.92,106a51.88,51.88,0,0,1,36.79,3.28A68.17,68.17,0,0,0,99.23,135.29Zm42.06-26.06A51.88,51.88,0,0,1,178.08,106a52.19,52.19,0,0,1-21.31,29.34A68.17,68.17,0,0,0,141.29,109.23ZM128,40A52.06,52.06,0,0,1,180,89.91,67.72,67.72,0,0,0,128,98.35a67.72,67.72,0,0,0-51.95-8.44A52.06,52.06,0,0,1,128,40ZM40,156a52,52,0,0,1,23.23-43.29A68.36,68.36,0,0,0,96.12,152c-.07,1.31-.12,2.63-.12,4a67.74,67.74,0,0,0,18.71,46.77A52,52,0,0,1,40,156Zm124,52a51.65,51.65,0,0,1-22.71-5.23A67.74,67.74,0,0,0,160,156c0-1.33-.05-2.65-.12-4a68.36,68.36,0,0,0,32.89-39.33A52,52,0,0,1,164,208Z"/></symbol>
+    <symbol id="ph-globe-simple" viewBox="0 0 256 256"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" class="duo" opacity="0.2"/><path d="M128,24h0A104,104,0,1,0,232,128,104.12,104.12,0,0,0,128,24Zm87.62,96H175.79C174,83.49,159.94,57.67,148.41,42.4A88.19,88.19,0,0,1,215.63,120ZM96.23,136h63.54c-2.31,41.61-22.23,67.11-31.77,77C118.45,203.1,98.54,177.6,96.23,136Zm0-16C98.54,78.39,118.46,52.89,128,43c9.55,9.93,29.46,35.43,31.77,77Zm11.36-77.6C96.06,57.67,82,83.49,80.21,120H40.37A88.19,88.19,0,0,1,107.59,42.4ZM40.37,136H80.21c1.82,36.51,15.85,62.33,27.38,77.6A88.19,88.19,0,0,1,40.37,136Zm108,77.6c11.53-15.27,25.56-41.09,27.38-77.6h39.84A88.19,88.19,0,0,1,148.41,213.6Z"/></symbol>
+    <symbol id="ph-presentation-chart" viewBox="0 0 256 256"><path d="M224,56V176a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V56a8,8,0,0,1,8-8H216A8,8,0,0,1,224,56Z" class="duo" opacity="0.2"/><path d="M216,40H136V24a8,8,0,0,0-16,0V40H40A16,16,0,0,0,24,56V176a16,16,0,0,0,16,16H79.36L57.75,219a8,8,0,0,0,12.5,10l29.59-37h56.32l29.59,37a8,8,0,1,0,12.5-10l-21.61-27H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,136H40V56H216V176ZM104,120v24a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Zm32-16v40a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm32-16v56a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z"/></symbol>
+    <symbol id="ph-sparkle" viewBox="0 0 256 256"><path d="M194.82,151.43l-55.09,20.3-20.3,55.09a7.92,7.92,0,0,1-14.86,0l-20.3-55.09-55.09-20.3a7.92,7.92,0,0,1,0-14.86l55.09-20.3,20.3-55.09a7.92,7.92,0,0,1,14.86,0l20.3,55.09,55.09,20.3A7.92,7.92,0,0,1,194.82,151.43Z" class="duo" opacity="0.2"/><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></symbol>
+    <symbol id="ph-microphone-stage" viewBox="0 0 256 256"><path d="M156.5,151,59,222.45a8,8,0,0,1-10.38-.79l-14.3-14.3A8,8,0,0,1,33.55,197L105,99.5l0,0A64,64,0,0,0,156.48,151Z" class="duo" opacity="0.2"/><path d="M168,16A72.07,72.07,0,0,0,96,88a73.29,73.29,0,0,0,.63,9.42L27.12,192.22A15.93,15.93,0,0,0,28.71,213L43,227.29a15.93,15.93,0,0,0,20.78,1.59l94.81-69.53A73.29,73.29,0,0,0,168,160a72,72,0,1,0,0-144Zm56,72a55.72,55.72,0,0,1-11.16,33.52L134.49,43.16A56,56,0,0,1,224,88ZM54.32,216,40,201.68,102.14,117A72.37,72.37,0,0,0,139,153.86ZM112,88a55.67,55.67,0,0,1,11.16-33.51l78.34,78.34A56,56,0,0,1,112,88Zm-2.35,58.34a8,8,0,0,1,0,11.31l-8,8a8,8,0,1,1-11.31-11.31l8-8A8,8,0,0,1,109.67,146.33Z"/></symbol>
+    <symbol id="ph-medal" viewBox="0 0 256 256"><path d="M176,96a48,48,0,1,1-48-48A48,48,0,0,1,176,96Z" class="duo" opacity="0.2"/><path d="M216,96A88,88,0,1,0,72,163.83V240a8,8,0,0,0,11.58,7.16L128,225l44.43,22.21A8.07,8.07,0,0,0,176,248a8,8,0,0,0,8-8V163.83A87.85,87.85,0,0,0,216,96ZM56,96a72,72,0,1,1,72,72A72.08,72.08,0,0,1,56,96ZM168,227.06l-36.43-18.21a8,8,0,0,0-7.16,0L88,227.06V174.37a87.89,87.89,0,0,0,80,0ZM128,152A56,56,0,1,0,72,96,56.06,56.06,0,0,0,128,152Zm0-96A40,40,0,1,1,88,96,40,40,0,0,1,128,56Z"/></symbol>
+    <symbol id="ph-graduation-cap" viewBox="0 0 256 256"><path d="M216,113.07v53.22a8,8,0,0,1-2,5.31c-11.3,12.59-38.9,36.4-86,36.4s-74.68-23.81-86-36.4a8,8,0,0,1-2-5.31V113.07L128,160Z" class="duo" opacity="0.2"/><path d="M251.76,88.94l-120-64a8,8,0,0,0-7.52,0l-120,64a8,8,0,0,0,0,14.12L32,117.87v48.42a15.91,15.91,0,0,0,4.06,10.65C49.16,191.53,78.51,216,128,216a130,130,0,0,0,48-8.76V240a8,8,0,0,0,16,0V199.51a115.63,115.63,0,0,0,27.94-22.57A15.91,15.91,0,0,0,224,166.29V117.87l27.76-14.81a8,8,0,0,0,0-14.12ZM128,200c-43.27,0-68.72-21.14-80-33.71V126.4l76.24,40.66a8,8,0,0,0,7.52,0L176,143.47v46.34C163.4,195.69,147.52,200,128,200Zm80-33.75a97.83,97.83,0,0,1-16,14.25V134.93l16-8.53ZM188,118.94l-.22-.13-56-29.87a8,8,0,0,0-7.52,14.12L171,128l-43,22.93L25,96,128,41.07,231,96Z"/></symbol>
     <symbol id="b-github" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
-    <symbol id="b-x" viewBox="0 0 24 24"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></symbol>
     <symbol id="b-googlescholar" viewBox="0 0 24 24"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/></symbol>
     <symbol id="b-huggingface" viewBox="0 0 24 24"><path d="M12.025 1.13c-5.77 0-10.449 4.647-10.449 10.378 0 1.112.178 2.181.503 3.185.064-.222.203-.444.416-.577a.96.96 0 0 1 .524-.15c.293 0 .584.124.84.284.278.173.48.408.71.694.226.282.458.611.684.951v-.014c.017-.324.106-.622.264-.874s.403-.487.762-.543c.3-.047.596.06.787.203s.31.313.4.467c.15.257.212.468.233.542.01.026.653 1.552 1.657 2.54.616.605 1.01 1.223 1.082 1.912.055.537-.096 1.059-.38 1.572.637.121 1.294.187 1.967.187.657 0 1.298-.063 1.921-.178-.287-.517-.44-1.041-.384-1.581.07-.69.465-1.307 1.081-1.913 1.004-.987 1.647-2.513 1.657-2.539.021-.074.083-.285.233-.542.09-.154.208-.323.4-.467a1.08 1.08 0 0 1 .787-.203c.359.056.604.29.762.543s.247.55.265.874v.015c.225-.34.457-.67.683-.952.23-.286.432-.52.71-.694.257-.16.547-.284.84-.285a.97.97 0 0 1 .524.151c.228.143.373.388.43.625l.006.04a10.3 10.3 0 0 0 .534-3.273c0-5.731-4.678-10.378-10.449-10.378M8.327 6.583a1.5 1.5 0 0 1 .713.174 1.487 1.487 0 0 1 .617 2.013c-.183.343-.762-.214-1.102-.094-.38.134-.532.914-.917.71a1.487 1.487 0 0 1 .69-2.803m7.486 0a1.487 1.487 0 0 1 .689 2.803c-.385.204-.536-.576-.916-.71-.34-.12-.92.437-1.103.094a1.487 1.487 0 0 1 .617-2.013 1.5 1.5 0 0 1 .713-.174m-10.68 1.55a.96.96 0 1 1 0 1.921.96.96 0 0 1 0-1.92m13.838 0a.96.96 0 1 1 0 1.92.96.96 0 0 1 0-1.92M8.489 11.458c.588.01 1.965 1.157 3.572 1.164 1.607-.007 2.984-1.155 3.572-1.164.196-.003.305.12.305.454 0 .886-.424 2.328-1.563 3.202-.22-.756-1.396-1.366-1.63-1.32q-.011.001-.02.006l-.044.026-.01.008-.03.024q-.018.017-.035.036l-.032.04a1 1 0 0 0-.058.09l-.014.025q-.049.088-.11.19a1 1 0 0 1-.083.116 1.2 1.2 0 0 1-.173.18q-.035.029-.075.058a1.3 1.3 0 0 1-.251-.243 1 1 0 0 1-.076-.107c-.124-.193-.177-.363-.337-.444-.034-.016-.104-.008-.2.022q-.094.03-.216.087-.06.028-.125.063l-.13.074q-.067.04-.136.086a3 3 0 0 0-.135.096 3 3 0 0 0-.26.219 2 2 0 0 0-.12.121 2 2 0 0 0-.106.128l-.002.002a2 2 0 0 0-.09.132l-.001.001a1.2 1.2 0 0 0-.105.212q-.013.036-.024.073c-1.139-.875-1.563-2.317-1.563-3.203 0-.334.109-.457.305-.454m.836 10.354c.824-1.19.766-2.082-.365-3.194-1.13-1.112-1.789-2.738-1.789-2.738s-.246-.945-.806-.858-.97 1.499.202 2.362c1.173.864-.233 1.45-.685.64-.45-.812-1.683-2.896-2.322-3.295s-1.089-.175-.938.647 2.822 2.813 2.562 3.244-1.176-.506-1.176-.506-2.866-2.567-3.49-1.898.473 1.23 2.037 2.16c1.564.932 1.686 1.178 1.464 1.53s-3.675-2.511-4-1.297c-.323 1.214 3.524 1.567 3.287 2.405-.238.839-2.71-1.587-3.216-.642-.506.946 3.49 2.056 3.522 2.064 1.29.33 4.568 1.028 5.713-.624m5.349 0c-.824-1.19-.766-2.082.365-3.194 1.13-1.112 1.789-2.738 1.789-2.738s.246-.945.806-.858.97 1.499-.202 2.362c-1.173.864.233 1.45.685.64.451-.812 1.683-2.896 2.322-3.295s1.089-.175.938.647-2.822 2.813-2.562 3.244 1.176-.506 1.176-.506 2.866-2.567 3.49-1.898-.473 1.23-2.037 2.16c-1.564.932-1.686 1.178-1.464 1.53s3.675-2.511 4-1.297c.323 1.214-3.524 1.567-3.287 2.405.238.839 2.71-1.587 3.216-.642.506.946-3.49 2.056-3.522 2.064-1.29.33-4.568 1.028-5.713-.624"/></symbol>
-    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2.5v19M2.5 12h19M5.3 5.3l13.4 13.4M18.7 5.3 5.3 18.7"/></symbol>
+    <symbol id="b-x" viewBox="0 0 24 24"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></symbol>
   </svg>
   <div class="scroll-progress" aria-hidden="true"></div>
 
   <header class="site-header">
     <div class="container header-bar">
-      <a class="brand" href="#top"><svg class="icon spark" aria-hidden="true"><use href="#i-spark"></use></svg><span>Jialuo Li</span></a>
+      <a class="brand" href="#top"><svg class="boba" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="boba-straw" d="M39.5 3.5 35 50"/><path class="boba-tea" d="M17.4 31h29.2l-2.3 24.4a3.6 3.6 0 0 1-3.6 3.3H23.3a3.6 3.6 0 0 1-3.6-3.3z"/><g class="boba-pearls"><circle cx="25" cy="53" r="3.1"/><circle cx="32" cy="54.6" r="3.1"/><circle cx="39" cy="53" r="3.1"/><circle cx="28.4" cy="46.6" r="3.1"/><circle cx="35.8" cy="46.8" r="3.1"/></g><path class="boba-cup" d="M15.5 24.5h33l-3.4 31.2a4.6 4.6 0 0 1-4.6 4.1H23.5a4.6 4.6 0 0 1-4.6-4.1z"/><path class="boba-lid" d="M11.5 24.5h41M17 24.5c1.6-8.5 28.4-8.5 30 0"/></svg><span>Jialuo Li</span></a>
       <nav class="site-nav" aria-label="Sections">
         <ul>
           <li><a href="#about">About</a></li>
@@ -76,12 +73,12 @@
       </nav>
       <div class="header-actions">
         <button class="icon-btn theme-toggle" type="button" aria-pressed="false" hidden>
-          <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg><svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"></use></svg>
+          <svg class="icon icon-moon" aria-hidden="true"><use href="#ph-moon"></use></svg><svg class="icon icon-sun" aria-hidden="true"><use href="#ph-sun"></use></svg>
           <span class="visually-hidden">Dark theme</span>
         </button>
-        <a class="btn btn-primary btn-sm" href="data/CVJialuo.pdf"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>CV</a>
+        <a class="btn btn-primary btn-sm" href="data/CVJialuo.pdf"><svg class="icon" aria-hidden="true"><use href="#ph-file-text"></use></svg>CV</a>
         <details class="mobile-menu">
-          <summary class="icon-btn"><svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"></use></svg><svg class="icon icon-close" aria-hidden="true"><use href="#i-x"></use></svg><span class="visually-hidden">Menu</span></summary>
+          <summary class="icon-btn"><svg class="icon icon-open" aria-hidden="true"><use href="#ph-list"></use></svg><svg class="icon icon-close" aria-hidden="true"><use href="#ph-x"></use></svg><span class="visually-hidden">Menu</span></summary>
           <nav aria-label="Sections (menu)">
             <ul>
               <li><a href="#about">About</a></li>
@@ -101,7 +98,7 @@
     <section class="hero" id="about" aria-labelledby="name">
       <div class="container hero-grid">
         <div class="hero-copy">
-          <p class="hero-eyebrow"><span class="status-dot" aria-hidden="true"></span>Graduate Student in Computer Science · Georgia Tech</p>
+          <p class="hero-role"><svg class="icon" aria-hidden="true"><use href="#ph-graduation-cap"></use></svg><span>Graduate Student in Computer Science · Georgia Tech</span></p>
           <h1 id="name">Jialuo Li <span class="name-zh" lang="zh-CN">李佳烙</span></h1>
           <p class="bio">
             I am a first-year graduate student in Computer Science at the
@@ -110,136 +107,133 @@
             degree from the <a href="https://iiis.tsinghua.edu.cn/en/">Institute for Interdisciplinary
             Information Sciences (IIIS)</a>, <a href="https://www.tsinghua.edu.cn/en/">Tsinghua
             University</a> (also known as the
-            <a href="https://iiis.tsinghua.edu.cn/en/Yao_Class/About_Yao_Class.htm">Yao Class</a>,
-            directed by Turing Award laureate
-            <a href="https://iiis.tsinghua.edu.cn/en/People/Faculty/yaoqizhi.htm">Andrew Chi-Chih
-            Yao</a>). Previously, I interned at <a href="https://www.nyu.edu/">New York University</a>,
-            where I was advised by Prof. <a href="https://www.sainingxie.com/">Saining Xie</a>.
+            <a href="https://iiis.tsinghua.edu.cn/en/Yao_Class/About_Yao_Class.htm">Yao Class</a>, directed
+            by Turing Award laureate
+            <a href="https://iiis.tsinghua.edu.cn/en/People/Faculty/yaoqizhi.htm">Andrew Chi-Chih Yao</a>).
+            Previously, I interned at <a href="https://www.nyu.edu/">New York University</a>, where I was
+            advised by Prof. <a href="https://www.sainingxie.com/">Saining Xie</a>.
           </p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="data/CVJialuo.pdf"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>CV<svg class="icon icon-arrow" aria-hidden="true"><use href="#i-arrow-up-right"></use></svg></a>
+            <a class="btn btn-primary" href="data/CVJialuo.pdf"><svg class="icon" aria-hidden="true"><use href="#ph-file-text"></use></svg>CV<svg class="icon icon-arrow" aria-hidden="true"><use href="#ph-arrow-up-right"></use></svg></a>
             <span class="email-pill">
-              <svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg><a href="mailto:jli3671@gatech.edu">jli3671@gatech.edu</a>
-              <button class="copy-btn" type="button" data-copy="jli3671@gatech.edu" hidden><svg class="icon icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg><svg class="icon icon-done" aria-hidden="true"><use href="#i-check"></use></svg><span class="visually-hidden">Copy email address</span></button>
+              <svg class="icon" aria-hidden="true"><use href="#ph-envelope-simple"></use></svg><a href="mailto:jli3671@gatech.edu">jli3671@gatech.edu</a>
+              <button class="copy-btn" type="button" data-copy="jli3671@gatech.edu" hidden><svg class="icon icon-copy" aria-hidden="true"><use href="#ph-copy"></use></svg><svg class="icon icon-done" aria-hidden="true"><use href="#ph-check"></use></svg><span class="visually-hidden">Copy email address</span></button>
             </span>
           </div>
-          <ul class="social" aria-label="Profiles">
-            <li><a class="chip-link" href="https://scholar.google.com/citations?user=xl9hSggAAAAJ&amp;hl=zh-CN"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-googlescholar"></use></svg>Google Scholar</a></li>
-            <li><a class="chip-link" href="https://x.com/JialuoLi1007"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-x"></use></svg>X / Twitter</a></li>
-            <li><a class="chip-link" href="https://github.com/Jialuo-Li"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>GitHub</a></li>
+          <ul class="socials" aria-label="Profiles">
+            <li><a class="social social-googlescholar" href="https://scholar.google.com/citations?user=xl9hSggAAAAJ&amp;hl=zh-CN" aria-label="Google Scholar" data-tip="Google Scholar"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-googlescholar"></use></svg></a></li>
+            <li><a class="social social-x" href="https://x.com/JialuoLi1007" aria-label="X / Twitter" data-tip="X / Twitter"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-x"></use></svg></a></li>
+            <li><a class="social social-github" href="https://github.com/Jialuo-Li" aria-label="GitHub" data-tip="GitHub"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg></a></li>
+            <li><a class="social social-huggingface" href="https://huggingface.co/Jialuo21" aria-label="Hugging Face" data-tip="Hugging Face"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-huggingface"></use></svg></a></li>
           </ul>
         </div>
         <figure class="portrait">
-          <a class="portrait-frame" href="images/Jialuo.jpg">
-            <img src="images/web/Jialuo-480.webp" srcset="images/web/Jialuo-480.webp 480w, images/web/Jialuo-960.webp 960w" sizes="(max-width: 47.5rem) min(78vw, 22rem), 22rem" width="960" height="1029" alt="Portrait of Jialuo Li" fetchpriority="high">
+          <a class="polaroid" href="images/Jialuo.jpg">
+            <img src="images/web/Jialuo-480.webp" srcset="images/web/Jialuo-480.webp 480w, images/web/Jialuo-960.webp 960w" sizes="(max-width: 47.5em) min(80vw, 18rem), 20.5rem" width="960" height="1029" alt="Portrait of Jialuo Li" fetchpriority="high">
           </a>
+          <span class="sticker" aria-hidden="true"><svg class="boba" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="boba-straw" d="M39.5 3.5 35 50"/><path class="boba-tea" d="M17.4 31h29.2l-2.3 24.4a3.6 3.6 0 0 1-3.6 3.3H23.3a3.6 3.6 0 0 1-3.6-3.3z"/><g class="boba-pearls"><circle cx="25" cy="53" r="3.1"/><circle cx="32" cy="54.6" r="3.1"/><circle cx="39" cy="53" r="3.1"/><circle cx="28.4" cy="46.6" r="3.1"/><circle cx="35.8" cy="46.8" r="3.1"/></g><path class="boba-cup" d="M15.5 24.5h33l-3.4 31.2a4.6 4.6 0 0 1-4.6 4.1H23.5a4.6 4.6 0 0 1-4.6-4.1z"/><path class="boba-lid" d="M11.5 24.5h41M17 24.5c1.6-8.5 28.4-8.5 30 0"/></svg></span>
         </figure>
       </div>
     </section>
 
-    <div class="container band">
-      <section class="section" id="research" aria-labelledby="research-heading">
-        <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-flask-conical"></use></svg><span>~/research</span></p>
-        <h2 id="research-heading">Research</h2>
-        <p class="lead">
-          Humans exhibit an extraordinary capacity to integrate information from multiple sensory
-          modalities, such as vision, auditory, and tactile inputs, to navigate and interpret their
-          environments with remarkable efficiency. This multimodal integration leverages the
-          complementary strengths of each sensory channel, facilitating a coherent and comprehensive
-          understanding of complex surroundings. Inspired by this cognitive prowess, my long-term
-          objective is to <strong>develop AI systems that emulate human-like multimodal synthesis,
-          thereby enhancing robustness and adaptability in both generative and understanding
-          tasks.</strong>
-        </p>
-        <div class="focus-card">
-          <p>
-            Specifically, I focus on multimodal generative models, ranging from text-to-image synthesis
-            to Multimodal Large Language Models (MLLMs) and unified models.
+    <section class="section" id="research" aria-labelledby="research-heading">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-badge" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#ph-flask"></use></svg></span>
+          <h2 id="research-heading">Research</h2>
+        </div>
+        <div class="research-grid">
+          <p class="lead">
+            Humans exhibit an extraordinary capacity to integrate information from multiple sensory
+            modalities, such as vision, auditory, and tactile inputs, to navigate and interpret their
+            environments with remarkable efficiency. This multimodal integration leverages the complementary
+            strengths of each sensory channel, facilitating a coherent and comprehensive understanding of
+            complex surroundings. Inspired by this cognitive prowess, my long-term objective is to
+            <strong>develop AI systems that emulate human-like multimodal synthesis, thereby enhancing
+            robustness and adaptability in both generative and understanding tasks.</strong>
           </p>
-          <ul class="focus-tags" aria-label="Focus areas">
-            <li><svg class="icon" aria-hidden="true"><use href="#i-image"></use></svg>Text-to-image synthesis</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-message-square"></use></svg>MLLMs</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>Unified models</li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="section" id="news" aria-labelledby="news-heading">
-        <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-terminal"></use></svg><span>~/news</span></p>
-        <h2 id="news-heading">News</h2>
-        <div class="terminal">
-          <div class="terminal-bar" aria-hidden="true">
-            <span class="terminal-dots"><i></i><i></i><i></i></span>
-            <span class="terminal-title">news.log</span>
-          </div>
-          <div class="terminal-body">
-            <p class="prompt" aria-hidden="true"><span class="caret">&gt;</span>tail news.log</p>
-            <ul class="news-list">
-              <li>
-                <time datetime="2026-02">2026-02</time>
-                <p>
-                  Our papers <a href="https://arxiv.org/abs/2602.00508">DuoGen</a>,
-                  <a href="https://arxiv.org/abs/2512.04000">DIG</a>,
-                  <a href="https://praeclarumjj3.github.io/sage/">SAGE</a>, and
-                  <a href="https://github.com/SHI-Labs/physical-ai-bench">PAI-Bench</a> were accepted by
-                  CVPR 2026!
-                </p>
-              </li>
-              <li>
-                <time datetime="2025-02">2025-02</time>
-                <p>
-                  Our paper <a href="https://jialuo-li.github.io/Science-T2I-Web/">Science-T2I</a> was
-                  accepted by CVPR 2025!
-                </p>
-              </li>
-              <li>
-                <time datetime="2024-09">2024-09</time>
-                <p>
-                  I will join MSRA for an internship with Dr.
-                  <a href="https://www.microsoft.com/en-us/research/people/libin/">Bin Li</a>!
-                </p>
-              </li>
-              <!-- <li><strong>2024-09:</strong> ✨ Our research project about reflection anomaly in generative model is now availiable!</li> -->
-              <li>
-                <time datetime="2024-07">2024-07</time>
-                <p>
-                  Our paper <a href="https://arxiv.org/abs/2404.01343">CHOPS</a> was accepted by COLM
-                  2024!
-                </p>
-              </li>
-              <li>
-                <time datetime="2024-02">2024-02</time>
-                <p>
-                  I will start my internship in NYU Courant advised by Prof.
-                  <a href="https://www.sainingxie.com/" rel="noopener noreferrer" target="_blank">Saining
-                  Xie</a>. Looking forward to working with Saining in New York!
-                </p>
-              </li>
-              <!-- <li><strong>2024-01:</strong> ✨ Our graphics course project is now available! Feel free to explore and try it out <a href="https://github.com/ziyuyuyuyu1/ACG-Project">here</a>.</li> -->
+          <div class="focus-card">
+            <p>
+              Specifically, I focus on multimodal generative models, ranging from text-to-image synthesis to
+              Multimodal Large Language Models (MLLMs) and unified models.
+            </p>
+            <ul class="focus-tags" aria-label="Focus areas">
+              <li><svg class="icon" aria-hidden="true"><use href="#ph-image"></use></svg>Text-to-image synthesis</li>
+              <li><svg class="icon" aria-hidden="true"><use href="#ph-chat-centered-text"></use></svg>MLLMs</li>
+              <li><svg class="icon" aria-hidden="true"><use href="#ph-intersect-three"></use></svg>Unified models</li>
             </ul>
-            <p class="prompt" aria-hidden="true"><span class="caret">&gt;</span><span class="cursor"></span></p>
           </div>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
+
+    <section class="section band" id="news" aria-labelledby="news-heading">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-badge" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#ph-newspaper"></use></svg></span>
+          <h2 id="news-heading">News</h2>
+        </div>
+        <ul class="news" id="news-list" data-visible="6">
+          <li>
+            <time datetime="2026-02">2026-02</time>
+            <p>
+              Our papers <a href="https://arxiv.org/abs/2602.00508">DuoGen</a>,
+              <a href="https://arxiv.org/abs/2512.04000">DIG</a>,
+              <a href="https://praeclarumjj3.github.io/sage/">SAGE</a>, and
+              <a href="https://github.com/SHI-Labs/physical-ai-bench">PAI-Bench</a> were accepted by
+              CVPR 2026!
+            </p>
+          </li>
+          <li>
+            <time datetime="2025-02">2025-02</time>
+            <p>
+              Our paper <a href="https://jialuo-li.github.io/Science-T2I-Web/">Science-T2I</a> was
+              accepted by CVPR 2025!
+            </p>
+          </li>
+          <li>
+            <time datetime="2024-09">2024-09</time>
+            <p>
+              I will join MSRA for an internship with Dr.
+              <a href="https://www.microsoft.com/en-us/research/people/libin/">Bin Li</a>!
+            </p>
+          </li>
+          <!-- <li><strong>2024-09:</strong> ✨ Our research project about reflection anomaly in generative model is now availiable!</li> -->
+          <li>
+            <time datetime="2024-07">2024-07</time>
+            <p>
+              Our paper <a href="https://arxiv.org/abs/2404.01343">CHOPS</a> was accepted by COLM
+              2024!
+            </p>
+          </li>
+          <li>
+            <time datetime="2024-02">2024-02</time>
+            <p>
+              I will start my internship in NYU Courant advised by Prof.
+              <a href="https://www.sainingxie.com/" rel="noopener noreferrer" target="_blank">Saining
+              Xie</a>. Looking forward to working with Saining in New York!
+            </p>
+          </li>
+          <!-- <li><strong>2024-01:</strong> ✨ Our graphics course project is now available! Feel free to explore and try it out <a href="https://github.com/ziyuyuyuyu1/ACG-Project">here</a>.</li> -->
+        </ul>
+      </div>
+    </section>
 
     <section class="section" id="publications" aria-labelledby="publications-heading">
       <div class="container">
         <div class="section-head">
-          <div>
-            <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-book-open"></use></svg><span>~/publications</span></p>
-            <h2 id="publications-heading">Publications</h2>
-          </div>
+          <span class="section-badge" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#ph-books"></use></svg></span>
+          <h2 id="publications-heading">Publications</h2>
           <p class="section-note">(* for equal contribution)</p>
         </div>
         <section class="pub-year" aria-labelledby="year-2026">
           <h3 class="year" id="year-2026">2026</h3>
           <article class="paper">
             <a class="paper-figure" href="https://arxiv.org/abs/2602.00508" tabindex="-1" aria-hidden="true">
-              <img src="images/web/DuoGen-640.webp" srcset="images/web/DuoGen-640.webp 640w, images/web/DuoGen-1280.webp 1280w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1280" height="908" loading="lazy" decoding="async" alt="DuoGen: Towards General Purpose Interleaved Multimodal Generation">
+              <img src="images/web/DuoGen-640.webp" srcset="images/web/DuoGen-640.webp 640w, images/web/DuoGen-1280.webp 1280w" sizes="(max-width: 47.5em) calc(100vw - 4.5rem), 19rem" width="1280" height="908" loading="lazy" decoding="async" alt="DuoGen: Towards General Purpose Interleaved Multimodal Generation">
             </a>
             <div class="paper-body">
-              <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span> <span class="chip chip-highlight"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>Highlight</span></p>
+              <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span> <span class="chip chip-highlight"><svg class="icon" aria-hidden="true"><use href="#ph-sparkle"></use></svg>Highlight</span></p>
               <h4 class="paper-title"><a href="https://arxiv.org/abs/2602.00508">DuoGen: Towards General Purpose Interleaved Multimodal Generation</a></h4>
               <p class="paper-authors">
                 <a href="https://openreview.net/profile?id=~Min_Shi2">Min Shi</a>,
@@ -266,14 +260,14 @@
                 achieves performance comparable to Nano-banana.
               </p>
               <ul class="paper-links" aria-label="Resources for DuoGen">
-                <li><a class="link-chip" href="https://arxiv.org/abs/2602.00508"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
-                <li><a class="link-chip" href="https://research.nvidia.com/labs/dir/duogen/"><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>Project Page</a></li>
+                <li><a class="link-chip" href="https://arxiv.org/abs/2602.00508"><svg class="icon" aria-hidden="true"><use href="#ph-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://research.nvidia.com/labs/dir/duogen/"><svg class="icon" aria-hidden="true"><use href="#ph-globe-simple"></use></svg>Project Page</a></li>
               </ul>
             </div>
           </article>
           <article class="paper">
             <a class="paper-figure" href="https://arxiv.org/abs/2512.04000" tabindex="-1" aria-hidden="true">
-              <img src="images/web/DIG-640.webp" srcset="images/web/DIG-640.webp 640w, images/web/DIG-1280.webp 1280w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1280" height="695" loading="lazy" decoding="async" alt="Divide, then Ground: Adapting Frame Selection to Query Types for Long-Form Video Understanding">
+              <img src="images/web/DIG-640.webp" srcset="images/web/DIG-640.webp 640w, images/web/DIG-1280.webp 1280w" sizes="(max-width: 47.5em) calc(100vw - 4.5rem), 19rem" width="1280" height="695" loading="lazy" decoding="async" alt="Divide, then Ground: Adapting Frame Selection to Query Types for Long-Form Video Understanding">
             </a>
             <div class="paper-body">
               <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span></p>
@@ -289,14 +283,14 @@
                 "localized" queries, applying different strategies for each with a training-free approach.
               </p>
               <ul class="paper-links" aria-label="Resources for Divide, then Ground">
-                <li><a class="link-chip" href="https://arxiv.org/abs/2512.04000"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://arxiv.org/abs/2512.04000"><svg class="icon" aria-hidden="true"><use href="#ph-file-text"></use></svg>Paper</a></li>
                 <li><a class="link-chip" href="https://github.com/Jialuo-Li/DIG"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>Code</a></li>
               </ul>
             </div>
           </article>
           <article class="paper">
             <a class="paper-figure" href="https://praeclarumjj3.github.io/sage/" tabindex="-1" aria-hidden="true">
-              <img src="images/web/SAGE-640.webp" srcset="images/web/SAGE-640.webp 640w, images/web/SAGE-1280.webp 1280w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1280" height="791" loading="lazy" decoding="async" alt="SAGE: Training Smart Any-Horizon Agents for Long Video Reasoning with Reinforcement Learning">
+              <img src="images/web/SAGE-640.webp" srcset="images/web/SAGE-640.webp 640w, images/web/SAGE-1280.webp 1280w" sizes="(max-width: 47.5em) calc(100vw - 4.5rem), 19rem" width="1280" height="791" loading="lazy" decoding="async" alt="SAGE: Training Smart Any-Horizon Agents for Long Video Reasoning with Reinforcement Learning">
             </a>
             <div class="paper-body">
               <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span></p>
@@ -319,8 +313,8 @@
                 understanding by leveraging a novel synthetic data pipeline and a specialized RL strategy.
               </p>
               <ul class="paper-links" aria-label="Resources for SAGE">
-                <li><a class="link-chip" href="https://praeclarumjj3.github.io/sage/"><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>Project Page</a></li>
-                <li><a class="link-chip" href="https://arxiv.org/abs/2512.13874"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://praeclarumjj3.github.io/sage/"><svg class="icon" aria-hidden="true"><use href="#ph-globe-simple"></use></svg>Project Page</a></li>
+                <li><a class="link-chip" href="https://arxiv.org/abs/2512.13874"><svg class="icon" aria-hidden="true"><use href="#ph-file-text"></use></svg>Paper</a></li>
                 <li><a class="link-chip" href="https://huggingface.co/collections/allenai/sage"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-huggingface"></use></svg>Dataset</a></li>
                 <li><a class="link-chip" href="https://github.com/allenai/SAGE"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>Code</a></li>
               </ul>
@@ -328,10 +322,10 @@
           </article>
           <article class="paper">
             <a class="paper-figure" href="https://github.com/SHI-Labs/physical-ai-bench" tabindex="-1" aria-hidden="true">
-              <img src="images/web/PAIBench-640.webp" srcset="images/web/PAIBench-640.webp 640w, images/web/PAIBench-1280.webp 1280w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1280" height="856" loading="lazy" decoding="async" alt="PAI-Bench: A Comprehensive Benchmark For Physical AI">
+              <img src="images/web/PAIBench-640.webp" srcset="images/web/PAIBench-640.webp 640w, images/web/PAIBench-1280.webp 1280w" sizes="(max-width: 47.5em) calc(100vw - 4.5rem), 19rem" width="1280" height="856" loading="lazy" decoding="async" alt="PAI-Bench: A Comprehensive Benchmark For Physical AI">
             </a>
             <div class="paper-body">
-              <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span> <span class="chip chip-oral"><svg class="icon" aria-hidden="true"><use href="#i-mic"></use></svg>Oral</span></p>
+              <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span> <span class="chip chip-oral"><svg class="icon" aria-hidden="true"><use href="#ph-microphone-stage"></use></svg>Oral</span></p>
               <h4 class="paper-title"><a href="https://github.com/SHI-Labs/physical-ai-bench">PAI-Bench: A Comprehensive Benchmark For Physical AI</a></h4>
               <p class="paper-authors">
                 <a href="https://github.com/Leymore">Fengzhe Zhou*</a>,
@@ -347,7 +341,7 @@
                 understand real-world dynamics.
               </p>
               <ul class="paper-links" aria-label="Resources for PAI-Bench">
-                <li><a class="link-chip" href="https://arxiv.org/abs/2512.01989"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://arxiv.org/abs/2512.01989"><svg class="icon" aria-hidden="true"><use href="#ph-file-text"></use></svg>Paper</a></li>
                 <li><a class="link-chip" href="https://huggingface.co/datasets/shi-labs/physical-ai-bench-generation"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-huggingface"></use></svg>Dataset</a></li>
                 <li><a class="link-chip" href="https://github.com/SHI-Labs/physical-ai-bench"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>Code</a></li>
               </ul>
@@ -358,7 +352,7 @@
           <h3 class="year" id="year-2025">2025</h3>
           <article class="paper">
             <a class="paper-figure" href="https://jialuo-li.github.io/Science-T2I-Web/" tabindex="-1" aria-hidden="true">
-              <img src="images/web/Scibench-640.webp" srcset="images/web/Scibench-640.webp 640w, images/web/Scibench-1203.webp 1203w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1203" height="602" loading="lazy" decoding="async" alt="Science-T2I: Addressing Scientific Illusions in Image Synthesis">
+              <img src="images/web/Scibench-640.webp" srcset="images/web/Scibench-640.webp 640w, images/web/Scibench-1203.webp 1203w" sizes="(max-width: 47.5em) calc(100vw - 4.5rem), 19rem" width="1203" height="602" loading="lazy" decoding="async" alt="Science-T2I: Addressing Scientific Illusions in Image Synthesis">
             </a>
             <div class="paper-body">
               <p class="paper-venue"><span class="chip chip-venue">CVPR 2025</span></p>
@@ -376,11 +370,11 @@
                 scientific image realism on Science-T2I dataset.
               </p>
               <ul class="paper-links" aria-label="Resources for Science-T2I">
-                <li><a class="link-chip" href="https://jialuo-li.github.io/Science-T2I-Web/"><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>Project Page</a></li>
-                <li><a class="link-chip" href="https://arxiv.org/abs/2504.13129"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://jialuo-li.github.io/Science-T2I-Web/"><svg class="icon" aria-hidden="true"><use href="#ph-globe-simple"></use></svg>Project Page</a></li>
+                <li><a class="link-chip" href="https://arxiv.org/abs/2504.13129"><svg class="icon" aria-hidden="true"><use href="#ph-file-text"></use></svg>Paper</a></li>
                 <li><a class="link-chip" href="https://huggingface.co/collections/Jialuo21/science-t2i-67d3bfe43253da2bc7cfaf06"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-huggingface"></use></svg>Dataset</a></li>
                 <li><a class="link-chip" href="https://github.com/Jialuo-Li/Science-T2I"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>Code</a></li>
-                <li><a class="link-chip" href="https://jialuo-li.github.io/data/CVPR_2025_Sciencet2i_poster.pdf"><svg class="icon" aria-hidden="true"><use href="#i-presentation"></use></svg>Poster</a></li>
+                <li><a class="link-chip" href="https://jialuo-li.github.io/data/CVPR_2025_Sciencet2i_poster.pdf"><svg class="icon" aria-hidden="true"><use href="#ph-presentation-chart"></use></svg>Poster</a></li>
               </ul>
             </div>
           </article>
@@ -389,7 +383,7 @@
           <h3 class="year" id="year-2024">2024</h3>
           <article class="paper">
             <a class="paper-figure" href="https://arxiv.org/abs/2404.01343" tabindex="-1" aria-hidden="true">
-              <img src="images/web/CHOPS-640.webp" srcset="images/web/CHOPS-640.webp 640w, images/web/CHOPS-840.webp 840w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="840" height="408" loading="lazy" decoding="async" alt="CHOPS: CHat with custOmer Profile Systems for Customer Service with LLMs">
+              <img src="images/web/CHOPS-640.webp" srcset="images/web/CHOPS-640.webp 640w, images/web/CHOPS-840.webp 840w" sizes="(max-width: 47.5em) calc(100vw - 4.5rem), 19rem" width="840" height="408" loading="lazy" decoding="async" alt="CHOPS: CHat with custOmer Profile Systems for Customer Service with LLMs">
             </a>
             <div class="paper-body">
               <p class="paper-venue"><span class="chip chip-venue">COLM 2024</span></p>
@@ -407,8 +401,8 @@
                 data, interacts with systems, and delivers accurate responses.
               </p>
               <ul class="paper-links" aria-label="Resources for CHOPS">
-                <li><a class="link-chip" href="https://github.com/JingzheShi/CHOPS"><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>Project Page</a></li>
-                <li><a class="link-chip" href="https://arxiv.org/abs/2404.01343"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://github.com/JingzheShi/CHOPS"><svg class="icon" aria-hidden="true"><use href="#ph-globe-simple"></use></svg>Project Page</a></li>
+                <li><a class="link-chip" href="https://arxiv.org/abs/2404.01343"><svg class="icon" aria-hidden="true"><use href="#ph-file-text"></use></svg>Paper</a></li>
               </ul>
             </div>
           </article>
@@ -465,50 +459,56 @@
             </tr>
           </tbody></table> -->
 
-    <section class="section" id="experience" aria-labelledby="experience-heading">
+    <section class="section band" id="experience" aria-labelledby="experience-heading">
       <div class="container">
         <div class="section-head">
-          <div>
-            <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"></use></svg><span>~/experience</span></p>
-            <h2 id="experience-heading">Experience</h2>
-          </div>
+          <span class="section-badge" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#ph-briefcase"></use></svg></span>
+          <h2 id="experience-heading">Experience</h2>
         </div>
         <ol class="timeline">
-          <li class="exp-card">
-            <div class="exp-top">
-              <span class="exp-logo"><img src="images/web/GT_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
-              <span class="exp-date">2025.08 - Present</span>
+          <li class="tl-item">
+            <span class="tl-logo"><img src="images/web/GT_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+            <div class="tl-card">
+              <div class="tl-head">
+                <h3 class="tl-org"><a href="https://www.gatech.edu/" target="_blank" rel="noopener noreferrer">Georgia Institute of Technology</a></h3>
+                <p class="tl-date">2025.08 - Present</p>
+              </div>
+              <p class="tl-role">Graduate Student</p>
+              <p class="tl-advisor">Research Advisor: Prof. <a href="https://www.humphreyshi.com/" rel="noopener noreferrer" target="_blank">Humphrey Shi</a></p>
             </div>
-            <h3 class="exp-org"><a href="https://www.gatech.edu/" target="_blank" rel="noopener noreferrer">Georgia Institute of Technology</a></h3>
-            <p class="exp-role">Graduate Student</p>
-            <p class="exp-advisor">Research Advisor: Prof. <a href="https://www.humphreyshi.com/" rel="noopener noreferrer" target="_blank">Humphrey Shi</a></p>
           </li>
-          <li class="exp-card">
-            <div class="exp-top">
-              <span class="exp-logo"><img src="images/web/MSRA_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
-              <span class="exp-date">2024.09 - 2025.06</span>
+          <li class="tl-item">
+            <span class="tl-logo"><img src="images/web/MSRA_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+            <div class="tl-card">
+              <div class="tl-head">
+                <h3 class="tl-org"><a href="https://www.microsoft.com/en-us/research/lab/microsoft-research-asia/" target="_blank" rel="noopener noreferrer">Microsoft Research Lab - Asia</a></h3>
+                <p class="tl-date">2024.09 - 2025.06</p>
+              </div>
+              <p class="tl-role">Research Intern</p>
+              <p class="tl-advisor">Research Advisor: Dr. <a href="https://www.microsoft.com/en-us/research/people/libin/" rel="noopener noreferrer" target="_blank">Bin Li</a></p>
             </div>
-            <h3 class="exp-org"><a href="https://www.microsoft.com/en-us/research/lab/microsoft-research-asia/" target="_blank" rel="noopener noreferrer">Microsoft Research Lab - Asia</a></h3>
-            <p class="exp-role">Research Intern</p>
-            <p class="exp-advisor">Research Advisor: Dr. <a href="https://www.microsoft.com/en-us/research/people/libin/" rel="noopener noreferrer" target="_blank">Bin Li</a></p>
           </li>
-          <li class="exp-card">
-            <div class="exp-top">
-              <span class="exp-logo"><img src="images/web/nyu_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
-              <span class="exp-date">2024.02 - 2025.02</span>
+          <li class="tl-item">
+            <span class="tl-logo"><img src="images/web/nyu_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+            <div class="tl-card">
+              <div class="tl-head">
+                <h3 class="tl-org"><a href="https://www.nyu.edu/" target="_blank" rel="noopener noreferrer">New York University</a></h3>
+                <p class="tl-date">2024.02 - 2025.02</p>
+              </div>
+              <p class="tl-role">Research Intern</p>
+              <p class="tl-advisor">Research Advisor: Prof. <a href="https://www.sainingxie.com/" rel="noopener noreferrer" target="_blank">Saining Xie</a></p>
             </div>
-            <h3 class="exp-org"><a href="https://www.nyu.edu/" target="_blank" rel="noopener noreferrer">New York University</a></h3>
-            <p class="exp-role">Research Intern</p>
-            <p class="exp-advisor">Research Advisor: Prof. <a href="https://www.sainingxie.com/" rel="noopener noreferrer" target="_blank">Saining Xie</a></p>
           </li>
-          <li class="exp-card">
-            <div class="exp-top">
-              <span class="exp-logo"><img src="images/web/Tsinghua_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
-              <span class="exp-date">2021.09 - 2025.06</span>
+          <li class="tl-item">
+            <span class="tl-logo"><img src="images/web/Tsinghua_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+            <div class="tl-card">
+              <div class="tl-head">
+                <h3 class="tl-org"><a href="https://www.tsinghua.edu.cn/" target="_blank" rel="noopener noreferrer">Tsinghua University</a></h3>
+                <p class="tl-date">2021.09 - 2025.06</p>
+              </div>
+              <p class="tl-role">Undergraduate Student</p>
+              <p class="tl-advisor">Research Advisor: Prof. <a href="https://ericyi.github.io/">Li Yi</a>.</p>
             </div>
-            <h3 class="exp-org"><a href="https://www.tsinghua.edu.cn/" target="_blank" rel="noopener noreferrer">Tsinghua University</a></h3>
-            <p class="exp-role">Undergraduate Student</p>
-            <p class="exp-advisor">Research Advisor: Prof. <a href="https://ericyi.github.io/">Li Yi</a>.</p>
           </li>
         </ol>
       </div>
@@ -517,12 +517,10 @@
     <section class="section" id="honors" aria-labelledby="honors-heading">
       <div class="container">
         <div class="section-head">
-          <div>
-            <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-award"></use></svg><span>~/honors</span></p>
-            <h2 id="honors-heading">Honors and Awards</h2>
-          </div>
+          <span class="section-badge" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#ph-trophy"></use></svg></span>
+          <h2 id="honors-heading">Honors and Awards</h2>
         </div>
-        <ul class="honors">
+        <ul class="honors" id="honors-list" data-visible="8">
           <li>
             <time datetime="2023">2023</time>
             <p>Outstanding Scholarship in Social Work from Tsinghua University.</p>
@@ -543,7 +541,7 @@
           <li>
             <time datetime="2020">2020</time>
             <p>Gold
-              Medalist<svg class="icon icon-inline medal" aria-hidden="true"><use href="#i-medal"></use></svg>
+              Medalist<svg class="icon icon-inline medal" aria-hidden="true"><use href="#ph-medal"></use></svg>
               in the 37th Chinese Physics Olympiad
               (<a href="https://cpho.pku.edu.cn/info/1070/1207.htm">CPhO</a>), <strong>ranking tenth
               nationwide</strong>.</p>
@@ -556,11 +554,11 @@
   <footer class="site-footer">
     <div class="container footer-grid">
       <div class="footer-brand">
-        <a class="brand" href="#top"><svg class="icon spark" aria-hidden="true"><use href="#i-spark"></use></svg><span>Jialuo Li</span></a>
+        <a class="brand" href="#top"><svg class="boba" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="boba-straw" d="M39.5 3.5 35 50"/><path class="boba-tea" d="M17.4 31h29.2l-2.3 24.4a3.6 3.6 0 0 1-3.6 3.3H23.3a3.6 3.6 0 0 1-3.6-3.3z"/><g class="boba-pearls"><circle cx="25" cy="53" r="3.1"/><circle cx="32" cy="54.6" r="3.1"/><circle cx="39" cy="53" r="3.1"/><circle cx="28.4" cy="46.6" r="3.1"/><circle cx="35.8" cy="46.8" r="3.1"/></g><path class="boba-cup" d="M15.5 24.5h33l-3.4 31.2a4.6 4.6 0 0 1-4.6 4.1H23.5a4.6 4.6 0 0 1-4.6-4.1z"/><path class="boba-lid" d="M11.5 24.5h41M17 24.5c1.6-8.5 28.4-8.5 30 0"/></svg><span>Jialuo Li</span></a>
         <p>Graduate Student in Computer Science · Georgia Tech</p>
         <span class="email-pill">
-          <svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg><a href="mailto:jli3671@gatech.edu">jli3671@gatech.edu</a>
-          <button class="copy-btn" type="button" data-copy="jli3671@gatech.edu" hidden><svg class="icon icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg><svg class="icon icon-done" aria-hidden="true"><use href="#i-check"></use></svg><span class="visually-hidden">Copy email address</span></button>
+          <svg class="icon" aria-hidden="true"><use href="#ph-envelope-simple"></use></svg><a href="mailto:jli3671@gatech.edu">jli3671@gatech.edu</a>
+          <button class="copy-btn" type="button" data-copy="jli3671@gatech.edu" hidden><svg class="icon icon-copy" aria-hidden="true"><use href="#ph-copy"></use></svg><svg class="icon icon-done" aria-hidden="true"><use href="#ph-check"></use></svg><span class="visually-hidden">Copy email address</span></button>
         </span>
       </div>
       <nav class="footer-col" aria-label="Sections (footer)">
@@ -577,10 +575,11 @@
       <div class="footer-col">
         <p class="footer-label">Elsewhere</p>
         <ul>
-          <li><a href="data/CVJialuo.pdf"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>CV</a></li>
+          <li><a href="data/CVJialuo.pdf"><svg class="icon" aria-hidden="true"><use href="#ph-file-text"></use></svg>CV</a></li>
           <li><a href="https://scholar.google.com/citations?user=xl9hSggAAAAJ&amp;hl=zh-CN"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-googlescholar"></use></svg>Google Scholar</a></li>
           <li><a href="https://x.com/JialuoLi1007"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-x"></use></svg>X / Twitter</a></li>
           <li><a href="https://github.com/Jialuo-Li"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>GitHub</a></li>
+          <li><a href="https://huggingface.co/Jialuo21"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-huggingface"></use></svg>Hugging Face</a></li>
         </ul>
       </div>
       <div class="footer-col footer-visitors">
@@ -594,9 +593,8 @@
     <div class="container footer-bottom">
       <p>© 2026 Jialuo Li</p>
       <p>Last updated: Jan 21, 2026</p>
-      <p>Originally based on <a href="http://jonbarron.info/">Jon Barron</a>'s homepage · Deployed on <a href="https://pages.github.com/">GitHub Pages</a></p>
     </div>
-    <a class="to-top" href="#top" hidden><svg class="icon" aria-hidden="true"><use href="#i-arrow-up"></use></svg><span class="visually-hidden">Back to top</span></a>
+    <a class="to-top" href="#top" hidden><svg class="icon" aria-hidden="true"><use href="#ph-arrow-up"></use></svg><span class="visually-hidden">Back to top</span></a>
   </footer>
 </body>
 </html>
