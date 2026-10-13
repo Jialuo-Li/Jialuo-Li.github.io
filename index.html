@@ -12,7 +12,7 @@
   <link rel="icon" href="images/favicon/icon.ico" type="image/x-icon">
   <link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="stylesheet.css">
+  <link rel="stylesheet" href="stylesheet.css?v=3193ade5db">
   <script>
     // Apply a saved theme before first paint (the page itself never needs JavaScript).
     try {
@@ -20,7 +20,7 @@
       if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme;
     } catch (error) {}
   </script>
-  <script src="assets/site.js" defer></script>
+  <script src="assets/site.js?v=1073323f73" defer></script>
 </head>
 <body id="top">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -121,6 +121,13 @@
               <button class="copy-btn" type="button" data-copy="jli3671@gatech.edu" hidden><svg class="icon icon-copy" aria-hidden="true"><use href="#ph-copy"></use></svg><svg class="icon icon-done" aria-hidden="true"><use href="#ph-check"></use></svg><span class="visually-hidden">Copy email address</span></button>
             </span>
           </div>
+        </div>
+        <div class="hero-aside">
+          <figure class="portrait">
+            <a href="images/Jialuo.jpg">
+              <img src="images/web/Jialuo-480.webp" srcset="images/web/Jialuo-480.webp 480w, images/web/Jialuo-960.webp 960w" sizes="(max-width: 47.5em) min(72vw, 16rem), 18rem" width="960" height="1029" alt="Portrait of Jialuo Li" fetchpriority="high">
+            </a>
+          </figure>
           <ul class="socials" aria-label="Profiles">
             <li><a class="social social-googlescholar" href="https://scholar.google.com/citations?user=xl9hSggAAAAJ&amp;hl=zh-CN" aria-label="Google Scholar" data-tip="Google Scholar"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-googlescholar"></use></svg></a></li>
             <li><a class="social social-x" href="https://x.com/JialuoLi1007" aria-label="X / Twitter" data-tip="X / Twitter"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-x"></use></svg></a></li>
@@ -129,11 +136,6 @@
             <li><a class="social social-linkedin" href="https://www.linkedin.com/in/jialuo-li-13a025397/" aria-label="LinkedIn" data-tip="LinkedIn"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-linkedin"></use></svg></a></li>
           </ul>
         </div>
-        <figure class="portrait">
-          <a href="images/Jialuo.jpg">
-            <img src="images/web/Jialuo-480.webp" srcset="images/web/Jialuo-480.webp 480w, images/web/Jialuo-960.webp 960w" sizes="(max-width: 47.5em) min(72vw, 16rem), 18rem" width="960" height="1029" alt="Portrait of Jialuo Li" fetchpriority="high">
-          </a>
-        </figure>
       </div>
     </section>
 
@@ -507,6 +509,16 @@
           <h2 id="experience-heading">Experience</h2>
         </div>
         <ol class="timeline">
+          <li class="tl-item">
+            <span class="tl-logo"><img src="images/web/Adobe_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+            <div class="tl-card">
+              <div class="tl-head">
+                <h3 class="tl-org"><a href="https://www.adobe.com/" target="_blank" rel="noopener noreferrer">Adobe</a></h3>
+                <p class="tl-date">2026.05 - Present</p>
+              </div>
+              <p class="tl-role">Research Intern</p>
+            </div>
+          </li>
           <li class="tl-item">
             <span class="tl-logo"><img src="images/web/GT_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
             <div class="tl-card">
