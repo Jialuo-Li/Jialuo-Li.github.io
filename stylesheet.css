@@ -1163,6 +1163,141 @@ h2 {
   transform: rotate(180deg);
 }
 
+/* The free space beside the News timeline holds a "Currently" card: the Experience entries that run to
+   "Present", in the same words. It stacks under the timeline on narrow screens. */
+.news-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 23rem);
+  align-items: start;
+  gap: 2rem clamp(2rem, 1rem + 3vw, 4rem);
+}
+
+.news-main {
+  min-width: 0;
+}
+
+.now-card {
+  container-type: inline-size;
+  padding: 1.2rem 1.35rem 1.3rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.now-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.now-head .sticker {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.now-head .boba {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+.now-head h3 {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.now-list > li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.9rem;
+  padding-top: 1rem;
+}
+
+.now-list > li + li {
+  margin-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+/* Logos keep their own colors on a white tile in both themes, as in Experience. */
+.now-logo {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--white);
+}
+
+.now-logo img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+}
+
+.now-org {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.now-role {
+  margin-top: 0.2rem;
+  color: var(--ink-2);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.now-date {
+  color: var(--tea);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.now-advisor {
+  color: var(--ink-3);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
+/* Keep a date or a person's name on one line once the card is wide enough for it (sizes are the card's
+   content width, so they grow with the reader's text size). */
+@container (min-width: 12rem) {
+  .now-date,
+  .now-advisor a {
+    white-space: nowrap;
+  }
+}
+
+/* Very narrow cards (enlarged text on small screens): logo above the text. */
+@container (max-width: 14rem) {
+  .now-list > li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+}
+
+@media (hover: hover) {
+  .now-card:hover {
+    border-color: var(--line-hover);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .now-card:hover .sticker {
+    transform: rotate(6deg) scale(1.05);
+  }
+}
+
 /* Publications: one list in the original order; each venue chip carries the year. */
 
 .paper {
@@ -1231,7 +1366,8 @@ h2 {
 }
 
 .paper-title a,
-.tl-org a {
+.tl-org a,
+.now-org a {
   color: inherit;
   text-decoration: none;
   background-image: linear-gradient(currentColor, currentColor);
@@ -1244,7 +1380,8 @@ h2 {
 }
 
 .paper-title a:hover,
-.tl-org a:hover {
+.tl-org a:hover,
+.now-org a:hover {
   color: var(--straw);
   background-size: 100% 1px;
 }
@@ -1485,7 +1622,7 @@ h2 {
   gap: 0.85rem;
 }
 
-/* The boba sticker signs off the page: on hover it turns and the pearls bob (see the motion block). */
+/* Boba sticker (footer brand and the "Currently" card): on hover it turns and the pearls bob (motion block). */
 .sticker {
   display: grid;
   flex: none;
@@ -1653,19 +1790,23 @@ h2 {
     transform: scale(1.04);
   }
 
-  .brand:hover .boba-pearls circle {
+  .brand:hover .boba-pearls circle,
+  .now-card:hover .boba-pearls circle {
     animation: bob 0.45s ease-in-out infinite alternate;
   }
 
-  .brand:hover .boba-pearls circle:nth-child(2n) {
+  .brand:hover .boba-pearls circle:nth-child(2n),
+  .now-card:hover .boba-pearls circle:nth-child(2n) {
     animation-delay: 0.15s;
   }
 
-  .brand:hover .boba-pearls circle:nth-child(3n) {
+  .brand:hover .boba-pearls circle:nth-child(3n),
+  .now-card:hover .boba-pearls circle:nth-child(3n) {
     animation-delay: 0.3s;
   }
 
-  .brand:hover .boba-straw {
+  .brand:hover .boba-straw,
+  .now-card:hover .boba-straw {
     animation: stir 0.9s ease-in-out infinite alternate;
   }
 
@@ -1767,6 +1908,14 @@ h2 {
 
   .mobile-menu {
     display: block;
+  }
+
+  .news-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .now-card {
+    max-width: 30rem;
   }
 }
 

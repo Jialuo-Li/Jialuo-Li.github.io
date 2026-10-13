@@ -12,7 +12,7 @@
   <link rel="icon" href="images/favicon/icon.ico" type="image/x-icon">
   <link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="stylesheet.css?v=3193ade5db">
+  <link rel="stylesheet" href="stylesheet.css?v=4359f0d083">
   <script>
     // Apply a saved theme before first paint (the page itself never needs JavaScript).
     try {
@@ -176,67 +176,95 @@
           <span class="section-badge" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#ph-newspaper"></use></svg></span>
           <h2 id="news-heading">News</h2>
         </div>
-        <ul class="news" id="news-list" data-visible="6">
-          <li>
-            <time datetime="2026-05">2026-05</time>
-            <p>
-              I joined Adobe as a research intern.
-            </p>
-          </li>
-          <li>
-            <time datetime="2026-02">2026-02</time>
-            <p>
-              Our papers <a href="https://arxiv.org/abs/2602.00508">DuoGen</a>,
-              <a href="https://arxiv.org/abs/2512.04000">DIG</a>,
-              <a href="https://praeclarumjj3.github.io/sage/">SAGE</a>, and
-              <a href="https://github.com/SHI-Labs/physical-ai-bench">PAI-Bench</a> were accepted by
-              CVPR 2026.
-            </p>
-          </li>
-          <li>
-            <time datetime="2025-08">2025-08</time>
-            <p>
-              I joined Georgia Tech as a graduate student in Computer Science.
-            </p>
-          </li>
-          <li>
-            <time datetime="2025-06">2025-06</time>
-            <p>
-              I graduated from Tsinghua University.
-            </p>
-          </li>
-          <li>
-            <time datetime="2025-02">2025-02</time>
-            <p>
-              Our paper <a href="https://jialuo-li.github.io/Science-T2I-Web/">Science-T2I</a> was
-              accepted by CVPR 2025.
-            </p>
-          </li>
-          <li>
-            <time datetime="2024-09">2024-09</time>
-            <p>
-              I joined MSRA for an internship with Dr.
-              <a href="https://www.microsoft.com/en-us/research/people/libin/">Bin Li</a>.
-            </p>
-          </li>
-          <!-- <li><strong>2024-09:</strong> ✨ Our research project about reflection anomaly in generative model is now availiable!</li> -->
-          <li>
-            <time datetime="2024-07">2024-07</time>
-            <p>
-              Our paper <a href="https://arxiv.org/abs/2404.01343">CHOPS</a> was accepted by COLM
-              2024.
-            </p>
-          </li>
-          <li>
-            <time datetime="2024-02">2024-02</time>
-            <p>
-              I started an internship at NYU Courant in New York, advised by Prof.
-              <a href="https://www.sainingxie.com/" rel="noopener noreferrer" target="_blank">Saining
-              Xie</a>.
-            </p>
-          </li>
-          <!-- <li><strong>2024-01:</strong> ✨ Our graphics course project is now available! Feel free to explore and try it out <a href="https://github.com/ziyuyuyuyu1/ACG-Project">here</a>.</li> -->
-        </ul>
+        <div class="news-layout">
+          <div class="news-main">
+            <ul class="news" id="news-list" data-visible="6">
+              <li>
+                <time datetime="2026-05">2026-05</time>
+                <p>
+                  I joined Adobe as a research intern.
+                </p>
+              </li>
+              <li>
+                <time datetime="2026-02">2026-02</time>
+                <p>
+                  Our papers <a href="https://arxiv.org/abs/2602.00508">DuoGen</a>,
+                  <a href="https://arxiv.org/abs/2512.04000">DIG</a>,
+                  <a href="https://praeclarumjj3.github.io/sage/">SAGE</a>, and
+                  <a href="https://github.com/SHI-Labs/physical-ai-bench">PAI-Bench</a> were accepted by
+                  CVPR 2026.
+                </p>
+              </li>
+              <li>
+                <time datetime="2025-08">2025-08</time>
+                <p>
+                  I joined Georgia Tech as a graduate student in Computer Science.
+                </p>
+              </li>
+              <li>
+                <time datetime="2025-06">2025-06</time>
+                <p>
+                  I graduated from Tsinghua University.
+                </p>
+              </li>
+              <li>
+                <time datetime="2025-02">2025-02</time>
+                <p>
+                  Our paper <a href="https://jialuo-li.github.io/Science-T2I-Web/">Science-T2I</a> was
+                  accepted by CVPR 2025.
+                </p>
+              </li>
+              <li>
+                <time datetime="2024-09">2024-09</time>
+                <p>
+                  I joined MSRA for an internship with Dr.
+                  <a href="https://www.microsoft.com/en-us/research/people/libin/">Bin Li</a>.
+                </p>
+              </li>
+              <!-- <li><strong>2024-09:</strong> ✨ Our research project about reflection anomaly in generative model is now availiable!</li> -->
+              <li>
+                <time datetime="2024-07">2024-07</time>
+                <p>
+                  Our paper <a href="https://arxiv.org/abs/2404.01343">CHOPS</a> was accepted by COLM
+                  2024.
+                </p>
+              </li>
+              <li>
+                <time datetime="2024-02">2024-02</time>
+                <p>
+                  I started an internship at NYU Courant in New York, advised by Prof.
+                  <a href="https://www.sainingxie.com/" rel="noopener noreferrer" target="_blank">Saining
+                  Xie</a>.
+                </p>
+              </li>
+              <!-- <li><strong>2024-01:</strong> ✨ Our graphics course project is now available! Feel free to explore and try it out <a href="https://github.com/ziyuyuyuyu1/ACG-Project">here</a>.</li> -->
+            </ul>
+          </div>
+          <div class="now-card">
+            <div class="now-head">
+              <span class="sticker" aria-hidden="true"><svg class="boba" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="boba-straw" d="M39.5 3.5 35 50"/><path class="boba-tea" d="M17.4 31h29.2l-2.3 24.4a3.6 3.6 0 0 1-3.6 3.3H23.3a3.6 3.6 0 0 1-3.6-3.3z"/><g class="boba-pearls"><circle cx="25" cy="53" r="3.1"/><circle cx="32" cy="54.6" r="3.1"/><circle cx="39" cy="53" r="3.1"/><circle cx="28.4" cy="46.6" r="3.1"/><circle cx="35.8" cy="46.8" r="3.1"/></g><path class="boba-cup" d="M15.5 24.5h33l-3.4 31.2a4.6 4.6 0 0 1-4.6 4.1H23.5a4.6 4.6 0 0 1-4.6-4.1z"/><path class="boba-lid" d="M11.5 24.5h41M17 24.5c1.6-8.5 28.4-8.5 30 0"/></svg></span>
+              <h3 id="now-heading">Currently</h3>
+            </div>
+            <ul class="now-list" aria-labelledby="now-heading">
+              <li>
+                <span class="now-logo"><img src="images/web/Adobe_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+                <div>
+                  <p class="now-org"><a href="https://research.adobe.com/" target="_blank" rel="noopener noreferrer">Adobe Research</a></p>
+                  <p class="now-role">Research Intern <span class="now-date">since 2026.05</span></p>
+                  <p class="now-advisor">Research Advisor: <a href="https://research.adobe.com/person/yan-kang/" rel="noopener noreferrer" target="_blank">Yan Kang</a></p>
+                </div>
+              </li>
+              <li>
+                <span class="now-logo"><img src="images/web/GT_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+                <div>
+                  <p class="now-org"><a href="https://www.gatech.edu/" target="_blank" rel="noopener noreferrer">Georgia Institute of Technology</a></p>
+                  <p class="now-role">Graduate Student <span class="now-date">since 2025.08</span></p>
+                  <p class="now-advisor">Research Advisor: Prof. <a href="https://www.humphreyshi.com/" rel="noopener noreferrer" target="_blank">Humphrey Shi</a></p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -256,14 +284,14 @@
               <p class="paper-venue"><span class="chip chip-venue">arXiv 2026</span></p>
               <h3 class="paper-title"><a href="https://arxiv.org/abs/2607.03461">WorldBagel: Uncovering the Power of Unified Multimodal Models for Vision-Language-Action-World Modeling</a></h3>
               <p class="paper-authors">
-                Zelin Zhao,
+                <a href="https://scholar.google.com/citations?user=UDi4V3AAAAAJ&amp;hl=en">Zelin Zhao</a>,
                 <a href="https://openreview.net/profile?id=~Min_Shi2">Min Shi</a>,
                 Bo Yuan,
-                Haotian Xue,
+                <a href="https://xavihart.github.io">Haotian Xue</a>,
                 <strong class="me">Jialuo Li</strong>,
                 Lama Moukheiber,
                 <a href="https://www.humphreyshi.com/">Humphrey Shi</a>,
-                Yongxin Chen
+                <a href="https://yongxin.ae.gatech.edu/">Yongxin Chen</a>
               </p>
               <p class="paper-summary">
                 WorldBagel is a unified Vision-Language-Action-World (VLAW) framework built on BAGEL that
@@ -513,10 +541,11 @@
             <span class="tl-logo"><img src="images/web/Adobe_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
             <div class="tl-card">
               <div class="tl-head">
-                <h3 class="tl-org"><a href="https://www.adobe.com/" target="_blank" rel="noopener noreferrer">Adobe</a></h3>
+                <h3 class="tl-org"><a href="https://research.adobe.com/" target="_blank" rel="noopener noreferrer">Adobe Research</a></h3>
                 <p class="tl-date">2026.05 - Present</p>
               </div>
               <p class="tl-role">Research Intern</p>
+              <p class="tl-advisor">Research Advisor: <a href="https://research.adobe.com/person/yan-kang/" rel="noopener noreferrer" target="_blank">Yan Kang</a></p>
             </div>
           </li>
           <li class="tl-item">

@@ -40,6 +40,8 @@ Font and icon licenses are in `assets/licenses/`.
 - **Experience** is a vertical timeline, newest first: copy an `<li class="tl-item">` and keep the order
   institution, date, role, advisor (the `tl-advisor` line is optional). Logos are decorative (`alt=""`),
   square, and are never stretched.
+- **Currently** (the card beside News) repeats the Experience entries that run to "Present", in the same
+  words. When one of them ends or a new one starts, update both places.
 - **Publications** form one list inside `<div class="pub-list">`, newest first (the venue chip carries
   the year). To add one, copy an `<article class="paper">` and keep the full title, the complete author
   list (your name in `<strong class="me">`, `*` for equal contribution), the venue chip, and only
