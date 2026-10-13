@@ -1,351 +1,421 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-  <title>Jialuo Li | 李佳烙</title>
-
-  <meta name="author" content="Jialuo Li">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="shortcut icon" href="images/favicon/icon.ico" type="image/x-icon">
-  <link rel="stylesheet" type="text/css" href="stylesheet.css">
-
+  <title>Jialuo Li | 李佳烙</title>
+  <meta name="author" content="Jialuo Li">
+  <meta name="description" content="Jialuo Li (李佳烙), graduate student in Computer Science at the Georgia Institute of Technology, working on multimodal generative models.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1f1e1d" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="images/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="images/favicon/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="images/favicon/apple-touch-icon.png">
+  <link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="stylesheet.css">
+  <script>
+    // Apply a saved theme before first paint (the page itself never needs JavaScript).
+    try {
+      var savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme;
+    } catch (error) {}
+  </script>
+  <script src="assets/site.js" defer></script>
 </head>
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <!-- Icons: Lucide (ISC) and Simple Icons (CC0); licenses in assets/licenses/. -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-mail" viewBox="0 0 24 24"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></symbol>
+    <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></symbol>
+    <symbol id="i-presentation" viewBox="0 0 24 24"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></symbol>
+    <symbol id="i-medal" viewBox="0 0 24 24"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><path d="M12 19h8"/><path d="m4 17 6-6-6-6"/></symbol>
+    <symbol id="i-user-round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
+    <symbol id="i-flask-conical" viewBox="0 0 24 24"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/></symbol>
+    <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></symbol>
+    <symbol id="i-briefcase" viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
+    <symbol id="i-message-square" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></symbol>
+    <symbol id="b-github" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
+    <symbol id="b-x" viewBox="0 0 24 24"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></symbol>
+    <symbol id="b-googlescholar" viewBox="0 0 24 24"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/></symbol>
+    <symbol id="b-huggingface" viewBox="0 0 24 24"><path d="M12.025 1.13c-5.77 0-10.449 4.647-10.449 10.378 0 1.112.178 2.181.503 3.185.064-.222.203-.444.416-.577a.96.96 0 0 1 .524-.15c.293 0 .584.124.84.284.278.173.48.408.71.694.226.282.458.611.684.951v-.014c.017-.324.106-.622.264-.874s.403-.487.762-.543c.3-.047.596.06.787.203s.31.313.4.467c.15.257.212.468.233.542.01.026.653 1.552 1.657 2.54.616.605 1.01 1.223 1.082 1.912.055.537-.096 1.059-.38 1.572.637.121 1.294.187 1.967.187.657 0 1.298-.063 1.921-.178-.287-.517-.44-1.041-.384-1.581.07-.69.465-1.307 1.081-1.913 1.004-.987 1.647-2.513 1.657-2.539.021-.074.083-.285.233-.542.09-.154.208-.323.4-.467a1.08 1.08 0 0 1 .787-.203c.359.056.604.29.762.543s.247.55.265.874v.015c.225-.34.457-.67.683-.952.23-.286.432-.52.71-.694.257-.16.547-.284.84-.285a.97.97 0 0 1 .524.151c.228.143.373.388.43.625l.006.04a10.3 10.3 0 0 0 .534-3.273c0-5.731-4.678-10.378-10.449-10.378M8.327 6.583a1.5 1.5 0 0 1 .713.174 1.487 1.487 0 0 1 .617 2.013c-.183.343-.762-.214-1.102-.094-.38.134-.532.914-.917.71a1.487 1.487 0 0 1 .69-2.803m7.486 0a1.487 1.487 0 0 1 .689 2.803c-.385.204-.536-.576-.916-.71-.34-.12-.92.437-1.103.094a1.487 1.487 0 0 1 .617-2.013 1.5 1.5 0 0 1 .713-.174m-10.68 1.55a.96.96 0 1 1 0 1.921.96.96 0 0 1 0-1.92m13.838 0a.96.96 0 1 1 0 1.92.96.96 0 0 1 0-1.92M8.489 11.458c.588.01 1.965 1.157 3.572 1.164 1.607-.007 2.984-1.155 3.572-1.164.196-.003.305.12.305.454 0 .886-.424 2.328-1.563 3.202-.22-.756-1.396-1.366-1.63-1.32q-.011.001-.02.006l-.044.026-.01.008-.03.024q-.018.017-.035.036l-.032.04a1 1 0 0 0-.058.09l-.014.025q-.049.088-.11.19a1 1 0 0 1-.083.116 1.2 1.2 0 0 1-.173.18q-.035.029-.075.058a1.3 1.3 0 0 1-.251-.243 1 1 0 0 1-.076-.107c-.124-.193-.177-.363-.337-.444-.034-.016-.104-.008-.2.022q-.094.03-.216.087-.06.028-.125.063l-.13.074q-.067.04-.136.086a3 3 0 0 0-.135.096 3 3 0 0 0-.26.219 2 2 0 0 0-.12.121 2 2 0 0 0-.106.128l-.002.002a2 2 0 0 0-.09.132l-.001.001a1.2 1.2 0 0 0-.105.212q-.013.036-.024.073c-1.139-.875-1.563-2.317-1.563-3.203 0-.334.109-.457.305-.454m.836 10.354c.824-1.19.766-2.082-.365-3.194-1.13-1.112-1.789-2.738-1.789-2.738s-.246-.945-.806-.858-.97 1.499.202 2.362c1.173.864-.233 1.45-.685.64-.45-.812-1.683-2.896-2.322-3.295s-1.089-.175-.938.647 2.822 2.813 2.562 3.244-1.176-.506-1.176-.506-2.866-2.567-3.49-1.898.473 1.23 2.037 2.16c1.564.932 1.686 1.178 1.464 1.53s-3.675-2.511-4-1.297c-.323 1.214 3.524 1.567 3.287 2.405-.238.839-2.71-1.587-3.216-.642-.506.946 3.49 2.056 3.522 2.064 1.29.33 4.568 1.028 5.713-.624m5.349 0c-.824-1.19-.766-2.082.365-3.194 1.13-1.112 1.789-2.738 1.789-2.738s.246-.945.806-.858.97 1.499-.202 2.362c-1.173.864.233 1.45.685.64.451-.812 1.683-2.896 2.322-3.295s1.089-.175.938.647-2.822 2.813-2.562 3.244 1.176-.506 1.176-.506 2.866-2.567 3.49-1.898-.473 1.23-2.037 2.16c-1.564.932-1.686 1.178-1.464 1.53s3.675-2.511 4-1.297c.323 1.214-3.524 1.567-3.287 2.405.238.839 2.71-1.587 3.216-.642.506.946-3.49 2.056-3.522 2.064-1.29.33-4.568 1.028-5.713-.624"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2.5v19M2.5 12h19M5.3 5.3l13.4 13.4M18.7 5.3 5.3 18.7"/></symbol>
+  </svg>
+  <div class="scroll-progress" aria-hidden="true"></div>
 
-<body>
-  <table
-    style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-    <tbody>
-      <tr style="padding:0px">
-        <td style="padding:0px">
-          <table
-            style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-            <tbody>
-              <tr style="padding:0px">
-                <td style="padding:2.5%;width:63%;vertical-align:middle">
-                  <p class="name" style="text-align: center;">
-                    Jialuo Li
-                  </p>
-                  <p>
-                    I am a first-year graduate student in Computer Science at the
-                    <a href="https://www.gatech.edu">Georgia Institute of Technology</a>, where I am advised by Prof.
-                    <a href="https://www.humphreyshi.com/">Humphrey Shi</a>.
-                    I received my undergraduate degree from the
-                    <a href="https://iiis.tsinghua.edu.cn/en/">Institute for Interdisciplinary Information Sciences
-                      (IIIS)</a>,
-                    <a href="https://www.tsinghua.edu.cn/en/">Tsinghua University</a> (also known as the
-                    <a href="https://iiis.tsinghua.edu.cn/en/yaoclass/">Yao Class</a>, directed by Turing Award laureate
-                    <a href="https://iiis.tsinghua.edu.cn/yao/">Andrew Chi-Chih Yao</a>).
-                    Previously, I interned at
-                    <a href="https://www.nyu.edu/">New York University</a>, where I was advised by Prof.
-                    <a href="https://www.sainingxie.com/">Saining Xie</a>.
-                  </p>
+  <header class="site-header">
+    <div class="container header-bar">
+      <a class="brand" href="#top"><svg class="icon spark" aria-hidden="true"><use href="#i-spark"></use></svg><span>Jialuo Li</span></a>
+      <nav class="site-nav" aria-label="Sections">
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#research">Research</a></li>
+          <li><a href="#news">News</a></li>
+          <li><a href="#publications">Publications</a></li>
+          <li><a href="#experience">Experience</a></li>
+          <li><a href="#honors">Honors</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn theme-toggle" type="button" aria-pressed="false" hidden>
+          <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg><svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"></use></svg>
+          <span class="visually-hidden">Dark theme</span>
+        </button>
+        <a class="btn btn-primary btn-sm" href="data/CVJialuo.pdf"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>CV</a>
+        <details class="mobile-menu">
+          <summary class="icon-btn"><svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"></use></svg><svg class="icon icon-close" aria-hidden="true"><use href="#i-x"></use></svg><span class="visually-hidden">Menu</span></summary>
+          <nav aria-label="Sections (menu)">
+            <ul>
+              <li><a href="#about">About</a></li>
+              <li><a href="#research">Research</a></li>
+              <li><a href="#news">News</a></li>
+              <li><a href="#publications">Publications</a></li>
+              <li><a href="#experience">Experience</a></li>
+              <li><a href="#honors">Honors</a></li>
+            </ul>
+          </nav>
+        </details>
+      </div>
+    </div>
+  </header>
 
-                  <p style="text-align:center">
-                    <a href="mailto:jli3671@gatech.edu">Email</a> &nbsp;/&nbsp;
-                    <a href="data/CVJialuo.pdf">CV</a> &nbsp;/&nbsp;
-                    <a href="https://scholar.google.com/citations?user=xl9hSggAAAAJ&hl=zh-CN">Google Scholar</a>
-                    &nbsp;/&nbsp;
-                    <a href="https://x.com/JialuoLi1007">Twitter</a> &nbsp;/&nbsp;
-                    <a href="https://github.com/Jialuo-Li">Github</a>
-                  </p>
-                </td>
-                <td style="padding:2.5%;width:40%;max-width:40%">
-                  <a href="images/Jialuo.jpg"><img
-                      style="width:100%;max-width:100%;object-fit: cover; border-radius: 50%;" alt="profile photo"
-                      src="images/Jialuo.jpg" class="hoverZoomLink"></a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+  <main id="main">
+    <section class="hero" id="about" aria-labelledby="name">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="hero-eyebrow"><span class="status-dot" aria-hidden="true"></span>Graduate Student in Computer Science · Georgia Tech</p>
+          <h1 id="name">Jialuo Li <span class="name-zh" lang="zh-CN">李佳烙</span></h1>
+          <p class="bio">
+            I am a first-year graduate student in Computer Science at the
+            <a href="https://www.gatech.edu">Georgia Institute of Technology</a>, where I am advised by
+            Prof. <a href="https://www.humphreyshi.com/">Humphrey Shi</a>. I received my undergraduate
+            degree from the <a href="https://iiis.tsinghua.edu.cn/en/">Institute for Interdisciplinary
+            Information Sciences (IIIS)</a>, <a href="https://www.tsinghua.edu.cn/en/">Tsinghua
+            University</a> (also known as the
+            <a href="https://iiis.tsinghua.edu.cn/en/Yao_Class/About_Yao_Class.htm">Yao Class</a>,
+            directed by Turing Award laureate
+            <a href="https://iiis.tsinghua.edu.cn/en/People/Faculty/yaoqizhi.htm">Andrew Chi-Chih
+            Yao</a>). Previously, I interned at <a href="https://www.nyu.edu/">New York University</a>,
+            where I was advised by Prof. <a href="https://www.sainingxie.com/">Saining Xie</a>.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="data/CVJialuo.pdf"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>CV<svg class="icon icon-arrow" aria-hidden="true"><use href="#i-arrow-up-right"></use></svg></a>
+            <span class="email-pill">
+              <svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg><a href="mailto:jli3671@gatech.edu">jli3671@gatech.edu</a>
+              <button class="copy-btn" type="button" data-copy="jli3671@gatech.edu" hidden><svg class="icon icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg><svg class="icon icon-done" aria-hidden="true"><use href="#i-check"></use></svg><span class="visually-hidden">Copy email address</span></button>
+            </span>
+          </div>
+          <ul class="social" aria-label="Profiles">
+            <li><a class="chip-link" href="https://scholar.google.com/citations?user=xl9hSggAAAAJ&amp;hl=zh-CN"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-googlescholar"></use></svg>Google Scholar</a></li>
+            <li><a class="chip-link" href="https://x.com/JialuoLi1007"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-x"></use></svg>X / Twitter</a></li>
+            <li><a class="chip-link" href="https://github.com/Jialuo-Li"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>GitHub</a></li>
+          </ul>
+        </div>
+        <figure class="portrait">
+          <a class="portrait-frame" href="images/Jialuo.jpg">
+            <img src="images/web/Jialuo-480.webp" srcset="images/web/Jialuo-480.webp 480w, images/web/Jialuo-960.webp 960w" sizes="(max-width: 47.5rem) min(78vw, 22rem), 22rem" width="960" height="1029" alt="Portrait of Jialuo Li" fetchpriority="high">
+          </a>
+        </figure>
+      </div>
+    </section>
 
-          <table
-            style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-            <tbody>
-              <h2>🔬 Research</h2>
+    <div class="container band">
+      <section class="section" id="research" aria-labelledby="research-heading">
+        <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-flask-conical"></use></svg><span>~/research</span></p>
+        <h2 id="research-heading">Research</h2>
+        <p class="lead">
+          Humans exhibit an extraordinary capacity to integrate information from multiple sensory
+          modalities, such as vision, auditory, and tactile inputs, to navigate and interpret their
+          environments with remarkable efficiency. This multimodal integration leverages the
+          complementary strengths of each sensory channel, facilitating a coherent and comprehensive
+          understanding of complex surroundings. Inspired by this cognitive prowess, my long-term
+          objective is to <strong>develop AI systems that emulate human-like multimodal synthesis,
+          thereby enhancing robustness and adaptability in both generative and understanding
+          tasks.</strong>
+        </p>
+        <div class="focus-card">
+          <p>
+            Specifically, I focus on multimodal generative models, ranging from text-to-image synthesis
+            to Multimodal Large Language Models (MLLMs) and unified models.
+          </p>
+          <ul class="focus-tags" aria-label="Focus areas">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-image"></use></svg>Text-to-image synthesis</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-message-square"></use></svg>MLLMs</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>Unified models</li>
+          </ul>
+        </div>
+      </section>
 
-              <tr>
-                <td style="width:100%;vertical-align:middle">
-                  <p>
-                    Humans exhibit an extraordinary capacity to integrate information from multiple sensory modalities,
-                    such as vision, auditory, and tactile inputs, to navigate and interpret their environments with
-                    remarkable efficiency. This multimodal integration leverages the complementary strengths of each
-                    sensory channel, facilitating a coherent and comprehensive understanding of complex surroundings.
-                    Inspired by this cognitive prowess, my long-term objective is to <strong>develop AI systems that
-                      emulate human-like multimodal synthesis, thereby enhancing robustness and adaptability in both
-                      generative and understanding tasks.</strong>
-                  </p>
-                  <p>
-                    Specifically, I focus on multimodal generative models, ranging from text-to-image synthesis to
-                    Multimodal Large Language Models (MLLMs) and unified models.
-                  </p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <br>
+      <section class="section" id="news" aria-labelledby="news-heading">
+        <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-terminal"></use></svg><span>~/news</span></p>
+        <h2 id="news-heading">News</h2>
+        <div class="terminal">
+          <div class="terminal-bar" aria-hidden="true">
+            <span class="terminal-dots"><i></i><i></i><i></i></span>
+            <span class="terminal-title">news.log</span>
+          </div>
+          <div class="terminal-body">
+            <p class="prompt" aria-hidden="true"><span class="caret">&gt;</span>tail news.log</p>
+            <ul class="news-list">
+              <li>
+                <time datetime="2026-02">2026-02</time>
+                <p>
+                  Our papers <a href="https://arxiv.org/abs/2602.00508">DuoGen</a>,
+                  <a href="https://arxiv.org/abs/2512.04000">DIG</a>,
+                  <a href="https://praeclarumjj3.github.io/sage/">SAGE</a>, and
+                  <a href="https://github.com/SHI-Labs/physical-ai-bench">PAI-Bench</a> were accepted by
+                  CVPR 2026!
+                </p>
+              </li>
+              <li>
+                <time datetime="2025-02">2025-02</time>
+                <p>
+                  Our paper <a href="https://jialuo-li.github.io/Science-T2I-Web/">Science-T2I</a> was
+                  accepted by CVPR 2025!
+                </p>
+              </li>
+              <li>
+                <time datetime="2024-09">2024-09</time>
+                <p>
+                  I will join MSRA for an internship with Dr.
+                  <a href="https://www.microsoft.com/en-us/research/people/libin/">Bin Li</a>!
+                </p>
+              </li>
+              <!-- <li><strong>2024-09:</strong> ✨ Our research project about reflection anomaly in generative model is now availiable!</li> -->
+              <li>
+                <time datetime="2024-07">2024-07</time>
+                <p>
+                  Our paper <a href="https://arxiv.org/abs/2404.01343">CHOPS</a> was accepted by COLM
+                  2024!
+                </p>
+              </li>
+              <li>
+                <time datetime="2024-02">2024-02</time>
+                <p>
+                  I will start my internship in NYU Courant advised by Prof.
+                  <a href="https://www.sainingxie.com/" rel="noopener noreferrer" target="_blank">Saining
+                  Xie</a>. Looking forward to working with Saining in New York!
+                </p>
+              </li>
+              <!-- <li><strong>2024-01:</strong> ✨ Our graphics course project is now available! Feel free to explore and try it out <a href="https://github.com/ziyuyuyuyu1/ACG-Project">here</a>.</li> -->
+            </ul>
+            <p class="prompt" aria-hidden="true"><span class="caret">&gt;</span><span class="cursor"></span></p>
+          </div>
+        </div>
+      </section>
+    </div>
 
-          <table
-            style="width:95%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-            <tbody>
-              <h2>🔥 News</h2>
-
-              <tr>
-                <td style="width:100%;vertical-align:middle">
-                  <p>
-                    <li><strong>2026-02:</strong> ✨ Our papers <a href="https://arxiv.org/abs/2602.00508">DuoGen</a>, <a
-                        href="https://arxiv.org/abs/2512.04000">DIG</a>, <a
-                        href="https://praeclarumjj3.github.io/sage/">SAGE</a>, and <a
-                        href="https://github.com/SHI-Labs/physical-ai-bench">PAI-Bench</a> were accepted by CVPR 2026!
-                    </li>
-                    <li><strong>2025-02:</strong> ✨ Our paper <a
-                        href="https://jialuo-li.github.io/Science-T2I-Web/">Science-T2I</a> was accepted by CVPR 2025!
-                    </li>
-                    <li><strong>2024-09:</strong> I will join MSRA for an internship with Dr. <a
-                        href="https://www.microsoft.com/en-us/research/people/libin/">Bin Li</a>! </li>
-                    <!-- <li><strong>2024-09:</strong> ✨ Our research project about reflection anomaly in generative model is now availiable!</li> -->
-                    <li><strong>2024-07:</strong> ✨ Our paper <a href="https://arxiv.org/abs/2404.01343">CHOPS</a> was
-                      accepted by COLM 2024!</li>
-                    <li><strong>2024-02:</strong> I will start my internship in NYU Courant advised by Prof. <a
-                        href="https://www.sainingxie.com/" target="_blank">Saining Xie</a>. Looking forward to working
-                      with Saining in New York!</li>
-                    <!-- <li><strong>2024-01:</strong> ✨ Our graphics course project is now available! Feel free to explore and try it out <a href="https://github.com/ziyuyuyuyu1/ACG-Project">here</a>.</li> -->
-                  </p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <br>
-
-          <table
-            style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-            <tbody>
-
-              <h2>📚 Publications</h2>
-              (* for equal contribution)
-
-              <tr>
-                <td style="padding:20px;width:40%;vertical-align:middle">
-                  <a href="https://arxiv.org/abs/2602.00508" style="display:inline-block;">
-                    <img src="images/DuoGen.png" alt="DuoGen" width="100%"
-                      style="border-style: none; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); transition: filter 0.3s ease;">
-                  </a>
-                </td>
-                <td width="60%" valign="middle">
-                  <a href="https://arxiv.org/abs/2602.00508">
-                    <span class="papertitle"> DuoGen: Towards General Purpose Interleaved Multimodal Generation
-                    </span>
-                  </a>
-                  <br>
-                  <a href="https://openreview.net/profile?id=~Min_Shi2">Min Shi</a>,
-                  <a href="https://scholar.google.com/citations?user=ba8ZWdcAAAAJ&hl=en">Xiaohui Zeng</a>,
-                  <a href="https://scholar.google.com/citations?user=Hy7YWAUAAAAJ&hl=en">Jiannan Huang</a>,
-                  <a href="https://ycui.me/">Yin Cui</a>,
-                  <a href="https://www.francescoferroni.com/">Francesco Ferroni</a>,
-                  <strong>Jialuo Li</strong>,
-                  <a href="https://www.linkedin.com/in/shubhampachori/?originalSubdomain=in">Shubham Pachori</a>,
-                  <a href="https://scholar.google.com/citations?user=oc7JNSwAAAAJ&hl=en">Zhaoshuo Li</a>,
-                  <a href="https://scholar.google.com/citations?user=0I2qH0oAAAAJ&hl=en">Yogesh Balaji</a>,
-                  <a href="https://scholar.google.com/citations?user=bcInPlwAAAAJ&hl=en">Haoxiang Wang</a>,
-                  <a href="https://tsungyilin.info/">Tsung-Yi Lin</a>,
-                  <a href="https://fuxiao0719.github.io/">Xiao Fu</a>,
-                  <a href="https://scholar.google.com/citations?user=vKg7z7gAAAAJ&hl=zh-CN">Yue Zhao</a>,
-                  <a href="https://scholar.google.com/citations?user=GyMuDGAAAAAJ&hl=zh-TW">Chieh-Yun Chen</a>,
-                  <a href="https://scholar.google.com/citations?user=y-f-MZgAAAAJ&hl=en">Ming-Yu Liu</a>,
-                  <a href="https://scholar.google.com/citations?user=WBvt5A8AAAAJ&hl=en">Humphrey Shi</a>
-                  <br>
-                  <em class="venue">CVPR 2026 (Highlight)</em>
-                  <br>
-                  <a href="https://arxiv.org/abs/2602.00508">Paper</a>
-                  /
-                  <a href="https://research.nvidia.com/labs/dir/duogen/">Project Page</a>
-                  <p></p>
-                  <p>DuoGen enables general-purpose interleaved multimodal generation by fusing a pretrained MLLM with
-                    a video-pretrained DiT. Leveraging a curated 298k-sample dataset, DuoGen significantly outperforms
-                    open-source baselines in visual fidelity and consistency and achieves performance comparable to
-                    Nano-banana.</p>
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:20px;width:40%;vertical-align:middle">
-                  <a href="https://arxiv.org/abs/2512.04000" style="display:inline-block;">
-                    <img src="images/DIG.png" alt="DIG" width="100%"
-                      style="border-style: none; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); transition: filter 0.3s ease;">
-                  </a>
-                </td>
-                <td width="60%" valign="middle">
-                  <a href="https://arxiv.org/abs/2512.04000">
-                    <span class="papertitle"> Divide, then Ground: Adapting Frame Selection to Query Types for Long-Form
-                      Video Understanding
-                    </span>
-                  </a>
-                  <br>
-                  <strong>Jialuo Li</strong>,
-                  <a
-                    href="https://scholar.google.com/citations?hl=zh-CN&user=rxZn4g0AAAAJ&view_op=list_works&sortby=pubdate">Bin
-                    Li</a>,
-                  <a href="https://www.microsoft.com/en-us/research/people/jiahali/">Jiahao Li</a>,
-                  <a href="https://www.microsoft.com/en-us/research/people/yanlu/">Yan Lu</a>
-                  <br>
-                  <em class="venue">CVPR 2026</em>
-                  <br>
-                  <a href="https://arxiv.org/abs/2512.04000">Paper</a>
-                  /
-                  <a href="https://github.com/Jialuo-Li/DIG">Code</a>
-                  <p></p>
-                  <p>DIG optimizes long-form video understanding by distinguishing between "global" and "localized"
-                    queries, applying different strategies for each with a training-free approach.</p>
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:20px;width:40%;vertical-align:middle">
-                  <a href="https://praeclarumjj3.github.io/sage/" style="display:inline-block;">
-                    <img src="images/SAGE.png" alt="SAGE" width="100%"
-                      style="border-style: none; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); transition: filter 0.3s ease;">
-                  </a>
-                </td>
-                <td width="60%" valign="middle">
-                  <a href="https://praeclarumjj3.github.io/sage/">
-                    <span class="papertitle"> SAGE: Training Smart Any-Horizon Agents for Long Video Reasoning with
-                      Reinforcement Learning
-                    </span>
-                  </a>
-                  <br>
-                  <a href="https://praeclarumjj3.github.io/">Jitesh Jain</a>,
-                  <strong>Jialuo Li</strong>,
-                  <a href="https://zixianma.github.io/">Zixian Ma</a>,
-                  <a href="https://jieyuz2.github.io/">Jieyu Zhang</a>,
-                  <a href="https://cdjkim.github.io/">Chris Dongjoo Kim</a>,
-                  <a href="https://sangho-vision.github.io/">Sangho Lee</a>,
-                  <a href="https://rohun-tripathi.github.io/">Rohun Tripathi</a>,
-                  <a href="https://tanmaygupta.info/">Tanmay Gupta</a>,
-                  <a href="https://chrisc36.github.io/">Christopher Clark</a>,
-                  <a href="https://www.humphreyshi.com/">Humphrey Shi</a>
-                  <br>
-                  <em class="venue">CVPR 2026</em>
-                  <br>
-                  <a href="https://praeclarumjj3.github.io/sage/">Project Page</a>
-                  /
-                  <a href="https://arxiv.org/abs/2512.13874">Paper</a>
-                  /
-                  <a href="https://huggingface.co/collections/allenai/sage">Dataset</a>
-                  /
-                  <a href="https://github.com/allenai/SAGE">Code</a>
-                  <p></p>
-                  <p>SAGE introduces a human-inspired agentic framework that replaces resource-heavy frame processing
-                    with iterative reasoning and a diverse toolkit for efficient long video understanding by leveraging
-                    a novel synthetic data pipeline and a specialized RL strategy.</p>
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:20px;width:40%;vertical-align:middle">
-                  <a href="https://github.com/SHI-Labs/physical-ai-bench" style="display:inline-block;">
-                    <img src="images/PAIBench.png" alt="PAIBench" width="100%"
-                      style="border-style: none; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); transition: filter 0.3s ease;">
-                  </a>
-                </td>
-                <td width="60%" valign="middle">
-                  <a href="https://github.com/SHI-Labs/physical-ai-bench">
-                    <span class="papertitle"> PAI-Bench: A Comprehensive Benchmark For Physical AI
-                    </span>
-                  </a>
-                  <br>
-                  <a href="https://github.com/Leymore">Fengzhe Zhou*</a>,
-                  <a href="https://rbrq03.github.io/">Jiannan Huang*</a>,
-                  <strong>Jialuo Li*</strong>,
-                  <a href="https://www.cs.cmu.edu/~deva/">Deva Ramanan</a>,
-                  <a href="https://www.humphreyshi.com/">Humphrey Shi</a>
-                  <br>
-                  <em class="venue">CVPR 2026 (Oral)</em>
-                  <br>
-                  <a href="https://arxiv.org/abs/2512.01989">Paper</a>
-                  /
-                  <a href="https://huggingface.co/datasets/shi-labs/physical-ai-bench-generation">Dataset</a>
-                  /
-                  <a href="https://github.com/SHI-Labs/physical-ai-bench">Code</a>
-                  <p></p>
-                  <p>PAI-Bench is a new benchmark designed to evaluate Physical AI capabilities across video generation
-                    and understanding. The study finds that while current models produce high-quality visuals, they lack
-                    the physical common sense and reasoning required to truly understand real-world dynamics.</p>
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:20px;width:40%;vertical-align:middle">
-                  <a href="https://jialuo-li.github.io/Science-T2I-Web/" style="display:inline-block;">
-                    <img src="images/Scibench.png" alt="Scibench" width="100%"
-                      style="border-style: none; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); transition: filter 0.3s ease;">
-                  </a>
-                </td>
-                <td width="60%" valign="middle">
-                  <a href="https://jialuo-li.github.io/Science-T2I-Web/">
-                    <span class="papertitle"> Science-T2I: Addressing Scientific Illusions in Image Synthesis
-                    </span>
-                  </a>
-                  <br>
-                  <strong>Jialuo Li</strong>,
-                  <a href="https://rese1f.github.io/">Wenhao Chai</a>,
-                  <a href="https://zeyofu.github.io/">Xingyu Fu</a>,
-                  <a href="https://xxuhaiyang.github.io/">Haiyang Xu</a>,
-                  <a href="https://www.sainingxie.com/">Saining Xie</a>
-                  <br>
-                  <em class="venue">CVPR 2025</em>
-                  <br>
-                  <a href="https://jialuo-li.github.io/Science-T2I-Web/">Project Page</a>
-                  /
-                  <a href="https://arxiv.org/abs/2504.13129">Paper</a>
-                  /
-                  <a href="https://huggingface.co/collections/Jialuo21/science-t2i-67d3bfe43253da2bc7cfaf06">Dataset</a>
-                  /
-                  <a href="https://github.com/Jialuo-Li/Science-T2I">Code</a>
-                  /
-                  <a href="https://jialuo-li.github.io/data/CVPR_2025_Sciencet2i_poster.pdf">Poster</a>
-                  <p></p>
-                  <p>We introduce SciScore, a reward model that improves generative models' scientific accuracy. Trained
-                    in two stages, it achieves human-level performance in evaluating scientific image realism on
-                    Science-T2I dataset.</p>
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:20px;width:40%;vertical-align:middle">
-                  <a href="https://arxiv.org/abs/2404.01343" style="display:inline-block;">
-                    <img src="images/CHOPS.png" alt="PontTuset" width="100%"
-                      style="border-style: none; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); transition: filter 0.3s ease;">
-                  </a>
-                </td>
-                <td width="60%" valign="middle">
-                  <a href="https://arxiv.org/abs/2404.01343">
-                    <span class="papertitle"> CHOPS: CHat with custOmer Profile Systems for Customer Service with LLMs
-                    </span>
-                  </a>
-                  <br>
-                  <a href="https://github.com/JingzheShi">Jingzhe Shi</a>,
-                  <strong>Jialuo Li</strong>,
-                  <a href="https://scholar.google.com/citations?user=LwUaV3kAAAAJ&hl=zh-CN">Qinwei Ma</a>,
-                  <a href="https://github.com/Faded-Nebula">Zaiwen Yang</a>,
-                  <a href="https://github.com/cjxh21">Huan Ma</a>,
-                  <a href="https://scholar.google.com/citations?user=DOyVxx0AAAAJ&">Lei Li</a>
-                  <br>
-                  <em class="venue">COLM 2024</em>
-                  <br>
-                  <a href="https://github.com/JingzheShi/CHOPS">Project Page</a>
-                  /
-                  <a href="https://arxiv.org/abs/2404.01343">Paper</a>
-                  <p></p>
-                  <p>CHOPS uses small and large LLMs to create an efficient, safe LLM agent that accesses user data,
-                    interacts with systems, and delivers accurate responses.</p>
-                </td>
-              </tr>
-
-            </tbody>
-          </table>
-
-          <!-- <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+    <section class="section" id="publications" aria-labelledby="publications-heading">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-book-open"></use></svg><span>~/publications</span></p>
+            <h2 id="publications-heading">Publications</h2>
+          </div>
+          <p class="section-note">(* for equal contribution)</p>
+        </div>
+        <section class="pub-year" aria-labelledby="year-2026">
+          <h3 class="year" id="year-2026">2026</h3>
+          <article class="paper">
+            <a class="paper-figure" href="https://arxiv.org/abs/2602.00508" tabindex="-1" aria-hidden="true">
+              <img src="images/web/DuoGen-640.webp" srcset="images/web/DuoGen-640.webp 640w, images/web/DuoGen-1280.webp 1280w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1280" height="908" loading="lazy" decoding="async" alt="DuoGen: Towards General Purpose Interleaved Multimodal Generation">
+            </a>
+            <div class="paper-body">
+              <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span> <span class="chip chip-highlight"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>Highlight</span></p>
+              <h4 class="paper-title"><a href="https://arxiv.org/abs/2602.00508">DuoGen: Towards General Purpose Interleaved Multimodal Generation</a></h4>
+              <p class="paper-authors">
+                <a href="https://openreview.net/profile?id=~Min_Shi2">Min Shi</a>,
+                <a href="https://scholar.google.com/citations?user=ba8ZWdcAAAAJ&amp;hl=en">Xiaohui Zeng</a>,
+                <a href="https://scholar.google.com/citations?user=Hy7YWAUAAAAJ&amp;hl=en">Jiannan Huang</a>,
+                <a href="https://ycui.me/">Yin Cui</a>,
+                <a href="https://www.francescoferroni.com/">Francesco Ferroni</a>,
+                <strong class="me">Jialuo Li</strong>,
+                <a href="https://www.linkedin.com/in/shubhampachori/?originalSubdomain=in">Shubham Pachori</a>,
+                <a href="https://scholar.google.com/citations?user=oc7JNSwAAAAJ&amp;hl=en">Zhaoshuo Li</a>,
+                <a href="https://scholar.google.com/citations?user=0I2qH0oAAAAJ&amp;hl=en">Yogesh Balaji</a>,
+                <a href="https://scholar.google.com/citations?user=bcInPlwAAAAJ&amp;hl=en">Haoxiang Wang</a>,
+                <a href="https://tsungyilin.info/">Tsung-Yi Lin</a>,
+                <a href="https://fuxiao0719.github.io/">Xiao Fu</a>,
+                <a href="https://scholar.google.com/citations?user=vKg7z7gAAAAJ&amp;hl=zh-CN">Yue Zhao</a>,
+                <a href="https://scholar.google.com/citations?user=GyMuDGAAAAAJ&amp;hl=zh-TW">Chieh-Yun Chen</a>,
+                <a href="https://scholar.google.com/citations?user=y-f-MZgAAAAJ&amp;hl=en">Ming-Yu Liu</a>,
+                <a href="https://scholar.google.com/citations?user=WBvt5A8AAAAJ&amp;hl=en">Humphrey Shi</a>
+              </p>
+              <p class="paper-summary">
+                DuoGen enables general-purpose interleaved multimodal generation by fusing a pretrained
+                MLLM with a video-pretrained DiT. Leveraging a curated 298k-sample dataset, DuoGen
+                significantly outperforms open-source baselines in visual fidelity and consistency and
+                achieves performance comparable to Nano-banana.
+              </p>
+              <ul class="paper-links" aria-label="Resources for DuoGen">
+                <li><a class="link-chip" href="https://arxiv.org/abs/2602.00508"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://research.nvidia.com/labs/dir/duogen/"><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>Project Page</a></li>
+              </ul>
+            </div>
+          </article>
+          <article class="paper">
+            <a class="paper-figure" href="https://arxiv.org/abs/2512.04000" tabindex="-1" aria-hidden="true">
+              <img src="images/web/DIG-640.webp" srcset="images/web/DIG-640.webp 640w, images/web/DIG-1280.webp 1280w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1280" height="695" loading="lazy" decoding="async" alt="Divide, then Ground: Adapting Frame Selection to Query Types for Long-Form Video Understanding">
+            </a>
+            <div class="paper-body">
+              <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span></p>
+              <h4 class="paper-title"><a href="https://arxiv.org/abs/2512.04000">Divide, then Ground: Adapting Frame Selection to Query Types for Long-Form Video Understanding</a></h4>
+              <p class="paper-authors">
+                <strong class="me">Jialuo Li</strong>,
+                <a href="https://scholar.google.com/citations?hl=zh-CN&amp;user=rxZn4g0AAAAJ&amp;view_op=list_works&amp;sortby=pubdate">Bin Li</a>,
+                <a href="https://www.microsoft.com/en-us/research/people/jiahali/">Jiahao Li</a>,
+                <a href="https://www.microsoft.com/en-us/research/people/yanlu/">Yan Lu</a>
+              </p>
+              <p class="paper-summary">
+                DIG optimizes long-form video understanding by distinguishing between "global" and
+                "localized" queries, applying different strategies for each with a training-free approach.
+              </p>
+              <ul class="paper-links" aria-label="Resources for Divide, then Ground">
+                <li><a class="link-chip" href="https://arxiv.org/abs/2512.04000"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://github.com/Jialuo-Li/DIG"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>Code</a></li>
+              </ul>
+            </div>
+          </article>
+          <article class="paper">
+            <a class="paper-figure" href="https://praeclarumjj3.github.io/sage/" tabindex="-1" aria-hidden="true">
+              <img src="images/web/SAGE-640.webp" srcset="images/web/SAGE-640.webp 640w, images/web/SAGE-1280.webp 1280w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1280" height="791" loading="lazy" decoding="async" alt="SAGE: Training Smart Any-Horizon Agents for Long Video Reasoning with Reinforcement Learning">
+            </a>
+            <div class="paper-body">
+              <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span></p>
+              <h4 class="paper-title"><a href="https://praeclarumjj3.github.io/sage/">SAGE: Training Smart Any-Horizon Agents for Long Video Reasoning with Reinforcement Learning</a></h4>
+              <p class="paper-authors">
+                <a href="https://praeclarumjj3.github.io/">Jitesh Jain</a>,
+                <strong class="me">Jialuo Li</strong>,
+                <a href="https://zixianma.github.io/">Zixian Ma</a>,
+                <a href="https://jieyuz2.github.io/">Jieyu Zhang</a>,
+                <a href="https://cdjkim.github.io/">Chris Dongjoo Kim</a>,
+                <a href="https://sangho-vision.github.io/">Sangho Lee</a>,
+                <a href="https://rohun-tripathi.github.io/">Rohun Tripathi</a>,
+                <a href="https://tanmaygupta.info/">Tanmay Gupta</a>,
+                <a href="https://chrisc36.github.io/">Christopher Clark</a>,
+                <a href="https://www.humphreyshi.com/">Humphrey Shi</a>
+              </p>
+              <p class="paper-summary">
+                SAGE introduces a human-inspired agentic framework that replaces resource-heavy frame
+                processing with iterative reasoning and a diverse toolkit for efficient long video
+                understanding by leveraging a novel synthetic data pipeline and a specialized RL strategy.
+              </p>
+              <ul class="paper-links" aria-label="Resources for SAGE">
+                <li><a class="link-chip" href="https://praeclarumjj3.github.io/sage/"><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>Project Page</a></li>
+                <li><a class="link-chip" href="https://arxiv.org/abs/2512.13874"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://huggingface.co/collections/allenai/sage"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-huggingface"></use></svg>Dataset</a></li>
+                <li><a class="link-chip" href="https://github.com/allenai/SAGE"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>Code</a></li>
+              </ul>
+            </div>
+          </article>
+          <article class="paper">
+            <a class="paper-figure" href="https://github.com/SHI-Labs/physical-ai-bench" tabindex="-1" aria-hidden="true">
+              <img src="images/web/PAIBench-640.webp" srcset="images/web/PAIBench-640.webp 640w, images/web/PAIBench-1280.webp 1280w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1280" height="856" loading="lazy" decoding="async" alt="PAI-Bench: A Comprehensive Benchmark For Physical AI">
+            </a>
+            <div class="paper-body">
+              <p class="paper-venue"><span class="chip chip-venue">CVPR 2026</span> <span class="chip chip-oral"><svg class="icon" aria-hidden="true"><use href="#i-mic"></use></svg>Oral</span></p>
+              <h4 class="paper-title"><a href="https://github.com/SHI-Labs/physical-ai-bench">PAI-Bench: A Comprehensive Benchmark For Physical AI</a></h4>
+              <p class="paper-authors">
+                <a href="https://github.com/Leymore">Fengzhe Zhou*</a>,
+                <a href="https://rbrq03.github.io/">Jiannan Huang*</a>,
+                <strong class="me">Jialuo Li*</strong>,
+                <a href="https://www.cs.cmu.edu/~deva/">Deva Ramanan</a>,
+                <a href="https://www.humphreyshi.com/">Humphrey Shi</a>
+              </p>
+              <p class="paper-summary">
+                PAI-Bench is a new benchmark designed to evaluate Physical AI capabilities across video
+                generation and understanding. The study finds that while current models produce
+                high-quality visuals, they lack the physical common sense and reasoning required to truly
+                understand real-world dynamics.
+              </p>
+              <ul class="paper-links" aria-label="Resources for PAI-Bench">
+                <li><a class="link-chip" href="https://arxiv.org/abs/2512.01989"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://huggingface.co/datasets/shi-labs/physical-ai-bench-generation"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-huggingface"></use></svg>Dataset</a></li>
+                <li><a class="link-chip" href="https://github.com/SHI-Labs/physical-ai-bench"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>Code</a></li>
+              </ul>
+            </div>
+          </article>
+        </section>
+        <section class="pub-year" aria-labelledby="year-2025">
+          <h3 class="year" id="year-2025">2025</h3>
+          <article class="paper">
+            <a class="paper-figure" href="https://jialuo-li.github.io/Science-T2I-Web/" tabindex="-1" aria-hidden="true">
+              <img src="images/web/Scibench-640.webp" srcset="images/web/Scibench-640.webp 640w, images/web/Scibench-1203.webp 1203w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="1203" height="602" loading="lazy" decoding="async" alt="Science-T2I: Addressing Scientific Illusions in Image Synthesis">
+            </a>
+            <div class="paper-body">
+              <p class="paper-venue"><span class="chip chip-venue">CVPR 2025</span></p>
+              <h4 class="paper-title"><a href="https://jialuo-li.github.io/Science-T2I-Web/">Science-T2I: Addressing Scientific Illusions in Image Synthesis</a></h4>
+              <p class="paper-authors">
+                <strong class="me">Jialuo Li</strong>,
+                <a href="https://wenhaochai.com/">Wenhao Chai</a>,
+                <a href="https://zeyofu.github.io/">Xingyu Fu</a>,
+                <a href="https://xxuhaiyang.github.io/">Haiyang Xu</a>,
+                <a href="https://www.sainingxie.com/">Saining Xie</a>
+              </p>
+              <p class="paper-summary">
+                We introduce SciScore, a reward model that improves generative models' scientific
+                accuracy. Trained in two stages, it achieves human-level performance in evaluating
+                scientific image realism on Science-T2I dataset.
+              </p>
+              <ul class="paper-links" aria-label="Resources for Science-T2I">
+                <li><a class="link-chip" href="https://jialuo-li.github.io/Science-T2I-Web/"><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>Project Page</a></li>
+                <li><a class="link-chip" href="https://arxiv.org/abs/2504.13129"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+                <li><a class="link-chip" href="https://huggingface.co/collections/Jialuo21/science-t2i-67d3bfe43253da2bc7cfaf06"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-huggingface"></use></svg>Dataset</a></li>
+                <li><a class="link-chip" href="https://github.com/Jialuo-Li/Science-T2I"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>Code</a></li>
+                <li><a class="link-chip" href="https://jialuo-li.github.io/data/CVPR_2025_Sciencet2i_poster.pdf"><svg class="icon" aria-hidden="true"><use href="#i-presentation"></use></svg>Poster</a></li>
+              </ul>
+            </div>
+          </article>
+        </section>
+        <section class="pub-year" aria-labelledby="year-2024">
+          <h3 class="year" id="year-2024">2024</h3>
+          <article class="paper">
+            <a class="paper-figure" href="https://arxiv.org/abs/2404.01343" tabindex="-1" aria-hidden="true">
+              <img src="images/web/CHOPS-640.webp" srcset="images/web/CHOPS-640.webp 640w, images/web/CHOPS-840.webp 840w" sizes="(max-width: 40rem) calc(100vw - 4.5rem), (max-width: 64rem) 40vw, 19rem" width="840" height="408" loading="lazy" decoding="async" alt="CHOPS: CHat with custOmer Profile Systems for Customer Service with LLMs">
+            </a>
+            <div class="paper-body">
+              <p class="paper-venue"><span class="chip chip-venue">COLM 2024</span></p>
+              <h4 class="paper-title"><a href="https://arxiv.org/abs/2404.01343">CHOPS: CHat with custOmer Profile Systems for Customer Service with LLMs</a></h4>
+              <p class="paper-authors">
+                <a href="https://github.com/JingzheShi">Jingzhe Shi</a>,
+                <strong class="me">Jialuo Li</strong>,
+                <a href="https://scholar.google.com/citations?user=LwUaV3kAAAAJ&amp;hl=zh-CN">Qinwei Ma</a>,
+                <a href="https://github.com/Faded-Nebula">Zaiwen Yang</a>,
+                <a href="https://github.com/cjxh21">Huan Ma</a>,
+                <a href="https://scholar.google.com/citations?user=DOyVxx0AAAAJ&amp;">Lei Li</a>
+              </p>
+              <p class="paper-summary">
+                CHOPS uses small and large LLMs to create an efficient, safe LLM agent that accesses user
+                data, interacts with systems, and delivers accurate responses.
+              </p>
+              <ul class="paper-links" aria-label="Resources for CHOPS">
+                <li><a class="link-chip" href="https://github.com/JingzheShi/CHOPS"><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>Project Page</a></li>
+                <li><a class="link-chip" href="https://arxiv.org/abs/2404.01343"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>Paper</a></li>
+              </ul>
+            </div>
+          </article>
+        </section>
+      </div>
+    </section>
+    <!-- <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
             
             <h2>Projects</h2>
             (* for equal contribution)
@@ -395,125 +465,138 @@
             </tr>
           </tbody></table> -->
 
-          <table
-            style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-            <tbody>
-
-              <h2>💼 Experience</h2>
-              <br>
-
-              <tr>
-                <td style="padding:20px;width:25%;vertical-align:middle"><img src="images/GT_logo.png" , width="120">
-                </td>
-                <td width="75%" valign="center">
-                  <strong><a href="https://www.gatech.edu/" target="_blank"><span class="papertitle">Georgia Institute
-                        of Technology</span> </a></strong>
-                  <br> <em>2025.08 - Present</em><br> <strong>Graduate Student</strong>
-                  <br> Research Advisor: Prof. <a href="https://www.humphreyshi.com/" target="_blank">Humphrey Shi</a>
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:20px;width:25%;vertical-align:middle"><img src="images/MSRA_logo.png" , width="120">
-                </td>
-                <td width="75%" valign="center">
-                  <strong><a href="https://www.microsoft.com/en-us/research/lab/microsoft-research-asia/"
-                      target="_blank"><span class="papertitle">Microsoft Research Lab - Asia</span> </a></strong>
-                  <br> <em>2024.09 - 2025.06</em><br> <strong>Research Intern</strong>
-                  <br> Research Advisor: Dr. <a href="https://www.microsoft.com/en-us/research/people/libin/"
-                    target="_blank">Bin Li</a>
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:20px;width:25%;vertical-align:middle"><img src="images/nyu_logo.png" , width="120">
-                </td>
-                <td width="75%" valign="center">
-                  <strong><a href="https://www.nyu.edu/" target="_blank"><span class="papertitle">New York
-                        University</span> </a></strong>
-                  <br> <em>2024.02 - 2025.02</em><br> <strong>Research Intern</strong>
-                  <br> Research Advisor: Prof. <a href="https://www.sainingxie.com/" target="_blank">Saining Xie</a>
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:20px;width:25%;vertical-align:middle"><img src="images/Tsinghua_logo.png" ,
-                    width="120"></td>
-                <td width="75%" valign="center">
-                  <strong><a href="https://www.tsinghua.edu.cn/" target="_blank"><span class="papertitle">Tsinghua
-                        University</span> </a></strong>
-                  <br> <em>2021.09 - 2025.06</em><br> <strong>Undergraduate Student</strong>
-                  <br> Research Advisor: Prof. <a href="https://ericyi.github.io/">Li Yi</a>.
-                </td>
-              </tr>
-
-            </tbody>
-          </table>
-          <br>
-
-          <table
-            style="width:95%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-            <tbody>
-
-              <h2>🏆 Honors and Awards</h2>
-              <tr>
-                <td style="width:100%;vertical-align:middle">
-                  <p>
-                    <li><strong>2023:</strong> Outstanding Scholarship in Social Work from Tsinghua University.</li>
-                  </p>
-                  <p>
-                    <li><strong>2022:</strong> Mr. and Mrs. Wong Yi-Chung Award, Friends of Tsinghua University.</li>
-                  </p>
-                  <p>
-                    <li><strong>2022:</strong> Outstanding Scholarship in Social Work from Tsinghua University.</li>
-                  </p>
-                  <p>
-                    <li><strong>2021:</strong> Member of the Chinese team of the 21st Asian Physics Olympiad (<a
-                        href="http://asianphysicsolympiad.org/">APhO</a>).</li>
-                  </p>
-                  <p>
-                    <li><strong>2020:</strong> Gold Medalist 🏅 in the 37th Chinese Physics Olympiad (<a
-                        href="https://cpho.pku.edu.cn/info/1070/1207.htm">CPhO</a>), <strong>ranking tenth
-                        nationwide</strong>.</li>
-                  </p>
-                </td>
-              </tr>
-
-            </tbody>
-          </table>
-          <br><br>
-          <div align="center">
-            <div align="center">
-              This Site Already Has
-              <small><a href="https://www.easycounter.com/"><img src="https://www.easycounter.com/counter.php?jialuoli"
-                    border="0" alt="Free Hit Counters"></a></small>
-              Visitors
-            </div>
-            <br>
-            <div align="center" style="width:20%">
-              <script type="text/javascript" id="mmvst_globe"
-                src="//mapmyvisitors.com/globe.js?d=9TG9HJU10uCL52kM2JNFhwRBVHIhbVePGHwJ5b2Eap0"></script>
-            </div>
-
+    <section class="section" id="experience" aria-labelledby="experience-heading">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"></use></svg><span>~/experience</span></p>
+            <h2 id="experience-heading">Experience</h2>
           </div>
-          <table
-            style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-            <tbody>
-              <tr>
-                <td style="padding:0px">
-                  <br>
-                  <p style="text-align:center;font-size:small;">
-                    This homepage is designed based on <a href="http://jonbarron.info/">Jon Barron</a>'s homepage and
-                    deployed on <a href="https://pages.github.com/">GitHub Pages</a>. Last updated: Jan 21, 2026.
-                    <br> © 2026 Jialuo Li
-                  </p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
-  </table>
-</body>
+        </div>
+        <ol class="timeline">
+          <li class="exp-card">
+            <div class="exp-top">
+              <span class="exp-logo"><img src="images/web/GT_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+              <span class="exp-date">2025.08 - Present</span>
+            </div>
+            <h3 class="exp-org"><a href="https://www.gatech.edu/" target="_blank" rel="noopener noreferrer">Georgia Institute of Technology</a></h3>
+            <p class="exp-role">Graduate Student</p>
+            <p class="exp-advisor">Research Advisor: Prof. <a href="https://www.humphreyshi.com/" rel="noopener noreferrer" target="_blank">Humphrey Shi</a></p>
+          </li>
+          <li class="exp-card">
+            <div class="exp-top">
+              <span class="exp-logo"><img src="images/web/MSRA_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+              <span class="exp-date">2024.09 - 2025.06</span>
+            </div>
+            <h3 class="exp-org"><a href="https://www.microsoft.com/en-us/research/lab/microsoft-research-asia/" target="_blank" rel="noopener noreferrer">Microsoft Research Lab - Asia</a></h3>
+            <p class="exp-role">Research Intern</p>
+            <p class="exp-advisor">Research Advisor: Dr. <a href="https://www.microsoft.com/en-us/research/people/libin/" rel="noopener noreferrer" target="_blank">Bin Li</a></p>
+          </li>
+          <li class="exp-card">
+            <div class="exp-top">
+              <span class="exp-logo"><img src="images/web/nyu_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+              <span class="exp-date">2024.02 - 2025.02</span>
+            </div>
+            <h3 class="exp-org"><a href="https://www.nyu.edu/" target="_blank" rel="noopener noreferrer">New York University</a></h3>
+            <p class="exp-role">Research Intern</p>
+            <p class="exp-advisor">Research Advisor: Prof. <a href="https://www.sainingxie.com/" rel="noopener noreferrer" target="_blank">Saining Xie</a></p>
+          </li>
+          <li class="exp-card">
+            <div class="exp-top">
+              <span class="exp-logo"><img src="images/web/Tsinghua_logo-144.webp" width="144" height="144" alt="" loading="lazy" decoding="async"></span>
+              <span class="exp-date">2021.09 - 2025.06</span>
+            </div>
+            <h3 class="exp-org"><a href="https://www.tsinghua.edu.cn/" target="_blank" rel="noopener noreferrer">Tsinghua University</a></h3>
+            <p class="exp-role">Undergraduate Student</p>
+            <p class="exp-advisor">Research Advisor: Prof. <a href="https://ericyi.github.io/">Li Yi</a>.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
 
+    <section class="section" id="honors" aria-labelledby="honors-heading">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-award"></use></svg><span>~/honors</span></p>
+            <h2 id="honors-heading">Honors and Awards</h2>
+          </div>
+        </div>
+        <ul class="honors">
+          <li>
+            <time datetime="2023">2023</time>
+            <p>Outstanding Scholarship in Social Work from Tsinghua University.</p>
+          </li>
+          <li>
+            <time datetime="2022">2022</time>
+            <p>Mr. and Mrs. Wong Yi-Chung Award, Friends of Tsinghua University.</p>
+          </li>
+          <li>
+            <time datetime="2022">2022</time>
+            <p>Outstanding Scholarship in Social Work from Tsinghua University.</p>
+          </li>
+          <li>
+            <time datetime="2021">2021</time>
+            <p>Member of the Chinese team of the 21st Asian Physics Olympiad
+              (<a href="http://asianphysicsolympiad.org/">APhO</a>).</p>
+          </li>
+          <li>
+            <time datetime="2020">2020</time>
+            <p>Gold
+              Medalist<svg class="icon icon-inline medal" aria-hidden="true"><use href="#i-medal"></use></svg>
+              in the 37th Chinese Physics Olympiad
+              (<a href="https://cpho.pku.edu.cn/info/1070/1207.htm">CPhO</a>), <strong>ranking tenth
+              nationwide</strong>.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#top"><svg class="icon spark" aria-hidden="true"><use href="#i-spark"></use></svg><span>Jialuo Li</span></a>
+        <p>Graduate Student in Computer Science · Georgia Tech</p>
+        <span class="email-pill">
+          <svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg><a href="mailto:jli3671@gatech.edu">jli3671@gatech.edu</a>
+          <button class="copy-btn" type="button" data-copy="jli3671@gatech.edu" hidden><svg class="icon icon-copy" aria-hidden="true"><use href="#i-copy"></use></svg><svg class="icon icon-done" aria-hidden="true"><use href="#i-check"></use></svg><span class="visually-hidden">Copy email address</span></button>
+        </span>
+      </div>
+      <nav class="footer-col" aria-label="Sections (footer)">
+        <p class="footer-label">Sections</p>
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#research">Research</a></li>
+          <li><a href="#news">News</a></li>
+          <li><a href="#publications">Publications</a></li>
+          <li><a href="#experience">Experience</a></li>
+          <li><a href="#honors">Honors</a></li>
+        </ul>
+      </nav>
+      <div class="footer-col">
+        <p class="footer-label">Elsewhere</p>
+        <ul>
+          <li><a href="data/CVJialuo.pdf"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>CV</a></li>
+          <li><a href="https://scholar.google.com/citations?user=xl9hSggAAAAJ&amp;hl=zh-CN"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-googlescholar"></use></svg>Google Scholar</a></li>
+          <li><a href="https://x.com/JialuoLi1007"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-x"></use></svg>X / Twitter</a></li>
+          <li><a href="https://github.com/Jialuo-Li"><svg class="icon icon-brand" aria-hidden="true"><use href="#b-github"></use></svg>GitHub</a></li>
+        </ul>
+      </div>
+      <div class="footer-col footer-visitors">
+        <p class="footer-label">Visitors</p>
+        <div class="globe">
+          <script type="text/javascript" id="mmvst_globe" src="//mapmyvisitors.com/globe.js?d=9TG9HJU10uCL52kM2JNFhwRBVHIhbVePGHwJ5b2Eap0"></script>
+        </div>
+        <p class="visitor-count">This Site Already Has <a class="counter" href="https://www.easycounter.com/"><img src="https://www.easycounter.com/counter.php?jialuoli" alt="Free Hit Counters"></a> Visitors</p>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>© 2026 Jialuo Li</p>
+      <p>Last updated: Jan 21, 2026</p>
+      <p>Originally based on <a href="http://jonbarron.info/">Jon Barron</a>'s homepage · Deployed on <a href="https://pages.github.com/">GitHub Pages</a></p>
+    </div>
+    <a class="to-top" href="#top" hidden><svg class="icon" aria-hidden="true"><use href="#i-arrow-up"></use></svg><span class="visually-hidden">Back to top</span></a>
+  </footer>
+</body>
 </html>
