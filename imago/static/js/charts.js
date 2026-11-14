@@ -62,7 +62,7 @@
     L.innerHTML = items.map((it) => `<span class="li" data-key="${it.key}"><span class="sw${it.dashed ? " dash" : ""}" style="color:${it.color};border-top-width:${it.thick ? 3.5 : 2.5}px"></span>${it.name}</span>`).join("");
     const focus = (key) => {
       L.querySelectorAll(".li").forEach((x) => x.classList.toggle("dim", !!key && x.dataset.key !== key));
-      d3.select(scope()).selectAll("[data-s]").transition("focus").duration(dur(160)).attr("opacity", function () {
+      d3.select(scope()).selectAll("[data-s]").transition("focus").duration(I.uiDur(160)).attr("opacity", function () {
         const o = +(this.getAttribute("data-o") || 1);
         return !key || this.getAttribute("data-s") === key ? o : 0.07;
       });

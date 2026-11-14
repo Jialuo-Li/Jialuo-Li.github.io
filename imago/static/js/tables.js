@@ -7,7 +7,7 @@
 
   function reveal(table) {
     table.classList.add("reveal");
-    table.querySelectorAll("tbody tr").forEach((tr, i) => (tr.style.transitionDelay = `${Math.min(i * 35, 600)}ms`));
+    table.querySelectorAll("tbody tr").forEach((tr, i) => (tr.style.transitionDelay = `${I.dur(Math.min(i * 35, 600))}ms`));
     I.reveal(table);
   }
 

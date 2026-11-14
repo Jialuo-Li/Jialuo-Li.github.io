@@ -17,8 +17,13 @@
   I.esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   I.fmt = (v, d = 2) => (v == null ? "–" : (+v).toFixed(d));
   I.pct = (v, d = 1) => (v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(d) + "%");
-  I.sleep = (ms) => new Promise((r) => setTimeout(r, I.reduced ? 0 : ms));
-  I.dur = (ms) => (I.reduced ? 0 : ms);
+  /* Pace of every build animation: JS delays/durations (I.dur, I.sleep) and CSS build transitions
+     (calc(… * var(--pace))) are multiplied by it. Hover feedback uses I.uiDur and is not paced. */
+  I.pace = 1.8;
+  document.documentElement.style.setProperty("--pace", I.pace);
+  I.dur = (ms) => (I.reduced ? 0 : ms * I.pace);
+  I.sleep = (ms) => new Promise((r) => setTimeout(r, I.dur(ms)));
+  I.uiDur = (ms) => (I.reduced ? 0 : ms);
 
   /* ------------------------------------------------------------ tooltip */
   const tip = document.getElementById("tip");

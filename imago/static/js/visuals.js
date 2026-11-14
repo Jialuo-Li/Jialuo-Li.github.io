@@ -19,7 +19,7 @@
     rows.forEach((r, ri) => {
       h += `<div class="rowhead">${r.model}</div>`;
       r.items.forEach((it, ci) => {
-        h += `<figure class="shot fade-in" data-r="${ri}" data-c="${ci}" style="transition-delay:${ri * 120 + ci * 70}ms"><img src="${it.img}" alt="${I.esc(r.model)} after RL with ${it.reward}" loading="lazy" decoding="async"></figure>`;
+        h += `<figure class="shot fade-in" data-r="${ri}" data-c="${ci}" style="transition-delay:${I.dur(ri * 120 + ci * 70)}ms"><img src="${it.img}" alt="${I.esc(r.model)} after RL with ${it.reward}" loading="lazy" decoding="async"></figure>`;
       });
       h += `<p class="prompt"><span class="pm">${r.model}: </span>“${I.esc(r.prompt)}”</p>`;
     });
@@ -44,7 +44,7 @@
     const mount = el.querySelector(".designs-mount");
     const D = Object.fromEntries(Q.designs.map((d) => [d.key, d]));
     const TAG = { balanced: "<i>Imago</i>-Long" };
-    const card = (d, i) => `<div class="dcard fade-in" style="transition-delay:${180 + i * 110}ms">
+    const card = (d, i) => `<div class="dcard fade-in" style="transition-delay:${I.dur(180 + i * 110)}ms">
         <img src="${d.img}" alt="${d.name} prompt, visualized" loading="lazy" decoding="async">
         <div><div class="dc-name">${d.name}${TAG[d.key] ? `<span class="dc-tag">${TAG[d.key]}</span>` : ""}</div>
         <p class="dc-text">${segHtml(d.segments, (k) => `chip ${k}`)}</p></div></div>`;
@@ -58,8 +58,13 @@
       <div class="sg-key" aria-hidden="true"><span class="chip entity">entities</span><span class="chip attribute">attributes</span><span class="chip relation">relations</span></div>
       <div class="dgrid paint">${["balanced", "entity", "attribute", "relation"].map((k, i) => card(D[k], i)).join("")}</div>`;
     const grid = mount.querySelector(".dgrid");
-    // highlights paint in, card by card, once the cards are in view
-    grid.querySelectorAll(".dcard").forEach((c, ci) => c.querySelectorAll(".chip").forEach((ch, k) => (ch.style.transitionDelay = `${450 + ci * 160 + k * 45}ms`)));
+    // highlights paint in, card by card, once the cards are in view; hover focus is immediate afterwards
+    let paintMs = 0;
+    grid.querySelectorAll(".dcard").forEach((c, ci) => c.querySelectorAll(".chip").forEach((ch, k) => {
+      const ms = 450 + ci * 160 + k * 45;
+      paintMs = Math.max(paintMs, ms + 350);
+      ch.style.transitionDelay = `${I.dur(ms)}ms`;
+    }));
     mount.querySelectorAll(".fade-in").forEach((n) => I.reveal(n));
     // hovering a key entry isolates that primitive in every card
     mount.querySelectorAll(".sg-key .chip").forEach((k) => {
@@ -67,7 +72,7 @@
       k.addEventListener("pointerenter", () => grid.classList.add("focus-" + kind));
       k.addEventListener("pointerleave", () => grid.classList.remove("focus-" + kind));
     });
-    const paint = () => grid.classList.remove("paint");
+    const paint = () => { grid.classList.remove("paint"); setTimeout(() => grid.classList.add("painted"), I.dur(paintMs)); };
     if (I.reduced) paint();
 
     // the corpus numbers count up once
@@ -75,7 +80,7 @@
     const count = () => nums.forEach((n, i) => {
       const end = +n.dataset.count, suf = n.dataset.suffix || "";
       if (I.reduced) return;
-      const t0 = performance.now() + i * 220, ms = 900;
+      const t0 = performance.now() + I.dur(i * 220), ms = I.dur(900);
       const tick = (t) => {
         const p = Math.min(1, Math.max(0, (t - t0) / ms)), e = 1 - Math.pow(1 - p, 3);
         n.textContent = Math.round(end * e) + suf;
@@ -98,8 +103,8 @@
       h += `<div class="cp-row"><div class="cp-reg"><i style="background:${REG[r]}"></i>${cap(r)} prompts · ${pair[0].source}</div><div class="cp-halves">`;
       pair.forEach((c, k) => {
         h += `<div class="cp-half"><div class="cp-half-head">${head(c)}</div><div class="cp-imgs">
-            <figure class="shot fade-in callouts" data-r="${ri}" data-k="${k}" style="transition-delay:${k * 120}ms"><img src="${c.base}" alt="${c.baseName}: ${c.source} prompt" loading="lazy" decoding="async">${boxes(c.baseBoxes)}</figure>
-            <figure class="shot fade-in callouts" data-r="${ri}" data-k="${k}" style="transition-delay:${k * 120 + 60}ms"><img src="${c.ours}" alt="${c.oursName}: ${c.source} prompt" loading="lazy" decoding="async">${boxes(c.oursBoxes)}</figure>
+            <figure class="shot fade-in callouts" data-r="${ri}" data-k="${k}" style="transition-delay:${I.dur(k * 120)}ms"><img src="${c.base}" alt="${c.baseName}: ${c.source} prompt" loading="lazy" decoding="async">${boxes(c.baseBoxes)}</figure>
+            <figure class="shot fade-in callouts" data-r="${ri}" data-k="${k}" style="transition-delay:${I.dur(k * 120 + 60)}ms"><img src="${c.ours}" alt="${c.oursName}: ${c.source} prompt" loading="lazy" decoding="async">${boxes(c.oursBoxes)}</figure>
           </div><p class="cp-text">${segHtml(c.segments, () => "hl")}</p></div>`;
       });
       h += `</div></div>`;
@@ -107,7 +112,7 @@
     mount.innerHTML = h;
     const rows = ["short", "medium", "long"];
     mount.querySelectorAll(".shot").forEach((s, idx) => {
-      s.querySelectorAll(".callout").forEach((c, k) => (c.style.transitionDelay = `${450 + (idx % 4) * 90 + k * 140}ms`));
+      s.querySelectorAll(".callout").forEach((c, k) => (c.style.transitionDelay = `${I.dur(450 + (idx % 4) * 90 + k * 140)}ms`));
       I.reveal(s);
       s.addEventListener("click", () => {
         const c = find(+s.dataset.k ? "6b" : "4b", rows[+s.dataset.r]);
@@ -130,7 +135,7 @@
     function pairRows() {
       const pairs = [...new Set(A.tiles.map((t) => t.pair))].map((k) => A.tiles.filter((t) => t.pair === k));
       mount.innerHTML = `<div class="pairs"><div class="pairs-head"><span>${A.baseName}</span><span class="ours"><i>Imago</i>${A.oursName.slice(5)}</span></div>${pairs.map((p, i) =>
-        `<div class="pair-row">${p.map((t) => `<figure class="shot fade-in" style="aspect-ratio:${t.w * A.aspect / t.h};transition-delay:${i * 60}ms"><img src="${t.img}" alt="${t.side === "ours" ? A.oursName : A.baseName}" loading="lazy" decoding="async"></figure>`).join("")}</div>`).join("")}</div>`;
+        `<div class="pair-row">${p.map((t) => `<figure class="shot fade-in" style="aspect-ratio:${t.w * A.aspect / t.h};transition-delay:${I.dur(i * 60)}ms"><img src="${t.img}" alt="${t.side === "ours" ? A.oursName : A.baseName}" loading="lazy" decoding="async"></figure>`).join("")}</div>`).join("")}</div>`;
       mount.querySelectorAll(".pair-row").forEach((row, i) => {
         row.querySelectorAll(".shot").forEach((s) => I.reveal(s));
         row.addEventListener("click", () => zoom(pairs[i]));
@@ -141,7 +146,7 @@
       if (narrowNow) return pairRows();
       const tiles = A.tiles;
       mount.innerHTML = `<div class="mosaic" style="aspect-ratio:${A.aspect}">${tiles.map((t) => `
-        <figure class="tile fade-in ${t.side}" data-pair="${t.pair}" style="left:${t.x}%;top:${t.y}%;width:${t.w}%;height:${t.h}%;transition-delay:${(t.pair * 2 + (t.side === "ours")) * 55}ms">
+        <figure class="tile fade-in ${t.side}" data-pair="${t.pair}" style="left:${t.x}%;top:${t.y}%;width:${t.w}%;height:${t.h}%;transition-delay:${I.dur((t.pair * 2 + (t.side === "ours")) * 55)}ms">
           <img src="${t.img}" alt="${t.side === "ours" ? A.oursName : A.baseName}" loading="lazy" decoding="async"><span class="lab" title="${t.side === "ours" ? A.oursName : A.baseName}">${t.side === "ours" ? A.oursName : "Base"}</span></figure>`).join("")}</div>`;
       const mosaic = mount.querySelector(".mosaic");
       mosaic.querySelectorAll(".tile").forEach((t) => {
