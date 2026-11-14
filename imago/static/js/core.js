@@ -67,27 +67,50 @@
     return ctx.measureText(text).width;
   };
 
-  /* Greedy label placement: for each label try its candidate offsets and keep the first whose box stays
-     inside `bounds` and clear of every obstacle box (points, lines, other labels). */
+  /* Label placement: each label has candidate offsets, in order of preference. A small backtracking search picks one
+     per label so that no label leaves `bounds` or touches an obstacle box (marks, lines) or another label; if no
+     such arrangement exists, labels fall back to the candidate with the least overlap. */
   I.placeLabels = (labels, obstacles, bounds) => {
-    const boxes = obstacles.slice();
     const hit = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-    labels.forEach((L) => {
+    const area = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+    const B = { x: bounds.x0, y: bounds.y0, w: bounds.x1 - bounds.x0, h: bounds.y1 - bounds.y0 };
+    const cand = labels.map((L) => {
       const w = I.textWidth(L.text, L.size || 13, L.weight || 400), h = (L.size || 13) + 2;
-      let chosen = null;
-      for (const c of L.cands) {
+      return L.cands.map((c) => {
         const x = c.anchor === "end" ? L.x + c.dx - w : c.anchor === "middle" ? L.x + c.dx - w / 2 : L.x + c.dx;
-        const box = { x: x - 2, y: L.y + c.dy - h + 3, w: w + 4, h: h };
+        const box = { x: x - 2, y: L.y + c.dy - h + 3, w: w + 4, h };
         const inside = box.x >= bounds.x0 && box.x + box.w <= bounds.x1 && box.y >= bounds.y0 && box.y + box.h <= bounds.y1;
-        if (inside && !boxes.some((b) => hit(box, b))) { chosen = { ...c, box }; break; }
+        return { ...c, box, ok: inside && !obstacles.some((o) => hit(box, o)) };
+      });
+    });
+    const pick = new Array(labels.length).fill(-1);
+    let steps = 0;
+    const solve = (i) => {
+      if (i === labels.length) return true;
+      for (let k = 0; k < cand[i].length; k++) {
+        const c = cand[i][k];
+        if (!c.ok || ++steps > 40000) continue;
+        let clash = false;
+        for (let j = 0; j < i && !clash; j++) clash = hit(c.box, cand[j][pick[j]].box);
+        if (clash) continue;
+        pick[i] = k;
+        if (solve(i + 1)) return true;
       }
-      if (!chosen) {
-        const c = L.cands[0];
-        const x = c.anchor === "end" ? L.x + c.dx - w : c.anchor === "middle" ? L.x + c.dx - w / 2 : L.x + c.dx;
-        chosen = { ...c, box: { x, y: L.y + c.dy - h + 3, w, h } };
-      }
-      L.pos = chosen;
-      boxes.push(chosen.box);
+      return false;
+    };
+    if (solve(0)) {
+      labels.forEach((L, i) => (L.pos = cand[i][pick[i]]));
+      return labels;
+    }
+    const placed = obstacles.slice();
+    labels.forEach((L, i) => {
+      let best = null, bestCost = Infinity;
+      cand[i].forEach((c) => {
+        const cost = placed.reduce((s, o) => s + area(c.box, o), 0) + 4 * (c.box.w * c.box.h - area(c.box, B));
+        if (cost < bestCost) { bestCost = cost; best = c; }
+      });
+      L.pos = best;
+      placed.push(best.box);
     });
     return labels;
   };

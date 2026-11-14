@@ -1,10 +1,11 @@
-/* Image figures: reward hacking grid, prompt-design explorer, compositional examples, appeal mosaic.
-   Images and prompt text come from the paper's figure PDFs (scripts/build.py); nothing is annotated
-   beyond what the paper shows. */
+/* Image figures: reward hacking grid, prompt designs, compositional examples, appeal mosaics.
+   Images and prompt text come from the paper's figure PDFs (scripts/build.py). Every figure shows all of its
+   content at once; clicking an image only enlarges it next to its counterpart. */
 (function () {
   "use strict";
   const I = window.Imago, Q = I.P.qual;
-
+  const REG = { short: "var(--short)", medium: "var(--medium)", long: "var(--long)" };
+  const cap = (s) => s[0].toUpperCase() + s.slice(1);
   const segHtml = (segs, cls) => segs.map((s) => (s.k ? `<span class="${cls(s.k)}">${I.esc(s.t)}</span>` : I.esc(s.t))).join("");
 
   /* ---------------------------------------------------------------- reward hacking (2 x 5) */
@@ -26,8 +27,8 @@
     grid.querySelectorAll(".shot").forEach((s) => {
       I.reveal(s);
       s.addEventListener("click", () => {
-        const r = rows[+s.dataset.r], c = +s.dataset.c, other = c === 0 ? n - 1 : 0;
-        const pick = [0, c === 0 ? other : c].map((k) => r.items[k]);
+        const r = rows[+s.dataset.r], c = +s.dataset.c;
+        const pick = (c === 0 ? [0, n - 1] : [0, c]).map((k) => r.items[k]);
         I.lightbox.open({
           title: `<b>${r.model}</b>`,
           items: pick.map((it) => ({ src: it.img, cap: it.reward === "Base model" ? "Base model (no RL)" : `RL with ${it.reward}` })),
@@ -38,59 +39,40 @@
     return {};
   });
 
-  /* ---------------------------------------------------------------- one seed prompt, four designs */
+  /* ---------------------------------------------------------------- one seed prompt and its four designs, all at once */
   I.register("designs", (el) => {
     const mount = el.querySelector(".designs-mount");
-    const D = Q.designs;
-    const NOTE = { seed: "<i>Imago</i>-Short", balanced: "<i>Imago</i>-Long", entity: "", attribute: "", relation: "" };
-    let cur = "balanced", prim = null;
-    mount.innerHTML = `<div class="designs">
-        <div class="design-list" role="group" aria-label="Prompt design">${D.map((d) => `<button type="button" data-k="${d.key}" aria-pressed="${d.key === cur}">${d.name}${NOTE[d.key] ? `<span class="note">${NOTE[d.key]}</span>` : ""}</button>`).join("")}</div>
-        <div><div class="design-text"></div>
-          <div class="prim-legend" role="group" aria-label="Highlight one primitive">
-            <button type="button" class="entity" data-p="entity">entities</button><button type="button" class="attribute" data-p="attribute">attributes</button><button type="button" class="relation" data-p="relation">relations</button>
-          </div></div>
-        <figure class="design-img"><img alt="" decoding="async"><figcaption>Nano-Banana, for visualization</figcaption></figure>
-      </div>`;
-    const text = mount.querySelector(".design-text"), img = mount.querySelector(".design-img img");
-    D.forEach((d) => { const im = new Image(); im.src = d.img; });
-
-    function show(animate) {
-      const d = D.find((x) => x.key === cur);
-      const html = segHtml(d.segments, (k) => `chip ${k}`);
-      const swap = () => {
-        text.innerHTML = html;
-        text.className = "design-text" + (prim ? " focus-" + prim : "");
-        img.src = d.img;
-        img.alt = `${d.name} prompt, visualized`;
-        text.style.opacity = 1; img.style.opacity = 1;
-        if (animate && !I.reduced) {
-          text.querySelectorAll(".chip").forEach((c, i) => {
-            const bg = getComputedStyle(c).backgroundColor;
-            c.animate([{ backgroundColor: "rgba(255,255,255,0)" }, { backgroundColor: bg }], { duration: 420, delay: 60 + i * 45, easing: "ease-out", fill: "backwards" });
-          });
-        }
-      };
-      if (animate && !I.reduced) { text.style.opacity = 0; img.style.opacity = 0; setTimeout(swap, 180); } else swap();
-      mount.querySelectorAll(".design-list button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === cur)));
-      mount.querySelector(".prim-legend").style.visibility = d.segments.some((s) => s.k) ? "visible" : "hidden";
-    }
-    text.style.transition = "opacity .18s"; img.style.transition = "opacity .18s";
-    mount.querySelectorAll(".design-list button").forEach((b) => b.addEventListener("click", () => { cur = b.dataset.k; show(true); }));
-    mount.querySelectorAll(".prim-legend button").forEach((b) => {
-      const on = () => { prim = b.dataset.p; text.className = "design-text focus-" + prim; };
-      const off = () => { prim = null; text.className = "design-text"; };
-      b.addEventListener("pointerenter", on);
-      b.addEventListener("pointerleave", off);
-      b.addEventListener("focus", on);
-      b.addEventListener("blur", off);
-      b.addEventListener("click", () => (prim === b.dataset.p ? off() : on()));
+    const D = Object.fromEntries(Q.designs.map((d) => [d.key, d]));
+    const TAG = { balanced: "<i>Imago</i>-Long" };
+    const card = (d, i) => `<div class="dcard fade-in" style="transition-delay:${180 + i * 110}ms">
+        <img src="${d.img}" alt="${d.name} prompt, visualized" loading="lazy" decoding="async">
+        <div><div class="dc-name">${d.name}${TAG[d.key] ? `<span class="dc-tag">${TAG[d.key]}</span>` : ""}</div>
+        <p class="dc-text">${segHtml(d.segments, (k) => `chip ${k}`)}</p></div></div>`;
+    mount.innerHTML = `
+      <div class="seed-row fade-in">
+        <img src="${D.seed.img}" alt="Seed prompt, visualized" loading="lazy" decoding="async">
+        <div><div class="dc-name">Seed prompt<span class="dc-tag"><i>Imago</i>-Short</span></div>
+        <p class="dc-text seed-text">“${I.esc(D.seed.segments.map((s) => s.t).join(""))}”</p>
+        <p class="seed-note">Qwen3.5-27B expands it into four prompts of about 200 words, one per design:</p></div>
+      </div>
+      <div class="sg-key" aria-hidden="true"><span class="chip entity">entities</span><span class="chip attribute">attributes</span><span class="chip relation">relations</span></div>
+      <div class="dgrid paint">${["balanced", "entity", "attribute", "relation"].map((k, i) => card(D[k], i)).join("")}</div>`;
+    const grid = mount.querySelector(".dgrid");
+    // highlights paint in, card by card, once the cards are in view
+    grid.querySelectorAll(".dcard").forEach((c, ci) => c.querySelectorAll(".chip").forEach((ch, k) => (ch.style.transitionDelay = `${450 + ci * 160 + k * 45}ms`)));
+    mount.querySelectorAll(".fade-in").forEach((n) => I.reveal(n));
+    // hovering a key entry isolates that primitive in every card
+    mount.querySelectorAll(".sg-key .chip").forEach((k) => {
+      const kind = ["entity", "attribute", "relation"].find((x) => k.classList.contains(x));
+      k.addEventListener("pointerenter", () => grid.classList.add("focus-" + kind));
+      k.addEventListener("pointerleave", () => grid.classList.remove("focus-" + kind));
     });
-    show(false);
+    const paint = () => grid.classList.remove("paint");
+    if (I.reduced) paint();
 
     // the corpus numbers count up once
     const nums = el.querySelectorAll(".pipe-step .n[data-count]");
-    const run = () => nums.forEach((n, i) => {
+    const count = () => nums.forEach((n, i) => {
       const end = +n.dataset.count, suf = n.dataset.suffix || "";
       if (I.reduced) return;
       const t0 = performance.now() + i * 220, ms = 900;
@@ -101,62 +83,64 @@
       };
       requestAnimationFrame(tick);
     });
-    return { play: run };
+    return { play: () => { count(); setTimeout(paint, 50); } };
   });
 
-  /* ---------------------------------------------------------------- compositional fidelity */
-  I.register("compositional", (el, state) => {
+  /* ---------------------------------------------------------------- compositional fidelity, both models (as in the paper) */
+  I.register("compositional", (el) => {
     const mount = el.querySelector(".comp-mount");
-    const REG = { short: "var(--short)", medium: "var(--medium)", long: "var(--long)" };
     const boxes = (bs) => bs.map((b) => `<span class="callout${b.thin ? " thin" : ""}" style="left:${b.x}%;top:${b.y}%;width:${b.w}%;height:${b.h}%"></span>`).join("");
-    function render() {
-      const rows = Q.compositional.filter((c) => c.model === state.model);
-      const r0 = rows[0];
-      let h = `<div class="comp-heads"><div class="ph"></div><div>${r0.baseName}</div><div class="ours"><i>Imago</i>${r0.oursName.slice(5)}</div></div>`;
-      rows.forEach((c, i) => {
-        h += `<div class="comp-row">
-          <div class="comp-text"><div class="src"><i style="background:${REG[c.regime]}"></i>${c.regime} · ${c.source}</div><p>${segHtml(c.segments, () => "hl")}</p></div>
-          <figure class="shot fade-in callouts" data-i="${i}" data-side="base" style="transition-delay:${i * 90}ms"><img src="${c.base}" alt="${c.baseName}: ${c.source} prompt" loading="lazy" decoding="async">${boxes(c.baseBoxes)}</figure>
-          <figure class="shot fade-in callouts" data-i="${i}" data-side="ours" style="transition-delay:${i * 90 + 60}ms"><img src="${c.ours}" alt="${c.oursName}: ${c.source} prompt" loading="lazy" decoding="async">${boxes(c.oursBoxes)}</figure>
-        </div>`;
+    const find = (m, r) => Q.compositional.find((c) => c.model === m && c.regime === r);
+    const head = (c) => `<span>${c.baseName}</span><span class="ours"><i>Imago</i>${c.oursName.slice(5)}</span>`;
+    let h = `<div class="cp-head"><div>${head(find("4b", "short"))}</div><div>${head(find("6b", "short"))}</div></div>`;
+    ["short", "medium", "long"].forEach((r, ri) => {
+      const pair = [find("4b", r), find("6b", r)];
+      h += `<div class="cp-row"><div class="cp-reg"><i style="background:${REG[r]}"></i>${cap(r)} prompts · ${pair[0].source}</div><div class="cp-halves">`;
+      pair.forEach((c, k) => {
+        h += `<div class="cp-half"><div class="cp-half-head">${head(c)}</div><div class="cp-imgs">
+            <figure class="shot fade-in callouts" data-r="${ri}" data-k="${k}" style="transition-delay:${k * 120}ms"><img src="${c.base}" alt="${c.baseName}: ${c.source} prompt" loading="lazy" decoding="async">${boxes(c.baseBoxes)}</figure>
+            <figure class="shot fade-in callouts" data-r="${ri}" data-k="${k}" style="transition-delay:${k * 120 + 60}ms"><img src="${c.ours}" alt="${c.oursName}: ${c.source} prompt" loading="lazy" decoding="async">${boxes(c.oursBoxes)}</figure>
+          </div><p class="cp-text">${segHtml(c.segments, () => "hl")}</p></div>`;
       });
-      mount.innerHTML = h;
-      mount.querySelectorAll(".shot").forEach((s) => {
-        s.querySelectorAll(".callout").forEach((c, k) => (c.style.transitionDelay = `${450 + (+s.dataset.i) * 90 + k * 140}ms`));
-        I.reveal(s);
-        s.addEventListener("click", () => {
-          const c = rows[+s.dataset.i];
-          I.lightbox.open({
-            title: `<b>${c.regime[0].toUpperCase() + c.regime.slice(1)} prompt</b> · ${c.source}`,
-            items: [{ src: c.base, cap: c.baseName }, { src: c.ours, cap: c.oursName }],
-            note: segHtml(c.segments, () => "hl").replace(/class="hl"/g, 'style="color:var(--hl);font-weight:600"'),
-          });
+      h += `</div></div>`;
+    });
+    mount.innerHTML = h;
+    const rows = ["short", "medium", "long"];
+    mount.querySelectorAll(".shot").forEach((s, idx) => {
+      s.querySelectorAll(".callout").forEach((c, k) => (c.style.transitionDelay = `${450 + (idx % 4) * 90 + k * 140}ms`));
+      I.reveal(s);
+      s.addEventListener("click", () => {
+        const c = find(+s.dataset.k ? "6b" : "4b", rows[+s.dataset.r]);
+        I.lightbox.open({
+          title: `<b>${cap(c.regime)} prompt</b> · ${c.source}`,
+          items: [{ src: c.base, cap: c.baseName }, { src: c.ours, cap: c.oursName }],
+          note: segHtml(c.segments, () => "hl").replace(/class="hl"/g, 'style="color:var(--hl);font-weight:600"'),
         });
       });
-    }
-    render();
-    return { update: render };
+    });
+    return {};
   });
 
-  /* ---------------------------------------------------------------- visual appeal mosaic */
-  I.register("appeal", (el, state) => {
+  /* ---------------------------------------------------------------- visual appeal mosaic (one per figure: data-model) */
+  I.register("appeal", (el) => {
     const mount = el.querySelector(".mosaic-mount");
+    const A = Q.appeal[el.dataset.model];
     let narrowNow = null;
-    function pairRows(A) {
+    const zoom = (pair) => I.lightbox.open({ title: "<b>Visual appeal</b> · same prompt", items: pair.map((t) => ({ src: t.img, cap: t.side === "ours" ? A.oursName : A.baseName })) });
+    function pairRows() {
       const pairs = [...new Set(A.tiles.map((t) => t.pair))].map((k) => A.tiles.filter((t) => t.pair === k));
       mount.innerHTML = `<div class="pairs"><div class="pairs-head"><span>${A.baseName}</span><span class="ours"><i>Imago</i>${A.oursName.slice(5)}</span></div>${pairs.map((p, i) =>
         `<div class="pair-row">${p.map((t) => `<figure class="shot fade-in" style="aspect-ratio:${t.w * A.aspect / t.h};transition-delay:${i * 60}ms"><img src="${t.img}" alt="${t.side === "ours" ? A.oursName : A.baseName}" loading="lazy" decoding="async"></figure>`).join("")}</div>`).join("")}</div>`;
       mount.querySelectorAll(".pair-row").forEach((row, i) => {
         row.querySelectorAll(".shot").forEach((s) => I.reveal(s));
-        row.addEventListener("click", () => I.lightbox.open({ title: "<b>Visual appeal</b> · same prompt", items: pairs[i].map((t) => ({ src: t.img, cap: t.side === "ours" ? A.oursName : A.baseName })) }));
+        row.addEventListener("click", () => zoom(pairs[i]));
       });
     }
     function render() {
-      const A = Q.appeal[state.model];
       narrowNow = mount.clientWidth < 560;
-      if (narrowNow) return pairRows(A);
+      if (narrowNow) return pairRows();
       const tiles = A.tiles;
-      mount.innerHTML = `<div class="mosaic" style="aspect-ratio:${A.aspect}">${tiles.map((t, i) => `
+      mount.innerHTML = `<div class="mosaic" style="aspect-ratio:${A.aspect}">${tiles.map((t) => `
         <figure class="tile fade-in ${t.side}" data-pair="${t.pair}" style="left:${t.x}%;top:${t.y}%;width:${t.w}%;height:${t.h}%;transition-delay:${(t.pair * 2 + (t.side === "ours")) * 55}ms">
           <img src="${t.img}" alt="${t.side === "ours" ? A.oursName : A.baseName}" loading="lazy" decoding="async"><span class="lab" title="${t.side === "ours" ? A.oursName : A.baseName}">${t.side === "ours" ? A.oursName : "Base"}</span></figure>`).join("")}</div>`;
       const mosaic = mount.querySelector(".mosaic");
@@ -170,13 +154,10 @@
           mosaic.classList.remove("pairing");
           mosaic.querySelectorAll(".pair-on").forEach((p) => p.classList.remove("pair-on"));
         });
-        t.addEventListener("click", () => {
-          const pair = tiles.filter((x) => String(x.pair) === t.dataset.pair);  // base first, as built
-          I.lightbox.open({ title: "<b>Visual appeal</b> · same prompt", items: pair.map((p) => ({ src: p.img, cap: p.side === "ours" ? A.oursName : A.baseName })) });
-        });
+        t.addEventListener("click", () => zoom(tiles.filter((x) => String(x.pair) === t.dataset.pair)));
       });
     }
     render();
-    return { update: render, resize: () => { if ((mount.clientWidth < 560) !== narrowNow) render(); } };
+    return { resize: () => { if ((mount.clientWidth < 560) !== narrowNow) render(); } };
   });
 })();

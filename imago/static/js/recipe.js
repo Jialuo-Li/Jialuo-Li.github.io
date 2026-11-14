@@ -27,7 +27,7 @@
           <div class="rc-time">
             <div class="rc-track"><span class="rc-fill"></span><span class="rc-mid"></span></div>
             <div class="rc-tl"><span>first half</span><span>second half</span></div>
-            <div class="rc-reset">optimizer and EMA reset</div>
+            <div class="rc-reset">reset optimizer and EMA</div>
           </div>
           <p class="rc-prompt"></p>
         </div>
