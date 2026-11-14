@@ -1,1053 +1,763 @@
-/* ==========================================================================
-   INTERACTIVE RESPONSIVE SVG CHARTS ENGINE
-   --------------------------------------------------------------------------
-   Renders crisp, data-driven interactive figures matching every plot in the
-   Imago paper while adding hover tooltips, click-to-inspect drilldowns,
-   series isolation, and smooth view transitions.
-   ========================================================================== */
+/* Charts: every quantitative figure, drawn with d3 from window.PAPER (written by scripts/build.py).
+   Each figure draws its final state in render() and builds itself up in play(): marks enter in reading
+   order (points pop, lines draw left to right, boxes open from the median), so the eye follows the claim. */
 (function () {
   "use strict";
-
-  const r1 = (v) => Math.round(v * 10) / 10;
-  const esc = (s) =>
-    String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-
-  /* Global cursor-following tooltip */
-  let tipEl = null;
-  function ensureTip() {
-    if (!tipEl) {
-      tipEl = document.createElement("div");
-      tipEl.className = "viz-tooltip";
-      document.body.appendChild(tipEl);
-    }
-    return tipEl;
-  }
-  function showTip(ev, html) {
-    const el = ensureTip();
-    el.innerHTML = html;
-    el.classList.add("visible");
-    moveTip(ev);
-  }
-  function moveTip(ev) {
-    if (!tipEl) return;
-    const pad = 14;
-    const rect = tipEl.getBoundingClientRect();
-    let x = ev.clientX + pad;
-    let y = ev.clientY + pad;
-    if (x + rect.width > window.innerWidth - 10) x = ev.clientX - rect.width - pad;
-    if (y + rect.height > window.innerHeight - 10) y = ev.clientY - rect.height - pad;
-    tipEl.style.left = `${Math.max(8, x)}px`;
-    tipEl.style.top = `${Math.max(8, y)}px`;
-  }
-  function hideTip() {
-    if (tipEl) tipEl.classList.remove("visible");
-  }
-
-  function linScale(d0, d1, r0, r1v) {
-    return (v) => r0 + ((v - d0) / (d1 - d0 || 1)) * (r1v - r0);
-  }
-  function logScale(d0, d1, r0, r1v) {
-    const l0 = Math.log10(d0), l1 = Math.log10(d1);
-    return (v) => r0 + ((Math.log10(Math.max(v, 1e-6)) - l0) / (l1 - l0)) * (r1v - r0);
-  }
-
-  function svgMarker(shape, cx, cy, rad, fill, stroke = "#fff", sw = 1.6, extra = "") {
-    const pts = (arr) => arr.map((p) => `${r1(p[0])},${r1(p[1])}`).join(" ");
-    if (shape === "square") {
-      const s = rad * 1.75;
-      return `<rect x="${r1(cx - s / 2)}" y="${r1(cy - s / 2)}" width="${r1(s)}" height="${r1(s)}" rx="1.6" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" ${extra}/>`;
-    }
-    if (shape === "tri-up") {
-      return `<polygon points="${pts([[cx, cy - rad * 1.25], [cx + rad * 1.15, cy + rad * 0.9], [cx - rad * 1.15, cy + rad * 0.9]])}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" ${extra}/>`;
-    }
-    if (shape === "diamond") {
-      return `<polygon points="${pts([[cx, cy - rad * 1.3], [cx + rad * 1.1, cy], [cx, cy + rad * 1.3], [cx - rad * 1.1, cy]])}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" ${extra}/>`;
-    }
-    if (shape === "plus") {
-      const a = rad * 0.42, b = rad * 1.15;
-      return `<polygon points="${pts([[cx - a, cy - b], [cx + a, cy - b], [cx + a, cy - a], [cx + b, cy - a], [cx + b, cy + a], [cx + a, cy + a], [cx + a, cy + b], [cx - a, cy + b], [cx - a, cy + a], [cx - b, cy + a], [cx - b, cy - a], [cx - a, cy - a]])}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" ${extra}/>`;
-    }
-    if (shape === "cross") {
-      const d = rad * 0.95;
-      return `<g ${extra}><circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(rad * 1.05)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/><path d="M${r1(cx - d * 0.52)},${r1(cy - d * 0.52)} L${r1(cx + d * 0.52)},${r1(cy + d * 0.52)} M${r1(cx + d * 0.52)},${r1(cy - d * 0.52)} L${r1(cx - d * 0.52)},${r1(cy + d * 0.52)}" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></g>`;
-    }
-    if (shape === "hex" || shape === "pent") {
-      const n = shape === "hex" ? 6 : 5;
-      const poly = Array.from({ length: n }, (_, i) => {
-        const ang = -Math.PI / 2 + (i * 2 * Math.PI) / n;
-        return [cx + rad * 1.12 * Math.cos(ang), cy + rad * 1.12 * Math.sin(ang)];
-      });
-      return `<polygon points="${pts(poly)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" ${extra}/>`;
-    }
-    return `<circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(rad)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" ${extra}/>`;
-  }
-
-  /* ========================================================================
-     MODULE 2A (§2 Left): Preference-Evaluator Correlation Matrix + Pair Scatter
-     ======================================================================== */
-  function mountPrefPairgrid() {
-    const host = document.getElementById("viz-pref-pairgrid");
-    if (!host || !window.PAPER_DATA) return;
-    const P = window.PAPER_DATA.prefAlignment;
-    const rews = P.rewards;
-    let selA = "HPSv3";
-    let selB = "PickScore";
-
-    function render() {
-      const rVal = P.pearson[selA][selB];
-      const rhoVal = P.spearman[selA][selB];
-      const metaA = rews.find((x) => x.key === selA);
-      const metaB = rews.find((x) => x.key === selB);
-
-      let matrixRows = `<tr><th style="text-align:left;padding:6px 8px;font-size:11px;color:#64748b">Pearson r</th>${rews
-        .map((rw) => `<th style="padding:6px 6px;font-size:11px;color:${rw.color}">${esc(rw.name)}</th>`)
-        .join("")}</tr>`;
-      rews.forEach((rRow) => {
-        matrixRows += `<tr><td style="padding:6px 8px;font-weight:700;font-size:11.5px;color:${rRow.color}">${esc(rRow.name)}</td>`;
-        rews.forEach((rCol) => {
-          const val = P.pearson[rRow.key][rCol.key];
-          const diag = rRow.key === rCol.key;
-          const active =
-            (rRow.key === selA && rCol.key === selB) || (rRow.key === selB && rCol.key === selA);
-          const bg = diag
-            ? "#f1f5f9"
-            : `rgba(37, 99, 235, ${(0.06 + Math.max(0, val - 0.35) * 0.42).toFixed(2)})`;
-          matrixRows += `<td data-ra="${rRow.key}" data-rb="${rCol.key}" style="padding:7px 6px;text-align:center;font-family:var(--font-mono);font-size:12px;font-weight:${
-            active ? "750" : "600"
-          };background:${bg};border-radius:6px;cursor:${diag ? "default" : "pointer"};outline:${
-            active ? "2px solid #2563eb" : "none"
-          }">${diag ? "1.00" : val.toFixed(2)}</td>`;
-        });
-        matrixRows += `</tr>`;
-      });
-
-      const meanBars = rews
-        .map((rw) => {
-          const pct = Math.round((rw.meanR / 0.8) * 100);
-          return `<div style="display:grid;grid-template-columns:96px 1fr 44px;align-items:center;gap:8px;margin-bottom:5px;font-size:12px">
-            <span style="font-weight:${rw.selected ? 700 : 600};color:${rw.selected ? "#15803d" : "#334155"}">${esc(rw.name)}${rw.selected ? " ★" : ""}</span>
-            <div style="height:8px;background:#eef2f6;border-radius:99px;overflow:hidden">
-              <div style="width:${pct}%;height:100%;background:${rw.color};border-radius:99px"></div>
-            </div>
-            <span style="font-family:var(--font-mono);font-size:11.5px;text-align:right;font-weight:600">${rw.meanR.toFixed(2)}</span>
-          </div>`;
-        })
-        .join("");
-
-      /* Scatter SVG of selected pair across the 133 z-scored cells */
-      const W = 400, H = 200, padL = 42, padR = 16, padT = 16, padB = 34;
-      const sx = linScale(-2.6, 2.6, padL, W - padR);
-      const sy = linScale(-2.6, 2.6, H - padB, padT);
-      const regColors = { Short: "#3b82f6", Medium: "#f59e0b", Long: "#ef4444" };
-
-      const xs = P.points.map((pt) => pt[selA]);
-      const ys = P.points.map((pt) => pt[selB]);
-      const mx = xs.reduce((a, b) => a + b, 0) / xs.length;
-      const my = ys.reduce((a, b) => a + b, 0) / ys.length;
-      const num = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0);
-      const den = xs.reduce((s, x) => s + (x - mx) * (x - mx), 0) || 1;
-      const slope = num / den;
-      const icpt = my - slope * mx;
-
-      const dots = P.points
-        .map(
-          (pt, idx) =>
-            `<circle class="pref-pt" data-idx="${idx}" cx="${r1(sx(pt[selA]))}" cy="${r1(sy(pt[selB]))}" r="4.1" fill="${
-              regColors[pt.regime] || "#3b82f6"
-            }" fill-opacity="0.78" stroke="#fff" stroke-width="0.9" style="cursor:pointer"/>`
-        )
-        .join("");
-
-      host.innerHTML = `
-        <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">Mean Off-Diagonal Correlation (r̄) — Lower = Less Redundant</div>
-        ${meanBars}
-        <div style="margin-top:12px;font-size:11.5px;color:#64748b;margin-bottom:4px">Click any off-diagonal cell to inspect 133 pooled (model, benchmark) z-scores:</div>
-        <table style="width:100%;border-collapse:separate;border-spacing:3px">${matrixRows}</table>
-        <div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px">
-            <strong>${esc(metaA.name)} vs. ${esc(metaB.name)}</strong>
-            <span style="font-family:var(--font-mono);color:#1d4ed8;font-weight:700">r = ${rVal.toFixed(2)} · ρ = ${rhoVal.toFixed(2)}</span>
-          </div>
-          <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Pairwise preference reward scatter">
-            <line x1="${padL}" y1="${sy(0)}" x2="${W - padR}" y2="${sy(0)}" stroke="#e2e8f0" stroke-dasharray="3 3"/>
-            <line x1="${sx(0)}" y1="${padT}" x2="${sx(0)}" y2="${H - padB}" stroke="#e2e8f0" stroke-dasharray="3 3"/>
-            <line x1="${sx(-2.3)}" y1="${r1(sy(slope * -2.3 + icpt))}" x2="${sx(2.3)}" y2="${r1(sy(slope * 2.3 + icpt))}" stroke="#1e293b" stroke-width="1.8" stroke-dasharray="5 3" opacity="0.7"/>
-            ${dots}
-            <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#94a3b8"/>
-            <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="#94a3b8"/>
-            <text x="${(padL + W - padR) / 2}" y="${H - 7}" text-anchor="middle" font-size="11" fill="#475569">${esc(metaA.name)} (z-score)</text>
-            <text x="13" y="${(padT + H - padB) / 2}" text-anchor="middle" font-size="11" fill="#475569" transform="rotate(-90 13 ${(padT + H - padB) / 2})">${esc(metaB.name)} (z)</text>
-          </svg>
-        </div>
-      `;
-
-      host.querySelectorAll("td[data-ra]").forEach((td) => {
-        td.addEventListener("click", () => {
-          const a = td.dataset.ra, b = td.dataset.rb;
-          if (a === b) return;
-          selA = a;
-          selB = b;
-          render();
-        });
-      });
-
-      host.querySelectorAll(".pref-pt").forEach((el) => {
-        el.addEventListener("mouseenter", (ev) => {
-          const pt = P.points[+el.dataset.idx];
-          showTip(
-            ev,
-            `<div class="tt-title">${esc(pt.model)}</div>
-             <div class="tt-sub">${esc(pt.benchmark)} (${pt.regime})</div>
-             <div>${esc(metaA.name)}: <b>${pt[selA].toFixed(2)}σ</b> · ${esc(metaB.name)}: <b>${pt[selB].toFixed(2)}σ</b></div>`
-          );
-        });
-        el.addEventListener("mousemove", moveTip);
-        el.addEventListener("mouseleave", hideTip);
-      });
-    }
-
-    render();
-  }
-
-  /* ========================================================================
-     MODULE 2B (§2 Right): 7-Benchmark Overview Bubble Chart + Live Model Ranking
-     ======================================================================== */
-  function mountBenchOverview() {
-    const host = document.getElementById("viz-bench-overview");
-    if (!host || !window.PAPER_DATA) return;
-    const B = window.PAPER_DATA.benchmarks;
-    let activeKey = "longbencht2i";
-
-    const regStyle = {
-      Short: { fill: "#93c5fd", stroke: "#1d4ed8" },
-      Medium: { fill: "#fcd34d", stroke: "#b45309" },
-      Long: { fill: "#fca5a5", stroke: "#b91c1c" },
-    };
-
-    function render() {
-      const W = 490, H = 262, padL = 48, padR = 26, padT = 22, padB = 40;
-      const sx = logScale(6.5, 760, padL, W - padR);
-      const sy = linScale(0.52, 0.90, H - padB, padT);
-
-      let grid = "";
-      [0.55, 0.65, 0.75, 0.85].forEach((yv) => {
-        const y = r1(sy(yv));
-        grid += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#eef2f6"/>
-                 <text x="${padL - 7}" y="${y + 4}" text-anchor="end" font-size="11" fill="#64748b">${yv.toFixed(2)}</text>`;
-      });
-      [10, 50, 100, 300, 500].forEach((xv) => {
-        const x = r1(sx(xv));
-        grid += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${H - padB}" stroke="#f1f5f9" stroke-dasharray="3 3"/>
-                 <text x="${x}" y="${H - padB + 16}" text-anchor="middle" font-size="11" fill="#64748b">${xv}</text>`;
-      });
-
-      /* Downward difficulty trend arrow */
-      const trend = `
-        <defs><marker id="arr-trend" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,1 L9,5 L0,9 z" fill="#94a3b8"/></marker></defs>
-        <path d="M${r1(sx(11))},${r1(sy(0.80))} Q${r1(sx(120))},${r1(sy(0.82))} ${r1(sx(500))},${r1(sy(0.60))}" fill="none" stroke="#cbd5e1" stroke-width="2.2" stroke-dasharray="5 4" marker-end="url(#arr-trend)"/>
-      `;
-
-      const offsets = {
-        t2icompbench: [8, -24],
-        tiifbench: [-14, -20],
-        spatialgeneval: [8, 28],
-        t2icorebench_composition: [-8, 26],
-        lpdbench: [-6, -20],
-        arenat2ihard: [-8, -18],
-        longbencht2i: [-58, 4],
-      };
-
-      let bubbles = "";
-      B.forEach((bm) => {
-        const cx = sx(bm.avgWords);
-        const cy = sy(bm.avgNorm);
-        const rad = 9 + Math.sqrt((bm.count - 400) / 1400) * 12;
-        const st = regStyle[bm.regime];
-        const sel = bm.key === activeKey;
-        const [dx, dy] = offsets[bm.key] || [0, -18];
-        bubbles += `
-          <g class="bm-bubble" data-key="${bm.key}" style="cursor:pointer">
-            ${sel ? `<circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(rad + 5)}" fill="none" stroke="${st.stroke}" stroke-width="2" stroke-dasharray="3 2"/>` : ""}
-            <circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(rad)}" fill="${st.fill}" fill-opacity="0.88" stroke="${sel ? st.stroke : "#fff"}" stroke-width="${sel ? 2.4 : 1.6}"/>
-            <text x="${r1(cx + dx)}" y="${r1(cy + dy)}" text-anchor="middle" font-size="11.2" font-weight="${sel ? 750 : 600}" fill="${sel ? "#0f172a" : "#334155"}">${esc(bm.name)}</text>
-          </g>`;
-      });
-
-      const cur = B.find((x) => x.key === activeKey) || B[0];
-      const sortedModels = Object.entries(cur.modelScores).sort((a, b) => b[1] - a[1]);
-      const top6 = sortedModels.slice(0, 6);
-      const maxS = cur.scaleMax;
-
-      const rankHtml = top6
-        .map(([m, sc]) => {
-          const pct = Math.max(6, Math.min(100, ((sc - cur.scaleMin) / (maxS - cur.scaleMin)) * 100));
-          return `<div class="bi-bar-row">
-            <span class="bi-bar-name" title="${esc(m)}">${esc(m)}</span>
-            <div class="bi-bar-track"><div class="bi-bar-fill" style="width:${pct.toFixed(1)}%"></div></div>
-            <span class="bi-bar-val">${sc.toFixed(2)}</span>
-          </div>`;
-        })
-        .join("");
-
-      host.innerHTML = `
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:11.5px">
-          <span class="regime-badge regime-Short">● Short (&lt;100w)</span>
-          <span class="regime-badge regime-Medium">● Medium (100–300w)</span>
-          <span class="regime-badge regime-Long">● Long (&gt;300w)</span>
-          <span style="color:#64748b;margin-left:auto">Bubble area ∝ prompt count · Click bubble to inspect</span>
-        </div>
-        <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="7 compositional benchmarks prompt length vs score">
-          ${grid}${trend}${bubbles}
-          <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#64748b"/>
-          <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="#64748b"/>
-          <text x="${(padL + W - padR) / 2}" y="${H - 6}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#334155">Average Prompt Length (words, log scale)</text>
-          <text x="13" y="${(padT + H - padB) / 2}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#334155" transform="rotate(-90 13 ${(padT + H - padB) / 2})">Normalized Mean Score</text>
-        </svg>
-        <div class="bench-inspector">
-          <div class="bi-top">
-            <div>
-              <span class="bi-name">${esc(cur.name)}</span>
-              <span class="regime-badge regime-${cur.regime}" style="margin-left:6px">${cur.regime} · ~${Math.round(cur.avgWords)} words · ${cur.count.toLocaleString()} prompts</span>
-            </div>
-            <span style="font-family:var(--font-mono);font-size:11.5px;color:#1d4ed8;font-weight:700">19-Model Avg: ${(cur.avgNorm * 100).toFixed(1)}%</span>
-          </div>
-          <div style="font-size:12px;color:#475569;line-height:1.45">${esc(cur.protocol)}</div>
-          <div style="font-size:11px;font-weight:700;color:#64748b;margin-top:8px;text-transform:uppercase;letter-spacing:0.05em">Top-6 Baseline Models on ${esc(cur.name)} (${cur.unit})</div>
-          <div class="bi-bars">${rankHtml}</div>
-        </div>
-      `;
-
-      host.querySelectorAll(".bm-bubble").forEach((g) => {
-        const bm = B.find((x) => x.key === g.dataset.key);
-        g.addEventListener("click", () => {
-          activeKey = bm.key;
-          render();
-        });
-        g.addEventListener("mouseenter", (ev) => {
-          showTip(
-            ev,
-            `<div class="tt-title">${esc(bm.name)} (${bm.regime})</div>
-             <div>Prompts: <b>${bm.count.toLocaleString()}</b> · Avg length: <b>${bm.avgWords.toFixed(1)} words</b></div>
-             <div>19-model normalized avg: <b>${(bm.avgNorm * 100).toFixed(1)}%</b></div>`
-          );
-        });
-        g.addEventListener("mousemove", moveTip);
-        g.addEventListener("mouseleave", hideTip);
-      });
-    }
-
-    render();
-  }
-
-  /* ========================================================================
-     MODULE 4 (§3.1): Reward vs. Judge Alignment Explorer (Fig. 2 & Fig. 3)
-     ======================================================================== */
-  function mountRewardAlignment() {
-    const host = document.getElementById("viz-reward-align");
-    if (!host || !window.PAPER_DATA) return;
-    const B = window.PAPER_DATA.benchmarks;
-    const metaList = window.PAPER_DATA.rewardSeriesMeta;
-    const align = window.PAPER_DATA.rewardAlignment;
-
-    let mode = "classic"; // "classic" (Fig. 2) | "vqa" (Fig. 3)
-    let metric = "r";     // "r" | "rho"
-    let selBench = "longbencht2i";
-    const hidden = new Set();
-
-    function activeSeries() {
-      return metaList.filter((m) => m.group === "both" || m.group === mode);
-    }
-
-    function render() {
-      const series = activeSeries();
-      const bmObj = B.find((x) => x.key === selBench) || B[6];
-      const benchData = align[selBench];
-
-      const legendHtml = series
-        .map((s) => {
-          const isMuted = hidden.has(s.key);
-          const curStat = benchData.rewards[s.key];
-          const statStr = curStat.collapsed
-            ? "collapsed"
-            : `${metric === "r" ? "r" : "ρ"}=${curStat[metric].toFixed(2)}`;
-          return `<button type="button" class="legend-chip ${isMuted ? "muted" : ""}" data-rkey="${s.key}">
-            <span class="legend-swatch" style="background:${s.color}"></span>
-            <span>${esc(s.short)}</span>
-            <span style="font-family:var(--font-mono);font-size:11px;color:#64748b">${statStr}</span>
-          </button>`;
-        })
-        .join("");
-
-      /* Left SVG: Correlation curve across all 7 benchmarks */
-      const LW = 510, LH = 290, lPadL = 46, lPadR = 18, lPadT = 18, lPadB = 58;
-      const yMin = mode === "vqa" ? -0.05 : -0.95;
-      const sxL = (i) => lPadL + (i / (B.length - 1)) * (LW - lPadL - lPadR);
-      const syL = linScale(yMin, 1.04, LH - lPadB, lPadT);
-
-      let lGrid = "";
-      const yTicks = mode === "vqa" ? [0.0, 0.25, 0.5, 0.75, 1.0] : [-0.8, -0.4, 0.0, 0.5, 1.0];
-      yTicks.forEach((yv) => {
-        const y = r1(syL(yv));
-        lGrid += `<line x1="${lPadL}" y1="${y}" x2="${LW - lPadR}" y2="${y}" stroke="${yv === 0 ? "#cbd5e1" : "#eef2f6"}" ${yv === 0 ? 'stroke-dasharray="4 3"' : ""}/>
-                  <text x="${lPadL - 7}" y="${y + 4}" text-anchor="end" font-size="11" fill="#64748b">${yv.toFixed(2)}</text>`;
-      });
-
-      B.forEach((bm, idx) => {
-        const x = r1(sxL(idx));
-        const active = bm.key === selBench;
-        lGrid += `<g class="align-bcol" data-bkey="${bm.key}" style="cursor:pointer">
-          <rect x="${r1(x - 28)}" y="${lPadT}" width="56" height="${LH - lPadT - lPadB}" fill="${active ? "rgba(37,99,235,0.08)" : "transparent"}" rx="6"/>
-          <line x1="${x}" y1="${lPadT}" x2="${x}" y2="${LH - lPadB}" stroke="${active ? "#3b82f6" : "#f1f5f9"}"/>
-          <text x="${x}" y="${LH - lPadB + 16}" text-anchor="end" font-size="10.8" font-weight="${active ? 750 : 500}" fill="${active ? "#1d4ed8" : "#475569"}" transform="rotate(-26 ${x} ${LH - lPadB + 16})">${esc(bm.shortName)}</text>
-        </g>`;
-      });
-
-      let lLines = "";
-      [...series.filter((s) => !s.highlight), ...series.filter((s) => s.highlight)].forEach((s) => {
-        if (hidden.has(s.key)) return;
-        const pts = [];
-        B.forEach((bm, idx) => {
-          const st = align[bm.key].rewards[s.key];
-          const val = st.collapsed ? 0.0 : st[metric];
-          pts.push([sxL(idx), syL(val), bm, st]);
-        });
-        const pathD = pts.map((p, i) => `${i === 0 ? "M" : "L"}${r1(p[0])},${r1(p[1])}`).join(" ");
-        lLines += `<path d="${pathD}" fill="none" stroke="${s.color}" stroke-width="${s.highlight ? 3.2 : 2.0}" opacity="${s.highlight ? 1 : 0.82}"/>`;
-        pts.forEach(([px, py, bm, st]) => {
-          lLines += svgMarker(
-            s.marker,
-            px,
-            py,
-            s.highlight ? 5.2 : 4.2,
-            st.collapsed ? "#fff" : s.color,
-            st.collapsed ? s.color : "#fff",
-            1.5,
-            `class="corr-pt" data-bkey="${bm.key}" data-rname="${esc(s.name)}" data-val="${st.collapsed ? "Collapsed (0 variance)" : (metric === "r" ? "r = " : "ρ = ") + st[metric].toFixed(3)}" style="cursor:pointer"`
-          );
-        });
-      });
-
-      /* Right SVG: 19-Model Normalized Scatter on Selected Benchmark */
-      const RW = 410, RH = 290, rPadL = 46, rPadR = 18, rPadT = 18, rPadB = 46;
-      const sxR = linScale(-0.04, 1.04, rPadL, RW - rPadR);
-      const syR = linScale(-0.04, 1.04, RH - rPadB, rPadT);
-
-      let rGrid = "";
-      [0.0, 0.5, 1.0].forEach((v) => {
-        rGrid += `<line x1="${rPadL}" y1="${r1(syR(v))}" x2="${RW - rPadR}" y2="${r1(syR(v))}" stroke="#eef2f6"/>
-                  <text x="${rPadL - 7}" y="${r1(syR(v) + 4)}" text-anchor="end" font-size="11" fill="#64748b">${v.toFixed(1)}</text>
-                  <line x1="${r1(sxR(v))}" y1="${rPadT}" x2="${r1(sxR(v))}" y2="${RH - rPadB}" stroke="#eef2f6"/>
-                  <text x="${r1(sxR(v))}" y="${RH - rPadB + 16}" text-anchor="middle" font-size="11" fill="#64748b">${v.toFixed(1)}</text>`;
-      });
-      /* Ideal diagonal y = x */
-      rGrid += `<line x1="${r1(sxR(0))}" y1="${r1(syR(0))}" x2="${r1(sxR(1))}" y2="${r1(syR(1))}" stroke="#cbd5e1" stroke-dasharray="4 4"/>`;
-
-      let rFits = "", rDots = "", collapseNote = "";
-      [...series.filter((s) => !s.highlight), ...series.filter((s) => s.highlight)].forEach((s) => {
-        if (hidden.has(s.key)) return;
-        const st = benchData.rewards[s.key];
-        if (!st.collapsed && st.slope !== null) {
-          const y0 = Math.max(-0.04, Math.min(1.04, st.intercept));
-          const y1 = Math.max(-0.04, Math.min(1.04, st.slope + st.intercept));
-          rFits += `<line x1="${r1(sxR(0))}" y1="${r1(syR(y0))}" x2="${r1(sxR(1))}" y2="${r1(syR(y1))}" stroke="${s.color}" stroke-width="${s.highlight ? 3.0 : 1.6}" opacity="${s.highlight ? 0.95 : 0.55}"/>`;
-        } else if (st.collapsed) {
-          collapseNote = `<rect x="${rPadL + 10}" y="${rPadT + 8}" width="268" height="24" rx="6" fill="#fef2f2" stroke="#fecaca"/>
-            <text x="${rPadL + 18}" y="${rPadT + 24}" font-size="10.5" font-weight="650" fill="#b91c1c">⚠ Strict Binary = 0.000 on all 19 models (zero signal)</text>`;
-        }
-        st.points.forEach((pt) => {
-          rDots += svgMarker(
-            s.marker,
-            sxR(pt.x),
-            syR(pt.y),
-            s.highlight ? 5.0 : 3.9,
-            s.color,
-            "#fff",
-            1.2,
-            `class="scat-pt" data-model="${esc(pt.model)}" data-rname="${esc(s.short)}" data-rx="${pt.rawX}" data-ry="${pt.rawY}" opacity="${s.highlight ? 0.96 : 0.72}" style="cursor:pointer"`
-          );
-        });
-      });
-
-      host.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
-          <div class="seg-group">
-            <button type="button" class="seg-btn ${mode === "classic" ? "active" : ""}" data-mode="classic">Fig. 2 · Candidate Rewards (6)</button>
-            <button type="button" class="seg-btn ${mode === "vqa" ? "active" : ""}" data-mode="vqa">Fig. 3 · Graded vs. Strict Binary &amp; Gemma</button>
-          </div>
-          <div class="seg-group">
-            <button type="button" class="seg-btn ${metric === "r" ? "active" : ""}" data-metric="r">Pearson r</button>
-            <button type="button" class="seg-btn ${metric === "rho" ? "active" : ""}" data-metric="rho">Spearman ρ</button>
-          </div>
-        </div>
-        <div class="chart-legend">${legendHtml}</div>
-        <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:center" class="align-panels">
-          <div style="background:#fcfcfd;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px">
-            <div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:4px">Cross-Benchmark Alignment Curve (Click any benchmark column)</div>
-            <svg viewBox="0 0 ${LW} ${LH}" role="img" aria-label="Correlation across benchmarks">
-              ${lGrid}${lLines}
-              <line x1="${lPadL}" y1="${LH - lPadB}" x2="${LW - lPadR}" y2="${LH - lPadB}" stroke="#64748b"/>
-              <line x1="${lPadL}" y1="${lPadT}" x2="${lPadL}" y2="${LH - lPadB}" stroke="#64748b"/>
-              <text x="13" y="${(lPadT + LH - lPadB) / 2}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#334155" transform="rotate(-90 13 ${(lPadT + LH - lPadB) / 2})">${metric === "r" ? "Pearson r" : "Spearman ρ"} vs. MLLM Judge</text>
-            </svg>
-          </div>
-          <div style="background:#fcfcfd;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px">
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px">
-              <strong>19-Model Scatter: ${esc(bmObj.name)}</strong>
-              <span class="regime-badge regime-${bmObj.regime}">${bmObj.regime} (~${Math.round(bmObj.avgWords)}w)</span>
-            </div>
-            <svg viewBox="0 0 ${RW} ${RH}" role="img" aria-label="19-model reward vs judge scatter">
-              ${rGrid}${rFits}${rDots}${collapseNote}
-              <line x1="${rPadL}" y1="${RH - rPadB}" x2="${RW - rPadR}" y2="${RH - rPadB}" stroke="#64748b"/>
-              <line x1="${rPadL}" y1="${rPadT}" x2="${rPadL}" y2="${RH - rPadB}" stroke="#64748b"/>
-              <text x="${(rPadL + RW - rPadR) / 2}" y="${RH - 8}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#334155">Normalized Reward Score [0, 1]</text>
-              <text x="13" y="${(rPadT + RH - rPadB) / 2}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#334155" transform="rotate(-90 13 ${(rPadT + RH - rPadB) / 2})">Normalized MLLM Judge [0, 1]</text>
-            </svg>
-          </div>
-        </div>
-      `;
-
-      host.querySelectorAll("[data-mode]").forEach((b) =>
-        b.addEventListener("click", () => {
-          mode = b.dataset.mode;
-          hidden.clear();
-          render();
-        })
-      );
-      host.querySelectorAll("[data-metric]").forEach((b) =>
-        b.addEventListener("click", () => {
-          metric = b.dataset.metric;
-          render();
-        })
-      );
-      host.querySelectorAll("[data-rkey]").forEach((b) =>
-        b.addEventListener("click", () => {
-          const k = b.dataset.rkey;
-          if (hidden.has(k)) hidden.delete(k);
-          else if (hidden.size < series.length - 1) hidden.add(k);
-          render();
-        })
-      );
-      host.querySelectorAll(".align-bcol, .corr-pt").forEach((el) => {
-        el.addEventListener("click", () => {
-          selBench = el.dataset.bkey;
-          render();
-        });
-      });
-      host.querySelectorAll(".corr-pt").forEach((el) => {
-        el.addEventListener("mouseenter", (ev) => {
-          showTip(ev, `<div class="tt-title">${el.dataset.rname}</div><div>${el.dataset.val}</div>`);
-        });
-        el.addEventListener("mousemove", moveTip);
-        el.addEventListener("mouseleave", hideTip);
-      });
-      host.querySelectorAll(".scat-pt").forEach((el) => {
-        el.addEventListener("mouseenter", (ev) => {
-          showTip(
-            ev,
-            `<div class="tt-title">${el.dataset.model}</div>
-             <div class="tt-sub">${el.dataset.rname} on ${esc(bmObj.name)}</div>
-             <div>Raw Reward: <b>${el.dataset.rx}</b> · Judge: <b>${el.dataset.ry}</b></div>`
-          );
-        });
-        el.addEventListener("mousemove", moveTip);
-        el.addEventListener("mouseleave", hideTip);
-      });
-    }
-
-    render();
-  }
-
-  /* ========================================================================
-     MODULE 7A (§3.2, Fig. 5): PromptScore vs. SpectraReward Regime/Benchmark Chart
-     ======================================================================== */
-  function mountSpectraChart() {
-    const host = document.getElementById("viz-spectra");
-    if (!host || !window.PAPER_DATA) return;
-    const S = window.PAPER_DATA.spectraData;
-    let gran = "regime"; // "regime" | "bench"
-
-    function render() {
-      const labels = gran === "regime" ? S.regimes.map((r) => r.name) : S.benchmarks;
-      const panelsHtml = Object.entries(S.models)
-        .map(([modelName, obj]) => {
-          const base = obj.Base;
-          const rawGains = (rk) => obj[rk].map((v, i) => ((v - base[i]) / base[i]) * 100);
-          const series = {};
-          ["PromptScore", "SpectraReward"].forEach((rk) => {
-            const g = rawGains(rk);
-            series[rk] =
-              gran === "regime"
-                ? S.regimes.map((rg) => rg.indices.reduce((a, idx) => a + g[idx], 0) / rg.indices.length)
-                : g;
-          });
-
-          const allV = [...series.PromptScore, ...series.SpectraReward];
-          const lo = Math.min(...allV) - 0.8;
-          const hi = Math.max(...allV) + 0.9;
-          const W = 450, H = 225, padL = 44, padR = 20, padT = 34, padB = gran === "regime" ? 36 : 56;
-          const sx = (i) => padL + ((i + 0.35) / (labels.length - 0.3)) * (W - padL - padR);
-          const sy = linScale(lo, hi, H - padB, padT);
-
-          let grid = "";
-          const nTicks = 4;
-          for (let t = 0; t <= nTicks; t++) {
-            const yv = lo + ((hi - lo) * t) / nTicks;
-            grid += `<line x1="${padL}" y1="${r1(sy(yv))}" x2="${W - padR}" y2="${r1(sy(yv))}" stroke="#eef2f6" stroke-dasharray="3 3"/>
-                     <text x="${padL - 7}" y="${r1(sy(yv) + 4)}" text-anchor="end" font-size="10.8" fill="#64748b">+${yv.toFixed(1)}%</text>`;
-          }
-          labels.forEach((lb, i) => {
-            const x = r1(sx(i));
-            grid +=
-              gran === "regime"
-                ? `<text x="${x}" y="${H - 12}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#334155">${esc(lb)}</text>`
-                : `<text x="${x}" y="${H - padB + 15}" text-anchor="end" font-size="10" fill="#475569" transform="rotate(-24 ${x} ${H - padB + 15})">${esc(lb)}</text>`;
-          });
-
-          const drawLine = (rk, col, marker, lw) => {
-            const pts = series[rk].map((v, i) => [sx(i), sy(v), v, labels[i]]);
-            const d = pts.map((p, i) => `${i === 0 ? "M" : "L"}${r1(p[0])},${r1(p[1])}`).join(" ");
-            return (
-              `<path d="${d}" fill="none" stroke="${col}" stroke-width="${lw}"/>` +
-              pts
-                .map(([px, py, v, lb]) =>
-                  svgMarker(
-                    marker,
-                    px,
-                    py,
-                    lw > 3 ? 5.6 : 4.8,
-                    col,
-                    "#fff",
-                    1.5,
-                    `class="spec-pt" data-m="${esc(modelName)}" data-r="${rk}" data-lb="${esc(lb)}" data-v="${v.toFixed(2)}" style="cursor:pointer"`
-                  )
-                )
-                .join("")
-            );
-          };
-
-          return `<div style="background:#fcfcfd;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px">
-            <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(modelName)} PromptScore vs SpectraReward">
-              ${grid}
-              ${drawLine("SpectraReward", "#38bdf8", "tri-up", 2.4)}
-              ${drawLine("PromptScore", "#2563eb", "circle", 3.6)}
-              <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#64748b"/>
-              <rect x="${padL + 6}" y="6" width="166" height="22" rx="5" fill="#fff" stroke="#cbd5e1"/>
-              <text x="${padL + 14}" y="21" font-size="11.5" font-weight="700" fill="#0f172a">${esc(modelName)}</text>
-            </svg>
-          </div>`;
-        })
-        .join("");
-
-      host.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
-          <div style="display:flex;gap:14px;align-items:center;font-size:12.5px;font-weight:650">
-            <span style="display:inline-flex;align-items:center;gap:6px;color:#1d4ed8"><span style="width:11px;height:11px;border-radius:50%;background:#2563eb"></span>PromptScore (Zero-shot Graded Score)</span>
-            <span style="display:inline-flex;align-items:center;gap:6px;color:#0284c7"><span style="width:11px;height:11px;border-radius:2px;background:#38bdf8"></span>SpectraReward (Prompt Reconstruction Log-Likelihood)</span>
-          </div>
-          <div class="seg-group">
-            <button type="button" class="seg-btn ${gran === "regime" ? "active" : ""}" data-gran="regime">By Length Regime (Fig. 5)</button>
-            <button type="button" class="seg-btn ${gran === "bench" ? "active" : ""}" data-gran="bench">All 7 Benchmarks</button>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">${panelsHtml}</div>
-      `;
-
-      host.querySelectorAll("[data-gran]").forEach((b) =>
-        b.addEventListener("click", () => {
-          gran = b.dataset.gran;
-          render();
-        })
-      );
-      host.querySelectorAll(".spec-pt").forEach((el) => {
-        el.addEventListener("mouseenter", (ev) => {
-          showTip(
-            ev,
-            `<div class="tt-title">${el.dataset.r} · ${el.dataset.m}</div>
-             <div>${el.dataset.lb}: <b>+${el.dataset.v}%</b> over Base</div>`
-          );
-        });
-        el.addEventListener("mousemove", moveTip);
-        el.addEventListener("mouseleave", hideTip);
-      });
-    }
-
-    render();
-  }
-
-  /* ========================================================================
-     MODULE 7B (§3.3, Fig. 6): Reward Backbone Scaling Boxplot + Dots
-     ======================================================================== */
-  function mountScalingChart() {
-    const host = document.getElementById("viz-scaling");
-    if (!host || !window.PAPER_DATA) return;
-    const panels = window.PAPER_DATA.scalingPanels;
-    const benchNames = window.PAPER_DATA.benchmarks.map((b) => b.name);
-    let showDots = true;
-
-    const palettes = {
-      "FLUX.2-Klein-Base-4B": ["#FAD2CF", "#F5A7A1", "#EE7E74", "#E4574A", "#C8322A", "#A50E0E"],
-      "Z-Image": ["#E8F0FE", "#BDD4F9", "#8DB6F5", "#5591F4", "#316FD5", "#174EA6"],
-    };
-
-    function render() {
-      const htmlPanels = Object.entries(panels)
-        .map(([baseName, items]) => {
-          const allVals = items.flatMap((it) => it.normScores);
-          const lo = Math.floor(Math.min(...allVals) - 3);
-          const hi = Math.ceil(Math.max(...allVals) + 3);
-          const W = 450, H = 240, padL = 42, padR = 18, padT = 20, padB = 40;
-          const sx = (i) => padL + ((i + 0.55) / items.length) * (W - padL - padR);
-          const sy = linScale(lo, hi, H - padB, padT);
-          const cols = palettes[baseName];
-
-          let grid = "";
-          for (let yv = Math.ceil(lo / 10) * 10; yv <= hi; yv += 10) {
-            grid += `<line x1="${padL}" y1="${r1(sy(yv))}" x2="${W - padR}" y2="${r1(sy(yv))}" stroke="#e2e8f0" stroke-dasharray="4 3"/>
-                     <text x="${padL - 7}" y="${r1(sy(yv) + 4)}" text-anchor="end" font-size="11" fill="#64748b">${yv}</text>`;
-          }
-
-          let boxes = "";
-          items.forEach((it, idx) => {
-            const cx = sx(idx);
-            const bw = 30;
-            const yMin = sy(it.min), yMax = sy(it.max), yQ1 = sy(it.q1), yQ3 = sy(it.q3), yMed = sy(it.median);
-            boxes += `<g class="scale-box" data-base="${esc(baseName)}" data-idx="${idx}" style="cursor:pointer">
-              ${it.selected ? `<rect x="${r1(cx - bw / 2 - 5)}" y="${padT}" width="${bw + 10}" height="${H - padT - padB}" rx="6" fill="rgba(37,99,235,0.06)"/>` : ""}
-              <line x1="${r1(cx)}" y1="${r1(yMax)}" x2="${r1(cx)}" y2="${r1(yQ3)}" stroke="#0f172a" stroke-width="1.6"/>
-              <line x1="${r1(cx)}" y1="${r1(yQ1)}" x2="${r1(cx)}" y2="${r1(yMin)}" stroke="#0f172a" stroke-width="1.6"/>
-              <line x1="${r1(cx - 8)}" y1="${r1(yMax)}" x2="${r1(cx + 8)}" y2="${r1(yMax)}" stroke="#0f172a" stroke-width="1.6"/>
-              <line x1="${r1(cx - 8)}" y1="${r1(yMin)}" x2="${r1(cx + 8)}" y2="${r1(yMin)}" stroke="#0f172a" stroke-width="1.6"/>
-              <rect x="${r1(cx - bw / 2)}" y="${r1(yQ3)}" width="${bw}" height="${r1(Math.max(2, yQ1 - yQ3))}" fill="${cols[idx]}" fill-opacity="0.9" stroke="#0f172a" stroke-width="1.7" rx="2"/>
-              <line x1="${r1(cx - bw / 2)}" y1="${r1(yMed)}" x2="${r1(cx + bw / 2)}" y2="${r1(yMed)}" stroke="#0f172a" stroke-width="2.2"/>
-              <text x="${r1(cx)}" y="${H - 14}" text-anchor="middle" font-size="11.5" font-weight="${it.selected ? 750 : 600}" fill="${it.selected ? "#1d4ed8" : "#334155"}">${esc(it.label)}</text>
-            </g>`;
-
-            if (showDots) {
-              it.normScores.forEach((nv, bi) => {
-                const jit = ((bi % 3) - 1) * 5.5;
-                boxes += `<circle class="scale-dot" data-full="${esc(it.full)}" data-bm="${esc(benchNames[bi])}" data-nv="${nv.toFixed(1)}" cx="${r1(cx + jit)}" cy="${r1(sy(nv))}" r="3.1" fill="#0f172a" fill-opacity="0.72" stroke="#fff" stroke-width="0.8" style="cursor:pointer"/>`;
-              });
-            }
-          });
-
-          return `<div style="background:#fcfcfd;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px">
-            <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(baseName)} reward backbone scaling">
-              ${grid}${boxes}
-              <rect x="${padL}" y="${padT}" width="${W - padL - padR}" height="${H - padT - padB}" fill="none" stroke="#334155" stroke-width="1.3"/>
-              <rect x="${W - padR - 154}" y="${H - padB - 28}" width="146" height="22" rx="5" fill="#fff" stroke="#0f172a" stroke-width="1.2"/>
-              <text x="${W - padR - 81}" y="${H - padB - 13}" text-anchor="middle" font-size="11.2" font-weight="700" fill="#0f172a">${esc(baseName)}</text>
-            </svg>
-          </div>`;
-        })
-        .join("");
-
-      host.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-          <span style="font-size:12.5px;color:#475569">Normalized [0–100] score distribution across 7 compositional benchmarks (4B → 320B MoE):</span>
-          <button type="button" class="replay-btn" id="btn-toggle-scaledots">${showDots ? "Hide Individual Benchmark Dots" : "Show Individual Benchmark Dots"}</button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">${htmlPanels}</div>
-      `;
-
-      host.querySelector("#btn-toggle-scaledots").addEventListener("click", () => {
-        showDots = !showDots;
-        render();
-      });
-
-      host.querySelectorAll(".scale-box").forEach((g) => {
-        g.addEventListener("mouseenter", (ev) => {
-          const it = panels[g.dataset.base][+g.dataset.idx];
-          showTip(
-            ev,
-            `<div class="tt-title">${esc(it.full)}</div>
-             <div class="tt-sub">Policy Backbone: ${g.dataset.base}</div>
-             <div>Mean: <b>${it.mean.toFixed(1)}</b> · Median: <b>${it.median.toFixed(1)}</b></div>
-             <div>IQR: [${it.q1.toFixed(1)}, ${it.q3.toFixed(1)}] · Range: [${it.min.toFixed(1)}, ${it.max.toFixed(1)}]</div>`
-          );
-        });
-        g.addEventListener("mousemove", moveTip);
-        g.addEventListener("mouseleave", hideTip);
-      });
-
-      host.querySelectorAll(".scale-dot").forEach((el) => {
-        el.addEventListener("mouseenter", (ev) => {
-          ev.stopPropagation();
-          showTip(
-            ev,
-            `<div class="tt-title">${el.dataset.bm}</div>
-             <div>Reward: ${el.dataset.full} · Normalized Score: <b>${el.dataset.nv}</b></div>`
-          );
-        });
-        el.addEventListener("mousemove", moveTip);
-        el.addEventListener("mouseleave", hideTip);
-      });
-    }
-
-    render();
-  }
-
-  /* ========================================================================
-     MODULE 8B (§4.2, Fig. 8): Prompt Design Relative Gain Across 7 Benchmarks
-     ======================================================================== */
-  function mountPromptTypeChart() {
-    const host = document.getElementById("viz-prompt-type");
-    if (!host || !window.PAPER_DATA) return;
-    const B = window.PAPER_DATA.benchmarks;
-    const P = window.PAPER_DATA.promptTypeSeries;
-    let focusKey = null; // null = show all, Balance highlighted
-
-    const markers = { Balance: "circle", Attribute: "square", Entity: "diamond", Relation: "tri-up" };
-
-    function render() {
-      const sample = P["FLUX.2-Klein-Base-4B"];
-      const chips = Object.entries(sample)
-        .map(([k, v]) => {
-          const zMean = P["Z-Image"][k].meanGain;
-          const active = focusKey === k;
-          return `<button type="button" class="legend-chip ${active ? "active-focus" : ""}" data-vk="${k}">
-            <span class="legend-swatch" style="background:${v.color}"></span>
-            <span>${esc(v.label)}${k === "Balance" ? " ★" : ""}</span>
-            <span style="font-family:var(--font-mono);font-size:11px;color:#64748b">4B: +${v.meanGain.toFixed(1)}% · 6B: +${zMean.toFixed(1)}%</span>
-          </button>`;
-        })
-        .join("");
-
-      const panelsHtml = Object.entries(P)
-        .map(([baseName, varMap]) => {
-          const allV = Object.values(varMap).flatMap((o) => o.gains);
-          const lo = Math.min(0, ...allV) - 0.6;
-          const hi = Math.max(...allV) + 1.0;
-          const W = 455, H = 250, padL = 44, padR = 18, padT = 34, padB = 56;
-          const sx = (i) => padL + (i / (B.length - 1)) * (W - padL - padR);
-          const sy = linScale(lo, hi, H - padB, padT);
-
-          let grid = "";
-          for (let t = 0; t <= 4; t++) {
-            const yv = lo + ((hi - lo) * t) / 4;
-            grid += `<line x1="${padL}" y1="${r1(sy(yv))}" x2="${W - padR}" y2="${r1(sy(yv))}" stroke="#eef2f6" stroke-dasharray="3 3"/>
-                     <text x="${padL - 6}" y="${r1(sy(yv) + 4)}" text-anchor="end" font-size="10.8" fill="#64748b">${yv >= 0 ? "+" : ""}${yv.toFixed(1)}%</text>`;
-          }
-          B.forEach((bm, i) => {
-            const x = r1(sx(i));
-            grid += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${H - padB}" stroke="#f8fafc"/>
-                     <text x="${x}" y="${H - padB + 15}" text-anchor="end" font-size="10.2" fill="#475569" transform="rotate(-25 ${x} ${H - padB + 15})">${esc(bm.shortName)}</text>`;
-          });
-
-          const order = ["Entity", "Relation", "Attribute", "Balance"];
-          let lines = "";
-          order.forEach((vk) => {
-            const obj = varMap[vk];
-            const isHi = focusKey ? focusKey === vk : vk === "Balance";
-            const op = focusKey && focusKey !== vk ? 0.22 : isHi ? 1.0 : 0.58;
-            const lw = isHi ? 3.5 : 2.0;
-            const pts = obj.gains.map((g, i) => [sx(i), sy(g), g, obj.raw[i], B[i].name]);
-            const d = pts.map((p, i) => `${i === 0 ? "M" : "L"}${r1(p[0])},${r1(p[1])}`).join(" ");
-            lines += `<g opacity="${op}">
-              <path d="${d}" fill="none" stroke="${obj.color}" stroke-width="${lw}"/>
-              ${pts
-                .map(([px, py, g, raw, bname]) =>
-                  svgMarker(
-                    markers[vk],
-                    px,
-                    py,
-                    isHi ? 5.3 : 4.2,
-                    obj.color,
-                    "#fff",
-                    1.4,
-                    `class="ptype-pt" data-base="${esc(baseName)}" data-v="${esc(obj.label)}" data-bm="${esc(bname)}" data-g="${g.toFixed(2)}" data-raw="${raw}" style="cursor:pointer"`
-                  )
-                )
-                .join("")}
-            </g>`;
-          });
-
-          return `<div style="background:#fcfcfd;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px">
-            <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(baseName)} prompt design gains">
-              ${grid}${lines}
-              <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#64748b"/>
-              <rect x="${padL + 6}" y="6" width="166" height="22" rx="5" fill="#fff" stroke="#cbd5e1"/>
-              <text x="${padL + 14}" y="21" font-size="11.5" font-weight="700" fill="#0f172a">${esc(baseName)}</text>
-            </svg>
-          </div>`;
-        })
-        .join("");
-
-      host.innerHTML = `
-        <div class="chart-legend">${chips}<span style="font-size:11.5px;color:#64748b;align-self:center;margin-left:auto">Click a design pill to isolate</span></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">${panelsHtml}</div>
-      `;
-
-      host.querySelectorAll("[data-vk]").forEach((b) =>
-        b.addEventListener("click", () => {
-          focusKey = focusKey === b.dataset.vk ? null : b.dataset.vk;
-          render();
-        })
-      );
-      host.querySelectorAll(".ptype-pt").forEach((el) => {
-        el.addEventListener("mouseenter", (ev) => {
-          showTip(
-            ev,
-            `<div class="tt-title">${el.dataset.v} · ${el.dataset.base}</div>
-             <div>${el.dataset.bm}: <b>+${el.dataset.g}%</b> (Score: ${el.dataset.raw})</div>`
-          );
-        });
-        el.addEventListener("mousemove", moveTip);
-        el.addEventListener("mouseleave", hideTip);
-      });
-    }
-
-    render();
-  }
-
-  /* ========================================================================
-     MODULE 9 (§4.3, Fig. 9): Sequential Short→Long vs Joint Mixing Trajectory
-     ======================================================================== */
-  function mountCurriculumChart() {
-    const host = document.getElementById("viz-curriculum");
-    if (!host || !window.PAPER_DATA) return;
-    const B = window.PAPER_DATA.benchmarks;
-    const C = window.PAPER_DATA.curriculumRaw;
-    let view = "both"; // "both" | "seq" | "joint"
-
-    const styles = {
-      "Imago-Short": { color: "#f59e0b", dash: "5 4", lw: 2.0, label: "Imago-Short Only" },
-      "Imago-Long": { color: "#16a34a", dash: "5 4", lw: 2.0, label: "Imago-Long Only" },
-      "Imago-Short ∪ Long": { color: "#dc2626", dash: "", lw: 2.8, label: "Joint (Imago-Short ∪ Long)" },
-      "Imago-Short → Long": { color: "#2563eb", dash: "", lw: 3.8, label: "Sequential (Imago-Short → Long ★)" },
-    };
-
-    function render(animate = false) {
-      const panelsHtml = Object.entries(C)
-        .map(([baseName, map]) => {
-          const base = map.Base;
-          const gainsOf = (k) => map[k].map((v, i) => ((v - base[i]) / base[i]) * 100);
-          const keys =
-            view === "seq"
-              ? ["Imago-Short", "Imago-Long", "Imago-Short → Long"]
-              : view === "joint"
-              ? ["Imago-Short", "Imago-Long", "Imago-Short ∪ Long"]
-              : ["Imago-Short", "Imago-Long", "Imago-Short ∪ Long", "Imago-Short → Long"];
-
-          const allG = keys.flatMap(gainsOf);
-          const lo = -0.6;
-          const hi = Math.max(...allG) + 1.4;
-          const W = 455, H = 258, padL = 46, padR = 20, padT = 34, padB = 46;
-          const sx = linScale(0, 560, padL, W - padR);
-          const sy = linScale(lo, hi, H - padB, padT);
-
-          let grid = "";
-          const yStep = hi > 11 ? 4 : 2;
-          for (let yv = 0; yv <= hi; yv += yStep) {
-            grid += `<line x1="${padL}" y1="${r1(sy(yv))}" x2="${W - padR}" y2="${r1(sy(yv))}" stroke="${yv === 0 ? "#94a3b8" : "#eef2f6"}" ${yv === 0 ? 'stroke-dasharray="4 3"' : ""}/>
-                     <text x="${padL - 7}" y="${r1(sy(yv) + 4)}" text-anchor="end" font-size="10.8" fill="#64748b">+${yv}%</text>`;
-          }
-          [0, 100, 200, 300, 400, 500].forEach((xv) => {
-            grid += `<line x1="${r1(sx(xv))}" y1="${padT}" x2="${r1(sx(xv))}" y2="${H - padB}" stroke="#f8fafc"/>
-                     <text x="${r1(sx(xv))}" y="${H - padB + 16}" text-anchor="middle" font-size="10.8" fill="#64748b">${xv}</text>`;
-          });
-          grid += `<text x="${padL + 8}" y="${r1(sy(0) - 5)}" font-size="10.2" font-weight="600" fill="#64748b">Base Model (0%)</text>`;
-
-          let paths = "";
-          keys.forEach((k) => {
-            const st = styles[k];
-            const gs = gainsOf(k);
-            const pts = gs.map((g, i) => [sx(B[i].avgWords), sy(g), g, map[k][i], B[i]]);
-            const d = pts.map((p, i) => `${i === 0 ? "M" : "L"}${r1(p[0])},${r1(p[1])}`).join(" ");
-            const animAttr =
-              animate && !st.dash
-                ? `stroke-dasharray="700" stroke-dashoffset="700" style="animation: drawLine 1.1s cubic-bezier(0.22,1,0.36,1) forwards"`
-                : st.dash
-                ? `stroke-dasharray="${st.dash}"`
-                : "";
-            paths += `<path d="${d}" fill="none" stroke="${st.color}" stroke-width="${st.lw}" ${animAttr}/>`;
-            pts.forEach(([px, py, g, raw, bm]) => {
-              paths += svgMarker(
-                k.includes("→") ? "circle" : k.includes("∪") ? "diamond" : "square",
-                px,
-                py,
-                k.includes("→") ? 5.4 : 4.2,
-                st.color,
-                "#fff",
-                1.3,
-                `class="curr-pt" data-base="${esc(baseName)}" data-k="${esc(st.label)}" data-bm="${esc(bm.name)}" data-w="${bm.avgWords}" data-g="${g.toFixed(2)}" data-raw="${raw}" style="cursor:pointer"`
-              );
-            });
-          });
-
-          return `<div style="background:#fcfcfd;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px">
-            <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(baseName)} prompt length curriculum trajectory">
-              <style>@keyframes drawLine { to { stroke-dashoffset: 0; } }</style>
-              ${grid}${paths}
-              <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#64748b"/>
-              <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="#64748b"/>
-              <text x="${(padL + W - padR) / 2}" y="${H - 8}" text-anchor="middle" font-size="11.2" font-weight="600" fill="#334155">Benchmark Average Prompt Length (words)</text>
-              <rect x="${padL + 8}" y="6" width="166" height="22" rx="5" fill="#fff" stroke="#cbd5e1"/>
-              <text x="${padL + 16}" y="21" font-size="11.5" font-weight="700" fill="#0f172a">${esc(baseName)}</text>
-            </svg>
-          </div>`;
-        })
-        .join("");
-
-      const leg = Object.entries(styles)
-        .map(
-          ([, st]) => `<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#334155">
-            <span style="width:18px;height:0;border-top:${st.lw}px ${st.dash ? "dashed" : "solid"} ${st.color}"></span>${esc(st.label)}
-          </span>`
-        )
-        .join("");
-
-      host.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
-          <div style="display:flex;flex-wrap:wrap;gap:14px">${leg}</div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <div class="seg-group">
-              <button type="button" class="seg-btn ${view === "both" ? "active" : ""}" data-cv="both">Compare All 4</button>
-              <button type="button" class="seg-btn ${view === "joint" ? "active" : ""}" data-cv="joint">Joint Mixing</button>
-              <button type="button" class="seg-btn ${view === "seq" ? "active" : ""}" data-cv="seq">Sequential (Ours)</button>
-            </div>
-            <button type="button" class="replay-btn" id="btn-replay-curr">↻ Replay</button>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">${panelsHtml}</div>
-      `;
-
-      host.querySelectorAll("[data-cv]").forEach((b) =>
-        b.addEventListener("click", () => {
-          view = b.dataset.cv;
-          render(true);
-        })
-      );
-      host.querySelector("#btn-replay-curr").addEventListener("click", () => render(true));
-      host.querySelectorAll(".curr-pt").forEach((el) => {
-        el.addEventListener("mouseenter", (ev) => {
-          showTip(
-            ev,
-            `<div class="tt-title">${el.dataset.k}</div>
-             <div class="tt-sub">${el.dataset.base} · ${el.dataset.bm} (~${Math.round(+el.dataset.w)} words)</div>
-             <div>Relative Gain: <b>+${el.dataset.g}%</b> · Raw Score: <b>${el.dataset.raw}</b></div>`
-          );
-        });
-        el.addEventListener("mousemove", moveTip);
-        el.addEventListener("mouseleave", hideTip);
-      });
-    }
-
-    render(false);
-  }
-
-  window.ImagoCharts = {
-    init() {
-      mountPrefPairgrid();
-      mountBenchOverview();
-      mountRewardAlignment();
-      mountSpectraChart();
-      mountScalingChart();
-      mountPromptTypeChart();
-      mountCurriculumChart();
-    },
+  const I = window.Imago, P = I.P;
+  const BLUE = "#4285f4";
+  const REG = { short: "#3a8dde", medium: "#e59837", long: "#d94f4f" };
+  const REGL = { short: "#a8d5ff", medium: "#ffd6a5", long: "#ffadad" };
+  const BENCH = P.benchmarks;                     // seven benchmarks, by mean prompt length
+  const TWO_LINE = {
+    "T2I-CompBench": ["T2I-", "CompBench"], "TIIF-Bench": ["TIIF-", "Bench"], "SpatialGenEval": ["Spatial-", "GenEval"],
+    "T2I-CoReBench": ["T2I-", "CoReBench"], "LPD-Bench": ["LPD-", "Bench"], "Arena-T2I-Hard": ["Arena-", "T2I-Hard"],
+    "LongBench-T2I": ["LongBench-", "T2I"],
   };
+  const SHORTNAME = { "T2I-CompBench": "CompBench", "TIIF-Bench": "TIIF", "SpatialGenEval": "Spatial", "T2I-CoReBench": "CoReBench",
+    "LPD-Bench": "LPD", "Arena-T2I-Hard": "Arena", "LongBench-T2I": "LongBench" };
+  const light = (c, a) => d3.interpolateRgb(c, "#fff")(a);
+  const dur = I.dur;
+  let uid = 0;
+
+  function svgIn(host, H) {
+    host.innerHTML = "";
+    const W = Math.max(260, Math.floor(host.clientWidth));
+    const svg = d3.select(host).append("svg").attr("width", W).attr("height", H).attr("viewBox", `0 0 ${W} ${H}`);
+    return { svg, W, H };
+  }
+
+  /* a clip rectangle that uncovers its contents from left to right */
+  function wipe(svg, x0, y0, w, h, animate, delay = 0, ms = 900) {
+    const id = "wipe" + ++uid;
+    const r = svg.append("defs").append("clipPath").attr("id", id).append("rect")
+      .attr("x", x0).attr("y", y0).attr("height", h).attr("width", animate ? 0 : w);
+    if (animate) r.transition().delay(dur(delay)).duration(dur(ms)).ease(d3.easeCubicInOut).attr("width", w);
+    return `url(#${id})`;
+  }
+
+  function twoLineTicks(g, names) {
+    g.selectAll(".tick text").each(function (d, i) {
+      const t = d3.select(this), parts = TWO_LINE[names[i]] || [names[i]];
+      t.text(null);
+      parts.forEach((p, k) => t.append("tspan").attr("x", 0).attr("dy", k ? "1.15em" : "0.9em").text(p));
+    });
+  }
+
+  function legendButtons(el, items, onToggle) {
+    const L = el.querySelector(".legend");
+    L.innerHTML = "";
+    items.forEach((it) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.key = it.key;
+      b.innerHTML = `<span class="sw${it.dashed ? " dash" : ""}" style="color:${it.color};border-top-width:${it.thick ? 3.5 : 2.5}px"></span>${it.name}`;
+      b.addEventListener("click", () => onToggle(it.key));
+      L.appendChild(b);
+    });
+    return (focus) => L.querySelectorAll("button").forEach((b) => b.classList.toggle("dim", !!focus && b.dataset.key !== focus));
+  }
+
+  const symbolOf = { o: d3.symbolCircle, s: d3.symbolSquare, D: d3.symbolDiamond, "^": d3.symbolTriangle, v: d3.symbolTriangle, "*": d3.symbolStar, X: d3.symbolCross };
+
+  /* ======================================================================== teaser: score vs. size */
+  I.register("teaser", (el, state) => {
+    const host = el.querySelector(".chart");
+    const BN = ["T2I-CompBench", "TIIF-Bench", "SpatialGenEval", "T2I-CoReBench", "LongBench-T2I"];
+    const DEC = [3, 2, 2, 2, 3];
+    const rows = P.main.map((r) => {
+      const id = `${r.model}|${r.size == null ? "p" : r.size}`;
+      const kind = r.model.startsWith("Imago") ? "imago"
+        : (r.model === "FLUX.2-Klein-Base" && r.size === 4) || (r.model === "Z-Image" && r.size === 6) ? "base"
+          : r.size == null ? "prop" : "other";
+      const disp = /^FLUX\.2-Klein/.test(r.model) ? `${r.model}-${r.size}B` : r.model;
+      return { ...r, id, kind, disp };
+    });
+    const pts = rows.filter((r) => r.kind !== "prop").sort((a, b) => a.size - b.size);
+    const props = rows.filter((r) => r.kind === "prop");
+    const byId = Object.fromEntries(rows.map((r) => [r.id, r]));
+    const pairs = [["FLUX.2-Klein-Base|4", "Imago-4B|4"], ["Z-Image|6", "Imago-6B|6"]];
+    // models of equal size sit side by side instead of on top of each other (pixels)
+    const JIT = { "SDXL|2.6": -6, "Lumina-Image-2|2.6": 6, "LongCat-Image|6": -9, "Z-Image-Turbo|6": 9, "FLUX.2-Klein|4": 9,
+      "FLUX.2-Klein-Base|9": -6, "FLUX.2-Klein|9": 6, "FLUX.1-schnell|12": -6, "FLUX.1-dev|12": 6 };
+    const COL = { other: "#c9ced5", base: "#59616b", imago: BLUE };
+    let S;
+
+    function scaffold() {
+      const H = Math.round(Math.max(300, Math.min(430, host.clientWidth * 0.47)));
+      const { svg, W } = svgIn(host, H);
+      const m = { t: 12, r: 12, b: 46, l: 56 };
+      const x = d3.scaleLog().domain([1.3, 44]).range([m.l, W - m.r]);
+      const R = W < 520 ? 4.3 : 5.4;
+      svg.append("defs").append("marker").attr("id", "tz-head").attr("viewBox", "0 0 10 10").attr("refX", 6).attr("refY", 5)
+        .attr("markerWidth", 6.5).attr("markerHeight", 6.5).attr("orient", "auto-start-reverse")
+        .append("path").attr("d", "M0,0 L10,5 L0,10 z").attr("fill", BLUE);
+      const g = {};
+      ["grid", "xa", "ya", "prop", "arrows", "pts", "lab"].forEach((k) => (g[k] = svg.append("g")));
+      g.grid.attr("class", "grid");
+      g.xa.attr("class", "axis").attr("transform", `translate(0,${H - m.b})`)
+        .call(d3.axisBottom(x).tickValues([2, 4, 8, 16, 32]).tickFormat((d) => d + "B").tickSizeOuter(0));
+      g.ya.attr("class", "axis").attr("transform", `translate(${m.l},0)`);
+      svg.append("text").attr("class", "axis-title").attr("x", (m.l + W - m.r) / 2).attr("y", H - 8).attr("text-anchor", "middle").text("Model parameters (log scale)");
+      const yTitle = svg.append("text").attr("class", "axis-title").attr("text-anchor", "middle")
+        .attr("transform", `translate(14,${(m.t + H - m.b) / 2}) rotate(-90)`);
+      S = { svg, W, H, m, x, R, g, yTitle };
+    }
+
+    function layout() {
+      const b = +state.bench, { x, m, H, W, R } = S;
+      const vals = rows.map((r) => r.scores[b]);
+      const lo = d3.min(vals), hi = d3.max(vals), pad = (hi - lo) * 0.07;
+      const y = d3.scaleLinear().domain([lo - pad, hi + pad]).nice(5).range([H - m.b, m.t]);
+      const pos = {};
+      pts.forEach((r) => { pos[r.id] = { x: x(r.size) + (JIT[r.id] || 0) * (W < 520 ? 0.7 : 1), y: y(r.scores[b]) }; });
+      props.forEach((r) => { pos[r.id] = { y: y(r.scores[b]) }; });
+      // an arrow too short to read is left out (the gain is then visible from the two points alone)
+      const arrows = pairs.map(([bi, ii]) => { const y1 = pos[bi].y - R - 3, y2 = pos[ii].y + R * 1.25 + 5; return { id: ii, x: pos[bi].x, y1, y2, show: y1 - y2 > 12 }; });
+
+      // labels, placed clear of points, arrows and each other
+      const obstacles = pts.map((r) => ({ x: pos[r.id].x - R - 2, y: pos[r.id].y - R - 2, w: 2 * R + 4, h: 2 * R + 4 }))
+        .concat(arrows.map((a) => ({ x: a.x - 4, y: a.y2, w: 8, h: a.y1 - a.y2 })));
+      const side = [{ dx: -11, dy: 4.5, anchor: "end" }, { dx: 11, dy: 4.5, anchor: "start" }, { dx: 0, dy: -11, anchor: "middle" }, { dx: 0, dy: 20, anchor: "middle" }];
+      const below = [{ dx: 0, dy: 20, anchor: "middle" }, { dx: -10, dy: 4.5, anchor: "end" }, { dx: 10, dy: 4.5, anchor: "start" }, { dx: 0, dy: -11, anchor: "middle" }];
+      const labels = [];
+      ["Imago-4B|4", "Imago-6B|6"].forEach((id) => labels.push({ id, text: byId[id].disp, x: pos[id].x, y: pos[id].y, size: 13.5, weight: 700, cls: "imago", cands: side }));
+      ["FLUX.2-Klein-Base|4", "Z-Image|6"].forEach((id) => labels.push({ id, text: byId[id].disp, x: pos[id].x, y: pos[id].y, size: 12.5, cls: "base", cands: below }));
+      props.forEach((r) => labels.push({ id: r.id, text: r.disp, x: W - m.r, y: pos[r.id].y, size: 12.5, cls: "prop",
+        cands: [{ dx: 0, dy: -6, anchor: "end" }, { dx: 0, dy: 15, anchor: "end" }, { dx: m.l - W + m.r + 6, dy: -6, anchor: "start" }, { dx: m.l - W + m.r + 6, dy: 15, anchor: "start" }] }));
+      const dev = "FLUX.2-dev|32";
+      labels.push({ id: dev, text: "FLUX.2-dev", x: pos[dev].x, y: pos[dev].y, size: 12.5, cls: "other", cands: [{ dx: -10, dy: 4.5, anchor: "end" }, { dx: 0, dy: 20, anchor: "middle" }, { dx: 0, dy: -11, anchor: "middle" }] });
+      I.placeLabels(labels, obstacles, { x0: m.l + 2, x1: W, y0: 0, y1: H - m.b - 2 });
+      return { b, y, pos, arrows, labels };
+    }
+
+    function tipHtml(r, L) {
+      const s = r.scores[L.b];
+      let h = `<b>${I.esc(r.disp)}</b>${r.size ? ` · ${r.size}B` : ""}<br>${BN[L.b]}: ${s.toFixed(DEC[L.b])}`;
+      const pair = pairs.find((p) => p[1] === r.id);
+      if (pair) {
+        const base = byId[pair[0]], bs = base.scores[L.b];
+        h += `<br><span class="s">${I.esc(base.disp)}: ${bs.toFixed(DEC[L.b])} (${I.pct((s - bs) / bs * 100)})</span>`;
+      }
+      if (r.kind === "base") h += `<br><span class="s">base model of ${byId[pairs.find((p) => p[0] === r.id)[1]].disp}</span>`;
+      return h;
+    }
+
+    function axes(L, t) {
+      const { g, m, W } = S;
+      const ya = d3.axisLeft(L.y).ticks(5).tickSizeOuter(0).tickFormat((d) => (L.b === 0 || L.b === 4 ? d.toFixed(1) : d));
+      const grid = (s) => s.call(d3.axisLeft(L.y).ticks(5).tickSize(-(W - m.l - m.r)).tickFormat("")).call((q) => q.select(".domain").remove());
+      if (t) { g.ya.transition(t).call(ya); g.grid.attr("transform", `translate(${m.l},0)`).transition(t).call(grid); }
+      else { g.ya.call(ya); g.grid.attr("transform", `translate(${m.l},0)`).call(grid); }
+      S.yTitle.text(`${BN[L.b]} score`);
+    }
+
+    function draw(build) {
+      scaffold();
+      const L = layout(), { g, R, m, W } = S;
+      axes(L);
+      const order = new Map(pts.map((r, i) => [r.id, i]));
+
+      g.prop.selectAll("line").data(props, (d) => d.id).join("line")
+        .attr("x1", m.l).attr("x2", build ? m.l : W - m.r).attr("y1", (d) => L.pos[d.id].y).attr("y2", (d) => L.pos[d.id].y)
+        .attr("stroke", "#9aa1aa").attr("stroke-width", 1.3).attr("stroke-dasharray", "5 4")
+        .call((s) => build && s.transition().delay(dur(650)).duration(dur(700)).ease(d3.easeCubicInOut).attr("x2", W - m.r));
+
+      g.arrows.selectAll("line").data(L.arrows, (d) => d.id).join("line")
+        .attr("x1", (d) => d.x).attr("x2", (d) => d.x).attr("y1", (d) => d.y1).attr("y2", (d) => (build ? d.y1 : d.y2))
+        .attr("stroke", BLUE).attr("stroke-width", 2.2).attr("marker-end", "url(#tz-head)").attr("opacity", (d) => (build || !d.show ? 0 : 1))
+        .call((s) => build && s.transition().delay((d, i) => dur(1350 + i * 160)).duration(dur(750)).ease(d3.easeCubicOut).attr("opacity", (d) => (d.show ? 1 : 0)).attr("y2", (d) => d.y2));
+
+      const rOf = (d) => (d.kind === "imago" ? R * 1.25 : d.kind === "base" ? R : R * 0.9);
+      const circles = g.pts.selectAll("circle.pt").data(pts, (d) => d.id).join("circle").attr("class", "pt")
+        .attr("cx", (d) => L.pos[d.id].x).attr("cy", (d) => L.pos[d.id].y).attr("r", (d) => (build ? 0 : rOf(d)))
+        .attr("fill", (d) => COL[d.kind]).attr("stroke", "#fff").attr("stroke-width", 1.4).style("cursor", "default");
+      if (build) {
+        circles.filter((d) => d.kind !== "imago").transition().delay((d) => dur(120 + order.get(d.id) * 38)).duration(dur(420)).ease(d3.easeBackOut.overshoot(2)).attr("r", rOf);
+        circles.filter((d) => d.kind === "imago").transition().delay((d, i) => dur(1950 + i * 160)).duration(dur(500)).ease(d3.easeBackOut.overshoot(2.4)).attr("r", rOf)
+          .on("start", function (d) {
+            g.pts.insert("circle", ":first-child").attr("cx", L.pos[d.id].x).attr("cy", L.pos[d.id].y).attr("r", R).attr("fill", "none")
+              .attr("stroke", BLUE).attr("stroke-width", 2).attr("opacity", 0.6)
+              .transition().duration(dur(900)).ease(d3.easeCubicOut).attr("r", R * 4).attr("opacity", 0).remove();
+          });
+      }
+      circles.raise();
+      I.hover(circles, (d) => tipHtml(d, S.L));
+      I.hover(g.prop.selectAll("line").style("pointer-events", "stroke").attr("stroke-width", 1.3), (d) => `<b>${d.disp}</b> · proprietary<br>${BN[S.L.b]}: ${d.scores[S.L.b].toFixed(DEC[S.L.b])}`);
+
+      // each label is a white halo copy under the coloured text, so a tspan's halo never clips its neighbour
+      g.lab.selectAll("g.lab").data(L.labels, (d) => d.id).join("g").attr("class", "lab")
+        .attr("transform", (d) => `translate(${d.x + d.pos.dx},${d.y + d.pos.dy})`)
+        .each(function (d) {
+          const gg = d3.select(this).html("");
+          ["halo", "ink"].forEach((layer) => {
+            const t = gg.append("text").attr("text-anchor", d.pos.anchor).style("font-size", d.size + "px").style("font-weight", d.weight || 400)
+              .attr("fill", layer === "halo" ? "#fff" : { imago: "#1f5fcf", base: "#4a525c", prop: "#7d858f", other: "#7d858f" }[d.cls]);
+            if (layer === "halo") t.attr("stroke", "#fff").attr("stroke-width", 4).attr("stroke-linejoin", "round");
+            if (d.cls === "imago") { t.append("tspan").attr("font-style", "italic").text("Imago"); t.append("tspan").text(d.text.slice(5)); }
+            else t.text(d.text);
+          });
+        })
+        .attr("opacity", build ? 0 : 1)
+        .call((s) => build && s.transition().delay((d) => dur(d.cls === "imago" ? 2250 : d.cls === "base" ? 1200 : 1000)).duration(dur(400)).attr("opacity", 1));
+      S.L = L;
+    }
+
+    function morph() {
+      if (!S) return draw(false);
+      const L = layout(), { g, R } = S;
+      const t = d3.transition().duration(dur(650)).ease(d3.easeCubicInOut);
+      axes(L, t);
+      g.pts.selectAll("circle.pt").transition(t).attr("cy", (d) => L.pos[d.id].y).attr("cx", (d) => L.pos[d.id].x);
+      g.prop.selectAll("line").transition(t).attr("y1", (d) => L.pos[d.id].y).attr("y2", (d) => L.pos[d.id].y);
+      g.arrows.selectAll("line").data(L.arrows, (d) => d.id)
+        .transition(t).attr("y1", (d) => d.y1).attr("y2", (d) => d.y1).attr("opacity", 0)
+        .transition().duration(dur(520)).ease(d3.easeCubicOut).attr("y2", (d) => d.y2).attr("opacity", (d) => (d.show ? 1 : 0));
+      g.lab.selectAll("g.lab").data(L.labels, (d) => d.id)
+        .transition().duration(dur(150)).attr("opacity", 0)
+        .transition().duration(0).attr("transform", (d) => `translate(${d.x + d.pos.dx},${d.y + d.pos.dy})`)
+        .on("end", function (d) { d3.select(this).selectAll("text").attr("text-anchor", d.pos.anchor); })
+        .transition().delay(dur(520)).duration(dur(300)).attr("opacity", 1);
+      S.L = L;
+      void R;
+    }
+
+    return { render: () => draw(false), play: () => draw(true), update: morph };
+  });
+
+  /* ======================================================================== benchmarks by prompt length */
+  I.register("benchmarks", (el) => {
+    const host = el.querySelector(".chart");
+    function draw(build) {
+      const H = Math.round(Math.max(290, Math.min(400, host.clientWidth * 0.46)));
+      const { svg, W } = svgIn(host, H);
+      const m = { t: 14, r: 16, b: 46, l: 54 };
+      const x = d3.scaleLog().domain([5.2, 1000]).range([m.l, W - m.r]);
+      const y = d3.scaleLinear().domain([0.515, 0.915]).range([H - m.b, m.t]);
+      const k = Math.min(1, W / 820);
+
+      svg.append("g").attr("class", "grid").attr("transform", `translate(${m.l},0)`)
+        .call(d3.axisLeft(y).tickValues([0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]).tickSize(-(W - m.l - m.r)).tickFormat(""))
+        .call((g) => g.select(".domain").remove());
+      // regimes: faint bands, dashed borders, names along the bottom
+      const regimes = [["short", 5.2, 100], ["medium", 100, 300], ["long", 300, 1000]];
+      const gReg = svg.append("g").attr("opacity", build ? 0 : 1);
+      gReg.selectAll("rect").data(regimes).join("rect").attr("x", (d) => x(d[1])).attr("width", (d) => x(d[2]) - x(d[1]))
+        .attr("y", m.t).attr("height", H - m.b - m.t).attr("fill", (d) => REGL[d[0]]).attr("opacity", 0.13);
+      gReg.selectAll("line").data([100, 300]).join("line").attr("x1", x).attr("x2", x).attr("y1", m.t).attr("y2", H - m.b)
+        .attr("stroke", "#5d646e").attr("stroke-width", 1).attr("stroke-dasharray", "6 5");
+      gReg.selectAll("text").data(regimes).join("text").attr("x", (d) => (d[0] === "long" ? x(780) : (x(d[1]) + x(d[2])) / 2))
+        .attr("y", (d) => (d[0] === "long" ? m.t + 22 : H - m.b - 10))
+        .attr("text-anchor", "middle").attr("fill", (d) => REG[d[0]]).style("font-size", "14px").style("font-weight", 700).text((d) => d[0]);
+      if (build) gReg.transition().duration(dur(500)).attr("opacity", 1);
+
+      svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`)
+        .call(d3.axisBottom(x).tickValues([10, 30, 100, 300, 1000]).tickFormat(d3.format("d")).tickSizeOuter(0));
+      svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`)
+        .call(d3.axisLeft(y).tickValues([0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]).tickFormat(d3.format(".2f")).tickSizeOuter(0));
+      svg.append("text").attr("class", "axis-title").attr("x", (m.l + W - m.r) / 2).attr("y", H - 8).attr("text-anchor", "middle").text("Mean prompt length (words, log scale)");
+      svg.append("text").attr("class", "axis-title").attr("text-anchor", "middle").attr("transform", `translate(14,${(m.t + H - m.b) / 2}) rotate(-90)`).text("Mean normalized score");
+
+      // the downward trend, drawn last
+      const p0 = [x(6.4), y(0.872)], c1 = [x(40), y(0.876)], c2 = [x(200), y(0.842)], p3 = [x(452), y(0.584)];
+      const path = d3.path();
+      path.moveTo(...p0);
+      path.bezierCurveTo(...c1, ...c2, ...p3);
+      const trend = svg.append("path").attr("d", path.toString()).attr("fill", "none").attr("stroke", "#dcdfe3")
+        .attr("stroke-width", Math.max(6, 10 * k)).attr("stroke-linecap", "butt");
+      const head = svg.append("path").attr("fill", "#dcdfe3")
+        .attr("d", (() => { const a = Math.atan2(p3[1] - c2[1], p3[0] - c2[0]), s = 16 * Math.max(0.7, k); const tip = [p3[0] + 10 * Math.cos(a), p3[1] + 10 * Math.sin(a)];
+          return `M${tip[0]},${tip[1]} L${tip[0] - s * Math.cos(a - 0.45)},${tip[1] - s * Math.sin(a - 0.45)} L${tip[0] - s * Math.cos(a + 0.45)},${tip[1] - s * Math.sin(a + 0.45)} Z`; })());
+      if (build) {
+        const len = trend.node().getTotalLength();
+        trend.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len)
+          .transition().delay(dur(1250)).duration(dur(1100)).ease(d3.easeCubicInOut).attr("stroke-dashoffset", 0)
+          .on("end", function () { d3.select(this).attr("stroke-dasharray", null); });
+        head.attr("opacity", 0).transition().delay(dur(2300)).duration(dur(250)).attr("opacity", 1);
+      }
+
+      const nmin = d3.min(BENCH, (d) => d.prompts), nmax = d3.max(BENCH, (d) => d.prompts);
+      const r0 = Math.max(9, Math.min(15.5, W * 0.0175));
+      const rOf = (d) => Math.sqrt((1 + 6 * (d.prompts - nmin) / (nmax - nmin))) * r0;   // area 1x .. 7x, as in the paper
+      const bub = svg.append("g").selectAll("circle").data(BENCH).join("circle")
+        .attr("cx", (d) => x(d.words)).attr("cy", (d) => y(d.score)).attr("r", (d) => (build ? 0 : rOf(d)))
+        .attr("fill", (d) => REGL[d.regime]).attr("fill-opacity", 0.92).attr("stroke", "#fff").attr("stroke-width", 1.5);
+      if (build) bub.transition().delay((d, i) => dur(250 + i * 130)).duration(dur(550)).ease(d3.easeBackOut.overshoot(1.6)).attr("r", rOf);
+      I.hover(bub, (d) => `<b>${d.name}</b> · ${d.regime}<br>${d.words} words on average · ${d.prompts.toLocaleString()} prompts<br>mean score of ${d.models} models: ${d.score.toFixed(3)}`,
+        function () { d3.select(this).attr("stroke", "#17191c"); }, function () { d3.select(this).attr("stroke", "#fff"); });
+
+      // labels where the paper puts them: above the bubble unless noted
+      const where = { tiifbench: [-12, "above"], spatialgeneval: [-4, "below"], t2icorebench_composition: [8, "below"], lpdbench: [-22, "above"], arenat2ihard: [0, "left"], longbencht2i: [46, "above"] };
+      const side = (d) => (where[d.key] || [0, "above"])[1];
+      const fs = W < 520 ? 11.5 : 13.5;
+      let pos = BENCH.map((d) => ({
+        x: side(d) === "left" ? x(d.words) - rOf(d) - 8 : x(d.words) + (where[d.key] ? where[d.key][0] : 0) * k,
+        y: side(d) === "below" ? y(d.score) + rOf(d) + 16 : side(d) === "left" ? y(d.score) + 4.5 : y(d.score) - rOf(d) - 7,
+        anchor: side(d) === "left" ? "end" : "middle" }));
+      if (W < 640) {
+        // narrow: place each label where it collides with no bubble, regime name, arrow or other label
+        const obstacles = BENCH.map((d) => ({ x: x(d.words) - rOf(d), y: y(d.score) - rOf(d), w: 2 * rOf(d), h: 2 * rOf(d) }));
+        const tp = trend.node(), tl = tp.getTotalLength();
+        for (let s = 0; s <= tl; s += 10) { const q = tp.getPointAtLength(s); obstacles.push({ x: q.x - 4, y: q.y - 4, w: 8, h: 8 }); }
+        gReg.selectAll("text").each(function () { const b = this.getBBox(); obstacles.push({ x: b.x, y: b.y, w: b.width, h: b.height }); });
+        const labels = BENCH.map((d) => {
+          const r = rOf(d);
+          return { text: d.name, x: x(d.words), y: y(d.score), size: fs, cands: [
+            { dx: 0, dy: -r - 6, anchor: "middle" }, { dx: 0, dy: r + 15, anchor: "middle" }, { dx: r + 5, dy: 4, anchor: "start" },
+            { dx: -r - 5, dy: 4, anchor: "end" }, { dx: r * 0.7, dy: -r - 6, anchor: "start" }, { dx: -r * 0.7, dy: -r - 6, anchor: "end" },
+            { dx: r * 0.7, dy: r + 15, anchor: "start" }, { dx: -r * 0.7, dy: r + 15, anchor: "end" }] };
+        });
+        I.placeLabels(labels, obstacles, { x0: m.l + 2, x1: W - 2, y0: 2, y1: H - m.b });
+        pos = labels.map((L) => ({ x: L.x + L.pos.dx, y: L.y + L.pos.dy, anchor: L.pos.anchor }));
+      }
+      svg.append("g").selectAll("text").data(BENCH).join("text")
+        .attr("x", (d, i) => pos[i].x).attr("y", (d, i) => pos[i].y).attr("text-anchor", (d, i) => pos[i].anchor)
+        .style("font-size", fs + "px").attr("fill", "#33383f")
+        .attr("stroke", "#fff").attr("stroke-width", 3.5).attr("paint-order", "stroke").text((d) => d.name)
+        .attr("opacity", build ? 0 : 1)
+        .call((s) => build && s.transition().delay((d, i) => dur(450 + i * 130)).duration(dur(400)).attr("opacity", 1));
+    }
+    return { render: () => draw(false), play: () => draw(true) };
+  });
+
+  /* ======================================================================== preference-evaluator pair grid */
+  I.register("prefEval", (el) => {
+    const host = el.querySelector(".chart");
+    const D = P.prefEval, names = D.order, n = names.length;
+    function draw(build) {
+      const Wc = Math.max(260, host.clientWidth);
+      const narrow = Wc < 620;
+      const gridW = Wc - 26, cw = gridW / n, ch = narrow ? cw * 0.62 : cw * 0.44;
+      const barsBelow = narrow;
+      const barH = barsBelow ? 4 * 26 + 32 : 0;
+      const H = Math.round(n * ch + 30 + barH);
+      const { svg } = svgIn(host, H);
+      const x0 = 24, y0 = 4;
+      const cells = [];
+      for (let i = 0; i < n; i++) for (let j = 0; j <= i; j++) cells.push({ i, j });
+      const gCells = svg.append("g");
+      const regionPath = (name, cx, cy) => D.regions[name].map((poly) =>
+        "M" + poly.map(([u, v]) => `${(cx + u * cw).toFixed(1)},${(cy + (1 - v) * ch).toFixed(1)}`).join("L") + "Z").join("");
+
+      const cellG = gCells.selectAll("g.cell").data(cells).join("g").attr("class", "cell")
+        .attr("transform", (d) => `translate(${x0 + d.j * cw},${y0 + d.i * ch})`);
+      cellG.append("rect").attr("width", cw).attr("height", ch).attr("fill", "#fff").attr("stroke", "#c9ced5").attr("stroke-width", 0.8);
+      cellG.each(function () {
+        const g = d3.select(this);
+        [1, 2, 3].forEach((q) => {
+          g.append("line").attr("x1", (cw * q) / 4).attr("x2", (cw * q) / 4).attr("y1", 0).attr("y2", ch).attr("stroke", "#f0f1f3");
+          g.append("line").attr("y1", (ch * q) / 4).attr("y2", (ch * q) / 4).attr("x1", 0).attr("x2", cw).attr("stroke", "#f0f1f3");
+        });
+      });
+      const regionsOf = (d) => (d.i === d.j ? [names[d.i]] : [names[d.j], names[d.i]]);
+      cellG.each(function (d, idx) {
+        const g = d3.select(this);
+        regionsOf(d).forEach((name, k) => {
+          const p = g.append("path").attr("d", regionPath(name, 0, 0)).attr("fill", D.fill[name]).attr("fill-opacity", 0.55)
+            .attr("stroke", D.edge[name]).attr("stroke-width", 1.8);
+          if (build) {
+            const delay = d.i === d.j ? 120 + d.i * 160 : 800 + idx * 70 + k * 120;
+            p.attr("fill-opacity", 0).attr("stroke-opacity", 0).attr("transform", `translate(${cw / 2},${ch / 2}) scale(0.6) translate(${-cw / 2},${-ch / 2})`)
+              .transition().delay(dur(delay)).duration(dur(650)).ease(d3.easeCubicOut)
+              .attr("fill-opacity", 0.55).attr("stroke-opacity", 1).attr("transform", "translate(0,0) scale(1)");
+          }
+        });
+        const label = d.i === d.j ? names[d.i] : `r = ${D.r[names[d.i]][names[d.j]].toFixed(2)}`;
+        g.append("text").attr("x", narrow ? 5 : 8).attr("y", narrow ? 14 : 17).text(label)
+          .style("font-size", (narrow ? 10 : 14.5) + "px").style("font-weight", 700)
+          .attr("fill", d.i === d.j ? D.edge[names[d.i]] : "#33383f").attr("opacity", build ? 0 : 1)
+          .call((s) => build && s.transition().delay(dur(d.i === d.j ? 300 + d.i * 160 : 1000 + idx * 70)).duration(dur(350)).attr("opacity", 1));
+      });
+      svg.append("text").attr("class", "axis-title").attr("x", x0 + gridW / 2).attr("y", y0 + n * ch + 20).attr("text-anchor", "middle").text("PC1");
+      svg.append("text").attr("class", "axis-title").attr("text-anchor", "middle").attr("transform", `translate(12,${y0 + (n * ch) / 2}) rotate(-90)`).text("PC2");
+
+      // r-bar per evaluator: right-anchored bars, as in the paper (upper-right block, or below on narrow screens)
+      const sorted = names.slice().sort((a, b) => D.rbar[b] - D.rbar[a]);
+      const bx0 = barsBelow ? x0 : x0 + cw + 18, bx1 = barsBelow ? x0 + gridW - 110 : x0 + gridW - 112;
+      const by0 = barsBelow ? y0 + n * ch + 58 : y0 + 10, bh = barsBelow ? 16 : Math.min(18, ch * 0.2), gap = barsBelow ? 10 : Math.min(15, ch * 0.16);
+      const base = d3.min(sorted, (r) => D.rbar[r]) - 0.03;
+      const bw = d3.scaleLinear().domain([base, d3.max(sorted, (r) => D.rbar[r])]).range([18, (bx1 - bx0) * 0.86]);
+      const gb = svg.append("g").attr("class", "rbar");
+      if (!barsBelow) gb.append("text").attr("x", bx1).attr("y", by0 - 1).attr("text-anchor", "end").style("font-size", "12.5px").attr("fill", "#8c939c");
+      sorted.forEach((name, k) => {
+        const yy = by0 + k * (bh + gap);
+        const w = bw(D.rbar[name]);
+        const rect = gb.append("rect").attr("class", "b-" + k).attr("data-name", name).attr("x", bx1 - (build ? 0 : w)).attr("y", yy).attr("width", build ? 0 : w).attr("height", bh)
+          .attr("fill", D.fill[name]).attr("rx", 2);
+        if (build) rect.transition().delay(dur(400 + k * 120)).duration(dur(700)).ease(d3.easeCubicOut).attr("x", bx1 - w).attr("width", w);
+        gb.append("text").attr("data-name", name).attr("x", bx1 - w - 7).attr("y", yy + bh / 2 + 4.5).attr("text-anchor", "end")
+          .style("font-size", "13.5px").style("font-weight", 700).attr("fill", "#33383f").text(D.rbar[name].toFixed(2))
+          .attr("opacity", build ? 0 : 1).call((s) => build && s.transition().delay(dur(900 + k * 120)).duration(dur(300)).attr("opacity", 1));
+        gb.append("text").attr("data-name", name).attr("x", bx1 + 8).attr("y", yy + bh / 2 + 4.5).style("font-size", "13.5px")
+          .style("font-weight", name === "PickScore" ? 700 : 400).attr("fill", D.edge[name]).text(name);
+      });
+      gb.append("text").attr("x", barsBelow ? bx0 : bx1 - bw(D.rbar[sorted[0]])).attr("y", by0 - 8).style("font-size", "12.5px").attr("fill", "#8c939c")
+        .text("mean correlation with the other three (r̄)");
+
+      // hover a lower panel: outline it and keep its two evaluators' bars
+      cellG.filter((d) => d.i !== d.j).style("cursor", "default");
+      I.hover(cellG, (d) => (d.i === d.j ? `<b>${names[d.i]}</b><br>r̄ with the others: ${D.rbar[names[d.i]].toFixed(2)}` : `<b>${names[d.i]}</b> and <b>${names[d.j]}</b><br>Pearson r = ${D.r[names[d.i]][names[d.j]].toFixed(2)}`),
+        function (d) {
+          d3.select(this).select("rect").attr("stroke", "#17191c").attr("stroke-width", 1.6);
+          const keep = new Set([names[d.i], names[d.j]]);
+          gb.selectAll("[data-name]").attr("opacity", function () { return keep.has(this.getAttribute("data-name")) ? 1 : 0.28; });
+        },
+        function () {
+          d3.select(this).select("rect").attr("stroke", "#c9ced5").attr("stroke-width", 0.8);
+          gb.selectAll("[data-name]").attr("opacity", 1);
+        });
+    }
+    return { render: () => draw(false), play: () => draw(true) };
+  });
+
+  /* ======================================================================== reward alignment */
+  I.register("rewardAlign", (el, state) => {
+    const host = el.querySelector(".chart");
+    let focus = null, sel = 6, setLegend;
+    const marker = { CLIPScore: "s", HPSv3: "P", PickScore: "D", ImageReward: "*", UnifiedReward: "^", PromptScore: "o",
+      "Binary · Qwen3.5-9B": "X", "Graded · Gemma-4-E4B": "h", "Graded · Qwen3.5-9B": "o" };
+    const sym = (name, size) => d3.symbol().type({ s: d3.symbolSquare, P: d3.symbolCross, D: d3.symbolDiamond, "*": d3.symbolStar, "^": d3.symbolTriangle, o: d3.symbolCircle, X: d3.symbolX || d3.symbolCross, h: d3.symbolDiamond2 || d3.symbolSquare }[marker[name]] || d3.symbolCircle).size(size)();
+
+    function series() { return P.rewardAlign[state.view]; }
+    function legend() {
+      const S = series();
+      setLegend = legendButtons(el, S.map((s) => ({ key: s.name, name: s.name, color: s.color, thick: s.highlight })), (k) => { focus = focus === k ? null : k; setLegend(focus); applyFocus(); });
+      setLegend(focus);
+    }
+    function applyFocus() {
+      d3.select(host).selectAll("[data-s]").transition().duration(dur(200))
+        .attr("opacity", function () { const s = this.getAttribute("data-s"); return !focus || s === focus ? (this.getAttribute("data-o") || 1) : 0.08; });
+    }
+
+    function draw(build) {
+      const S = series();
+      const Wc = Math.max(260, host.clientWidth), narrow = Wc < 640;
+      const leftW = narrow ? Wc : Math.round(Wc * 0.58), rightW = narrow ? Wc : Wc - leftW - 34;
+      const hL = narrow ? 270 : 330, hR = narrow ? Math.min(rightW, 330) : 330;
+      const H = narrow ? hL + hR + 40 : hL;
+      const { svg } = svgIn(host, H);
+
+      /* left: Pearson r per benchmark */
+      const m = { t: 10, r: 10, b: 56, l: 44 };
+      const gl = svg.append("g");
+      const x = d3.scalePoint().domain(d3.range(7)).range([m.l, leftW - m.r]).padding(0.35);
+      const lo = state.view === "classic" ? -1 : 0.7;
+      const y = d3.scaleLinear().domain([lo, 1]).range([hL - m.b, m.t]);
+      const yTicks = state.view === "classic" ? [-1, -0.5, 0, 0.5, 1] : [0.7, 0.8, 0.9, 1];
+      gl.append("g").attr("class", "grid").attr("transform", `translate(${m.l},0)`)
+        .call(d3.axisLeft(y).tickValues(yTicks).tickSize(-(leftW - m.l - m.r)).tickFormat("")).call((g) => g.select(".domain").remove());
+      if (state.view === "classic") gl.append("line").attr("x1", m.l).attr("x2", leftW - m.r).attr("y1", y(0)).attr("y2", y(0)).attr("stroke", "#c8cdd4");
+      // regime strip under the axis
+      const half = x.step() / 2;
+      [["short", 0, 2], ["medium", 3, 4], ["long", 5, 6]].forEach(([r, a, b]) => gl.append("rect").attr("x", x(a) - half + 2).attr("width", x(b) - x(a) + 2 * half - 4)
+        .attr("y", hL - m.b + 1).attr("height", 3).attr("fill", REG[r]).attr("opacity", 0.75));
+      const compact = leftW < 560;
+      const xa = gl.append("g").attr("class", "axis").attr("transform", `translate(0,${hL - m.b + 4})`)
+        .call(d3.axisBottom(x).tickFormat((i) => (compact ? SHORTNAME[BENCH[i].name] : BENCH[i].name)).tickSize(0)).call((g) => g.select(".domain").remove());
+      if (!compact) twoLineTicks(xa, BENCH.map((b) => b.name));
+      xa.selectAll(".tick text").style("font-size", compact ? "10px" : "12px");
+      gl.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues(yTicks).tickSizeOuter(0));
+      gl.append("text").attr("class", "axis-title").attr("text-anchor", "middle").attr("transform", `translate(12,${(m.t + hL - m.b) / 2}) rotate(-90)`).text("Pearson r");
+
+      // the selected benchmark (drives the scatter on the right)
+      const band = gl.append("rect").attr("y", m.t).attr("height", hL - m.b - m.t).attr("width", x.step() * 0.8).attr("x", x(sel) - x.step() * 0.4)
+        .attr("fill", "#17191c").attr("opacity", 0.045).attr("rx", 4);
+      gl.append("g").selectAll("rect").data(d3.range(7)).join("rect").attr("x", (i) => x(i) - half).attr("width", 2 * half)
+        .attr("y", m.t).attr("height", hL - m.t).attr("fill", "transparent").style("cursor", "pointer")
+        .on("click", (ev, i) => { sel = i; band.transition().duration(dur(250)).attr("x", x(i) - x.step() * 0.4); scatter(true); });
+
+      const clip = wipe(svg, 0, 0, leftW, hL, build, 100, 1100);
+      const order = S.filter((s) => !s.highlight).concat(S.filter((s) => s.highlight));
+      const gLines = gl.append("g").attr("clip-path", clip);
+      order.forEach((s) => {
+        const vals = s.bench.map((b) => b.r);
+        const hi = s.highlight;
+        const col = hi ? s.color : light(s.color, 0.35);
+        const op = hi ? 1 : 0.85;
+        gLines.append("path").attr("data-s", s.name).attr("data-o", op).attr("d", d3.line().defined((v) => v != null).x((v, i) => x(i)).y((v) => y(Math.max(lo, v)))(vals))
+          .attr("fill", "none").attr("stroke", col).attr("stroke-width", hi ? 3.6 : 2).attr("opacity", op);
+        const pts = gLines.append("g").attr("data-s", s.name).attr("data-o", op).attr("opacity", op).selectAll("path").data(vals.map((v, i) => ({ v, i, s }))
+          .filter((d) => d.v != null)).join("path").attr("transform", (d) => `translate(${x(d.i)},${y(Math.max(lo, d.v))})`)
+          .attr("d", sym(s.name, hi ? 95 : 60)).attr("fill", hi ? light(s.color, 0.25) : light(s.color, 0.5)).attr("stroke", hi ? s.color : "#fff").attr("stroke-width", hi ? 1.4 : 0.8);
+        I.hover(pts, (d) => `<b>${d.s.name}</b><br>${BENCH[d.i].name}: r = ${d.v.toFixed(3)}`);
+      });
+
+      /* right: the 19 models on the selected benchmark */
+      const ox = narrow ? 0 : leftW + 34, oy = narrow ? hL + 30 : 0;
+      const gr = svg.append("g").attr("transform", `translate(${ox},${oy})`);
+      const mm = { t: 26, r: 8, b: 40, l: 40 };
+      const side = Math.min(rightW - mm.l - mm.r, hR - mm.t - mm.b);
+      const sx = d3.scaleLinear().domain([-0.03, 1.03]).range([mm.l, mm.l + side]);
+      const sy = d3.scaleLinear().domain([-0.03, 1.03]).range([mm.t + side, mm.t]);
+      gr.append("g").attr("class", "grid").attr("transform", `translate(${mm.l},0)`).call(d3.axisLeft(sy).tickValues([0, 0.5, 1]).tickSize(-side).tickFormat("")).call((g) => g.select(".domain").remove());
+      gr.append("g").attr("class", "grid").attr("transform", `translate(0,${mm.t + side})`).call(d3.axisBottom(sx).tickValues([0, 0.5, 1]).tickSize(-side).tickFormat("")).call((g) => g.select(".domain").remove());
+      gr.append("g").attr("class", "axis").attr("transform", `translate(0,${mm.t + side})`).call(d3.axisBottom(sx).tickValues([0, 0.5, 1]).tickSizeOuter(0));
+      gr.append("g").attr("class", "axis").attr("transform", `translate(${mm.l},0)`).call(d3.axisLeft(sy).tickValues([0, 0.5, 1]).tickSizeOuter(0));
+      gr.append("text").attr("class", "axis-title").attr("x", mm.l + side / 2).attr("y", mm.t + side + 34).attr("text-anchor", "middle").text("Reward (normalized)");
+      gr.append("text").attr("class", "axis-title").attr("text-anchor", "middle").attr("transform", `translate(${mm.l - 30},${mm.t + side / 2}) rotate(-90)`).text("Benchmark score (normalized)");
+      const title = gr.append("text").attr("x", mm.l).attr("y", 15).style("font-size", "14px").style("font-weight", 700).attr("fill", "#17191c");
+      const gFit = gr.append("g"), gPts = gr.append("g");
+      const cp = "sc" + ++uid;
+      gr.append("defs").append("clipPath").attr("id", cp).append("rect").attr("x", sx(0)).attr("y", sy(1)).attr("width", sx(1) - sx(0)).attr("height", sy(0) - sy(1));
+      gFit.attr("clip-path", `url(#${cp})`);
+
+      function scatter(animate) {
+        const B = BENCH[sel];
+        title.text(`${B.name} · 19 models`);
+        const fits = order.map((s) => ({ s, b: s.bench[sel] }));
+        const lines = gFit.selectAll("line").data(fits, (d) => d.s.name).join("line")
+          .attr("data-s", (d) => d.s.name).attr("data-o", (d) => (d.s.highlight ? 1 : 0.85))
+          .attr("stroke", (d) => (d.s.highlight ? d.s.color : light(d.s.color, 0.35))).attr("stroke-width", (d) => (d.s.highlight ? 3.2 : 1.8))
+          .attr("stroke-dasharray", (d) => (d.b.fit.flat != null ? "2 4" : null))
+          .attr("opacity", (d) => (!focus || d.s.name === focus ? (d.s.highlight ? 1 : 0.85) : 0.08));
+        const ends = (d) => (d.b.fit.flat != null ? [0, d.b.fit.flat, 1, d.b.fit.flat] : [0, d.b.fit.intercept, 1, d.b.fit.slope + d.b.fit.intercept]);
+        lines.attr("x1", (d) => sx(0)).attr("y1", (d) => sy(ends(d)[1]));
+        (animate ? lines.attr("x2", sx(0)).attr("y2", (d) => sy(ends(d)[1])).transition().duration(dur(600)).delay(dur(150)) : lines)
+          .attr("x2", sx(1)).attr("y2", (d) => sy(ends(d)[3]));
+        const all = fits.flatMap((f) => f.b.pts.map((p) => ({ s: f.s, m: p[0], x: p[1], y: p[2], key: f.s.name + "|" + p[0] })));
+        const dots = gPts.selectAll("path").data(all, (d) => d.key).join("path").attr("data-s", (d) => d.s.name)
+          .attr("data-o", (d) => (d.s.highlight ? 0.95 : 0.7))
+          .attr("d", (d) => sym(d.s.name, d.s.highlight ? 62 : 40))
+          .attr("fill", (d) => (d.s.highlight ? light(d.s.color, 0.2) : light(d.s.color, 0.5))).attr("stroke", (d) => (d.s.highlight ? d.s.color : "#fff")).attr("stroke-width", 0.8)
+          .attr("opacity", (d) => (!focus || d.s.name === focus ? (d.s.highlight ? 0.95 : 0.7) : 0.06));
+        (animate ? dots.transition().duration(dur(500)).ease(d3.easeCubicInOut) : dots).attr("transform", (d) => `translate(${sx(d.x)},${sy(d.y)})`);
+        dots.filter((d) => d.s.highlight).raise();
+        I.hover(dots, (d) => `<b>${I.esc(d.m)}</b><br>${d.s.name}: ${d.x.toFixed(2)} · benchmark: ${d.y.toFixed(2)}<br><span class="s">${B.name}, r = ${d.s.bench[sel].r == null ? "n/a (constant reward)" : d.s.bench[sel].r.toFixed(3)}</span>`);
+      }
+      scatter(false);
+      if (build) {
+        gPts.attr("opacity", 0).transition().delay(dur(900)).duration(dur(500)).attr("opacity", 1);
+        gFit.attr("opacity", 0).transition().delay(dur(1200)).duration(dur(500)).attr("opacity", 1);
+      }
+    }
+    legend();
+    return {
+      render: () => draw(false),
+      play: () => draw(true),
+      update: () => { focus = null; legend(); draw(true); },
+    };
+  });
+
+  /* ======================================================================== line panels (shared) */
+  function linePanel(host, o) {
+    const W = Math.max(240, host.clientWidth), H = o.height || 260;
+    host.innerHTML = "";
+    if (o.title) d3.select(host).append("p").attr("class", "panel-title").html(o.title);
+    const svg = d3.select(host).append("svg").attr("width", W).attr("height", H);
+    const m = { t: 12, r: 12, b: o.xTitle ? 46 : 34, l: o.yTitle ? 58 : 44, ...(o.margin || {}) };
+    const x = o.xLinear ? d3.scaleLinear().domain(o.xDomain).range([m.l, W - m.r]) : d3.scalePoint().domain(d3.range(o.xs.length)).range([m.l, W - m.r]).padding(0.3);
+    const xOf = (i) => (o.xLinear ? x(o.xs[i]) : x(i));
+    const all = o.series.flatMap((s) => s.values).filter((v) => v != null).concat(o.zero ? [0] : []);
+    const lo = d3.min(all), hi = d3.max(all), pad = Math.max((hi - lo) * 0.09, 0.4);
+    const y = d3.scaleLinear().domain([lo - pad, hi + pad]).nice(5).range([H - m.b, m.t]);
+    svg.append("g").attr("class", "grid").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W - m.l - m.r)).tickFormat("")).call((g) => g.select(".domain").remove());
+    if (o.zero) {
+      svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(0)).attr("y2", y(0)).attr("stroke", "#9aa1aa").attr("stroke-dasharray", "4 4");
+      svg.append("text").attr("x", m.l + 6).attr("y", y(0) - 6).style("font-size", "12px").attr("fill", "#8c939c").text("Base model");
+    }
+    const xa = svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`);
+    if (o.xLinear) xa.call(d3.axisBottom(x).ticks(6).tickSizeOuter(0));
+    else {
+      xa.call(d3.axisBottom(x).tickFormat((i) => (o.xShort ? SHORTNAME[o.xs[i]] || o.xs[i] : o.xs[i])).tickSizeOuter(0));
+      if (o.xShort) xa.selectAll(".tick text").style("font-size", W < 380 ? "10.5px" : "12px");
+      if (o.regimeStrip) {
+        const half = x.step() / 2;
+        [["short", 0, 2], ["medium", 3, 4], ["long", 5, 6]].forEach(([r, a, b]) => svg.append("rect").attr("x", x(a) - half + 2).attr("width", x(b) - x(a) + 2 * half - 4)
+          .attr("y", H - m.b + 1).attr("height", 3).attr("fill", REG[r]).attr("opacity", 0.75));
+        xa.attr("transform", `translate(0,${H - m.b + 4})`).call((g) => g.select(".domain").remove()).selectAll(".tick line").remove();
+      }
+    }
+    svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat((d) => (o.yFormat ? o.yFormat(d) : d)).tickSizeOuter(0));
+    if (o.xTitle) svg.append("text").attr("class", "axis-title").attr("x", (m.l + W - m.r) / 2).attr("y", H - 6).attr("text-anchor", "middle").text(o.xTitle);
+    if (o.yTitle) svg.append("text").attr("class", "axis-title").attr("text-anchor", "middle").attr("transform", `translate(12,${(m.t + H - m.b) / 2}) rotate(-90)`).text(o.yTitle);
+
+    const groups = {};
+    o.series.forEach((s) => {
+      const animate = o.animate && (!o.animateKeys || o.animateKeys.has(s.key));
+      const g = svg.append("g").attr("data-s", s.key).attr("data-o", s.opacity || 1).attr("opacity", s.opacity == null ? 1 : s.opacity);
+      g.attr("clip-path", wipe(svg, 0, 0, W, H, animate, o.delay || 0, o.wipeMs || 1000));
+      g.append("path").attr("d", d3.line().defined((v) => v != null).x((v, i) => xOf(i)).y((v) => y(v))(s.values))
+        .attr("fill", "none").attr("stroke", s.color).attr("stroke-width", s.width || 2.2).attr("stroke-dasharray", s.dashed ? "7 5" : null).attr("stroke-linecap", "round");
+      const pts = g.selectAll("path.pt").data(s.values.map((v, i) => ({ v, i, s })).filter((d) => d.v != null)).join("path").attr("class", "pt")
+        .attr("transform", (d) => `translate(${xOf(d.i)},${y(d.v)})`).attr("d", d3.symbol().type(symbolOf[s.marker || "o"]).size(s.markerSize || 55)())
+        .attr("fill", s.markerFill || s.color).attr("stroke", "#fff").attr("stroke-width", 1.1);
+      if (s.marker === "v") pts.attr("transform", (d) => `translate(${xOf(d.i)},${y(d.v)}) rotate(180)`);
+      I.hover(pts, (d) => o.tip(d.s, d.i, d.v));
+      groups[s.key] = g;
+    });
+    // the highlighted series stays on top
+    o.series.filter((s) => s.top).forEach((s) => groups[s.key].raise());
+    return { svg, groups, x, y };
+  }
+
+  /* ======================================================================== PromptScore vs SpectraReward */
+  I.register("spectra", (el) => {
+    const panels = el.querySelector(".panels");
+    const D = P.spectra;
+    function draw(build) {
+      panels.innerHTML = "";
+      Object.entries(D.models).forEach(([model, rs], k) => {
+        const host = panels.appendChild(document.createElement("div"));
+        linePanel(host, {
+          title: `<b>${model}</b>`, xs: D.regimes, height: 240, animate: build, delay: 150 + k * 250, zero: false,
+          yTitle: k === 0 ? "Relative gain over base (%)" : null, yFormat: (d) => d + "%",
+          series: [
+            { key: "SpectraReward", values: rs.SpectraReward, color: light("#00acc1", 0.45), markerFill: light("#00acc1", 0.4), width: 2.6, marker: "v", markerSize: 85 },
+            { key: "PromptScore", values: rs.PromptScore, color: BLUE, width: 4, marker: "o", markerSize: 110, top: true },
+          ],
+          tip: (s, i, v) => `<b>${s.key}</b> · ${model}<br>${D.regimes[i]} prompts: ${I.pct(v, 2)}`,
+        });
+      });
+    }
+    return { render: () => draw(false), play: () => draw(true) };
+  });
+
+  /* ======================================================================== reward backbone scaling (box plots) */
+  I.register("scaling", (el) => {
+    const panels = el.querySelector(".panels");
+    function draw(build) {
+      panels.innerHTML = "";
+      P.scaling.panels.forEach((pn, k) => {
+        const host = panels.appendChild(document.createElement("div"));
+        const W = Math.max(240, host.clientWidth), H = 300;
+        d3.select(host).append("p").attr("class", "panel-title").html(`<b>${pn.model}</b>`);
+        const svg = d3.select(host).append("svg").attr("width", W).attr("height", H);
+        const m = { t: 10, r: 8, b: 62, l: k === 0 ? 44 : 34 };
+        const x = d3.scaleBand().domain(pn.boxes.map((b) => b.label)).range([m.l, W - m.r]).padding(0.38);
+        const lo = d3.min(pn.boxes, (b) => b.min), hi = d3.max(pn.boxes, (b) => b.max);
+        const y = d3.scaleLinear().domain([lo - 3, hi + 3]).nice(5).range([H - m.b, m.t]);
+        svg.append("g").attr("class", "grid").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W - m.l - m.r)).tickFormat("")).call((g) => g.select(".domain").remove());
+        svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSizeOuter(0));
+        const xa = svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickSizeOuter(0));
+        xa.selectAll(".tick text").style("font-size", "12.5px").attr("fill", (d) => (d === "9B" ? "#1f5fcf" : null)).style("font-weight", (d) => (d === "9B" ? 700 : 400));
+        // mean correlation of each backbone (Tab. 3 of the paper)
+        svg.append("g").selectAll("text").data(pn.boxes).join("text").attr("x", (b) => x(b.label) + x.bandwidth() / 2).attr("y", H - m.b + 36)
+          .attr("text-anchor", "middle").style("font-size", "11.5px").attr("fill", "#8c939c").text((b) => (b.meanR == null ? "–" : b.meanR.toFixed(3)));
+        svg.append("text").attr("x", m.l - 4).attr("y", H - m.b + 36).attr("text-anchor", "end").style("font-size", "11.5px").attr("fill", "#8c939c").text(k === 0 ? "r̄" : "");
+        if (k === 0) svg.append("text").attr("class", "axis-title").attr("text-anchor", "middle").attr("transform", `translate(11,${(m.t + H - m.b) / 2}) rotate(-90)`).text("Normalized score");
+        svg.append("text").attr("x", (m.l + W - m.r) / 2).attr("y", H - 6).attr("text-anchor", "middle").attr("class", "axis-title").text("PromptScore backbone");
+
+        const bw = x.bandwidth();
+        const box = svg.append("g").selectAll("g").data(pn.boxes).join("g").attr("transform", (b) => `translate(${x(b.label)},0)`);
+        box.each(function (b, i) {
+          const g = d3.select(this), cx = bw / 2, delay = 150 + i * 110 + k * 200;
+          const wh = g.append("line").attr("x1", cx).attr("x2", cx).attr("stroke", "#17191c").attr("stroke-width", 1.4);
+          const caps = [b.min, b.max].map((v) => g.append("line").attr("x1", cx - bw * 0.22).attr("x2", cx + bw * 0.22).attr("y1", y(v)).attr("y2", y(v)).attr("stroke", "#17191c").attr("stroke-width", 1.4));
+          const rect = g.append("rect").attr("x", 0).attr("width", bw).attr("fill", b.color).attr("fill-opacity", 0.92).attr("stroke", "#17191c").attr("stroke-width", 1.3).attr("rx", 2);
+          const med = g.append("line").attr("x1", 0).attr("x2", bw).attr("y1", y(b.med)).attr("y2", y(b.med)).attr("stroke", "#17191c").attr("stroke-width", 2.2);
+          if (build) {
+            wh.attr("y1", y(b.med)).attr("y2", y(b.med)).transition().delay(dur(delay + 250)).duration(dur(500)).ease(d3.easeCubicOut).attr("y1", y(b.min)).attr("y2", y(b.max));
+            caps.forEach((c) => c.attr("opacity", 0).transition().delay(dur(delay + 650)).duration(dur(200)).attr("opacity", 1));
+            rect.attr("y", y(b.med)).attr("height", 0).transition().delay(dur(delay)).duration(dur(550)).ease(d3.easeCubicOut).attr("y", y(b.q3)).attr("height", y(b.q1) - y(b.q3));
+            med.attr("opacity", 0).transition().delay(dur(delay)).duration(dur(200)).attr("opacity", 1);
+          } else {
+            wh.attr("y1", y(b.min)).attr("y2", y(b.max));
+            rect.attr("y", y(b.q3)).attr("height", y(b.q1) - y(b.q3));
+          }
+          rect.raise(); med.raise();
+          // per-benchmark values appear on hover
+          const dots = g.append("g").attr("opacity", 0);
+          Object.values(b.values).forEach((v, j) => dots.append("circle").attr("cx", cx + (j - 3) * bw * 0.09).attr("cy", y(v)).attr("r", 2.6).attr("fill", "#17191c").attr("stroke", "#fff").attr("stroke-width", 0.6));
+          const hit = g.append("rect").attr("x", -4).attr("width", bw + 8).attr("y", y(b.max) - 6).attr("height", y(b.min) - y(b.max) + 12).attr("fill", "transparent");
+          I.hover(hit, () => `<b>${b.backbone}</b> · ${pn.model}<br>median ${b.med.toFixed(1)}, range ${b.min.toFixed(1)}–${b.max.toFixed(1)}<br>` +
+            Object.entries(b.values).map(([n, v]) => `<span class="s">${n.replace("-Composition", "")}: ${v.toFixed(1)}</span>`).join("<br>"),
+          () => dots.transition().duration(150).attr("opacity", 1), () => dots.transition().duration(150).attr("opacity", 0));
+        });
+      });
+    }
+    return { render: () => draw(false), play: () => draw(true) };
+  });
+
+  /* ======================================================================== gains by prompt design */
+  I.register("designGain", (el) => {
+    const panels = el.querySelector(".panels");
+    const names = BENCH.map((b) => b.name);
+    let focus = null;
+    const first = Object.values(P.designs)[0];
+    const setLegend = legendButtons(el, first.map((s) => ({ key: s.key, name: s.name, color: s.color, thick: s.highlight })), (k) => {
+      focus = focus === k ? null : k;
+      setLegend(focus);
+      d3.select(panels).selectAll("g[data-s]").transition().duration(dur(200)).attr("opacity", function () {
+        return !focus || this.getAttribute("data-s") === focus ? this.getAttribute("data-o") : 0.08;
+      });
+    });
+    function draw(build) {
+      panels.innerHTML = "";
+      Object.entries(P.designs).forEach(([model, series], k) => {
+        const host = panels.appendChild(document.createElement("div"));
+        linePanel(host, {
+          title: `<b>${model}</b>`, xs: names, xShort: true, regimeStrip: true, height: 270, animate: build, delay: 150 + k * 250, zero: false,
+          yTitle: k === 0 ? "Relative gain over base (%)" : null, yFormat: (d) => d + "%",
+          series: series.slice().sort((a, b) => a.highlight - b.highlight).map((s) => ({
+            key: s.key, values: s.gain, color: s.highlight ? s.color : light(s.color, 0.4), markerFill: s.highlight ? s.color : light(s.color, 0.35),
+            width: s.highlight ? 3.8 : 2.2, marker: { Balance: "o", Attribute: "s", Entity: "D", Relation: "^" }[s.key], markerSize: s.highlight ? 100 : 60, top: s.highlight,
+            opacity: !focus || focus === s.key ? 1 : 0.08, name: s.name,
+          })),
+          tip: (s, i, v) => `<b>${s.name}</b> · ${model}<br>${names[i]}: ${I.pct(v, 2)}`,
+        });
+      });
+      d3.select(panels).selectAll("g[data-s]").attr("data-o", 1);
+    }
+    return { render: () => draw(false), play: () => draw(true) };
+  });
+
+  /* ======================================================================== schedules: short, long, joint, sequential */
+  I.register("schedule", (el, state) => {
+    const panels = el.querySelector(".panels");
+    const note = el.querySelector(".step-note");
+    const D = P.schedules;
+    const names = BENCH.map((b) => b.name);
+    const SHOWN = [["short", "long"], ["short", "long", "joint"], ["short", "long", "seq"]];
+    const first = Object.values(D.models)[0];
+    legendButtons(el, first.map((s) => ({ key: s.key, name: s.name, color: s.color, dashed: s.dashed, thick: !s.dashed })), () => {});
+    el.querySelectorAll(".legend button").forEach((b) => (b.style.cursor = "default"));
+    let shownBefore = new Set(), timer = null, auto = false;
+
+    function legendState(step) {
+      const on = new Set(SHOWN[step]);
+      el.querySelectorAll(".legend button").forEach((b) => b.classList.toggle("dim", !on.has(b.dataset.key)));
+    }
+    function draw(step, build, animateKeys) {
+      panels.innerHTML = "";
+      const on = SHOWN[step];
+      Object.entries(D.models).forEach(([model, series], k) => {
+        const host = panels.appendChild(document.createElement("div"));
+        const vis = series.filter((s) => on.includes(s.key));
+        linePanel(host, {
+          title: `<b>${model}</b>`, xs: D.words, xLinear: true, xDomain: [0, 560], height: 270, zero: true,
+          animate: build, animateKeys, delay: build && !animateKeys ? 150 + k * 200 : 60 + k * 120, wipeMs: 1000,
+          xTitle: "Mean prompt length of the benchmark (words)", yTitle: k === 0 ? "Relative gain over base (%)" : null, yFormat: (d) => d + "%",
+          // the y range covers all four runs so that stepping does not rescale the axes
+          series: series.map((s) => ({ key: s.key, values: s.gain, color: s.color, dashed: s.dashed, width: s.dashed ? 2.2 : 3.6,
+            markerSize: s.dashed ? 38 : 70, top: !s.dashed, opacity: on.includes(s.key) ? (s.dashed ? 0.9 : 1) : 0 })),
+          tip: (s, i, v) => `<b>${series.find((q) => q.key === s.key).name}</b><br>${names[i]} (${D.words[i]} words): ${I.pct(v, 2)}`,
+        });
+        void vis;
+      });
+      d3.select(panels).selectAll("g[data-s]").filter(function () { return !on.includes(this.getAttribute("data-s")); }).style("pointer-events", "none");
+      const li = el.querySelectorAll(".step-notes li")[step];
+      note.innerHTML = li ? li.innerHTML : "";
+      legendState(step);
+      shownBefore = new Set(on);
+    }
+    function goto(step, animate) {
+      const added = new Set(SHOWN[step].filter((k) => !shownBefore.has(k)));
+      draw(step, animate, added);
+    }
+    async function sequence() {
+      auto = true;
+      for (let s = 0; s < 3; s++) {
+        if (!auto) return;
+        state.set("step", String(s));
+        if (s === 0) { shownBefore = new Set(); draw(0, true); } else goto(s, true);
+        await I.sleep(s === 2 ? 0 : 2300);
+      }
+      auto = false;
+    }
+    el.querySelectorAll('.seg[data-ctl="step"] button').forEach((b) => b.addEventListener("click", () => { auto = false; clearTimeout(timer); }));
+    return {
+      render: () => draw(+state.step, false),
+      play: () => (I.reduced ? draw(2, false) : sequence()),
+      update: () => goto(+state.step, true),
+    };
+  });
 })();

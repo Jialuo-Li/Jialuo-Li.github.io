@@ -1,190 +1,73 @@
-/* ==========================================================================
-   MAIN BOOTSTRAPPER & DECLARATIVE SITE SHELL
-   --------------------------------------------------------------------------
-   Reads window.SITE_CONFIG and window.PAPER_DATA to populate:
-   - Hero header (title, subtitle, authors, links)
-   - Top sticky navigation + wide-screen left margin TOC + scroll-spy
-   - Reading progress bar
-   - FAQ accordion + BibTeX one-click copy
-   - Optional SITE_CONFIG.customModules extensions
-   ========================================================================== */
+/* Page shell: header, links, BibTeX, math, figure numbers, contents navigation, figure mounting. */
 (function () {
   "use strict";
+  const I = window.Imago, S = window.SITE;
 
-  const esc = (s) =>
-    String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-
-  const ICONS = {
-    paper: `<svg viewBox="0 0 20 20" fill="none"><path d="M5 3.5h7l3.5 3.5v9.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5V7h3.5M7 10.5h6M7 13.5h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
-    arxiv: `<svg viewBox="0 0 20 20" fill="none"><path d="M4.5 15.5L15.5 4.5M6 4.5l9.5 11" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`,
-    code: `<svg viewBox="0 0 20 20" fill="none"><path d="M7 6.5L3.5 10 7 13.5M13 6.5L16.5 10 13 13.5M11.2 4.5l-2.4 11" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    hf: `<svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><circle cx="7.6" cy="8.6" r="1" fill="currentColor"/><circle cx="12.4" cy="8.6" r="1" fill="currentColor"/><path d="M7.2 12.2c.7 1.1 1.7 1.6 2.8 1.6s2.1-.5 2.8-1.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
-    data: `<svg viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="5.5" rx="6" ry="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M4 5.5v9c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-9M4 10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5" stroke="currentColor" stroke-width="1.6"/></svg>`,
-    bib: `<svg viewBox="0 0 20 20" fill="none"><path d="M6.5 7.5h3v3h-2l-1 2.5M11.5 7.5h3v3h-2l-1 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="3.5" width="14" height="13" rx="2.5" stroke="currentColor" stroke-width="1.5"/></svg>`,
+  const ICON = {
+    paper: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.75h8.5L19.25 7.5v13.75H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14.25 2.75V7.75h5M9 12h7M9 15.5h7M9 19h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    arxiv: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5l14 15M19 4.5l-6.2 6.9M10.8 13.6L5 19.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    code: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    hf: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10.3" r="1.2" fill="currentColor"/><circle cx="15" cy="10.3" r="1.2" fill="currentColor"/><path d="M8.6 14.2c.9 1.4 2.1 2.1 3.4 2.1s2.5-.7 3.4-2.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    data: '<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+    quote: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 17.5c2.6-.6 3.9-2.4 3.9-5.3V7H4.5v5.2h2.1M13.5 17.5c2.6-.6 3.9-2.4 3.9-5.3V7h-3.9v5.2h2.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>',
   };
 
-  function mountShell() {
-    const cfg = window.SITE_CONFIG;
-    if (!cfg) return;
-
-    /* 1. Top Nav + Side TOC */
-    const topNav = document.getElementById("top-nav-links");
-    const sideToc = document.getElementById("side-toc");
-    if (topNav) {
-      topNav.innerHTML = cfg.nav
-        .map((n) => `<a href="#${esc(n.id)}" data-nav="${esc(n.id)}">${n.num ? `<span style="opacity:.65;margin-right:4px;font-family:var(--font-mono);font-size:11.5px">${esc(n.num)}</span>` : ""}${esc(n.label)}</a>`)
-        .join("");
-    }
-    if (sideToc) {
-      sideToc.innerHTML =
-        `<div class="toc-label">Contents</div>` +
-        cfg.nav
-          .map(
-            (n) =>
-              `<a href="#${esc(n.id)}" data-toc="${esc(n.id)}">${
-                n.num ? `<span style="font-family:var(--font-mono);font-size:10.5px;opacity:.7;margin-right:5px">${esc(n.num)}</span>` : ""
-              }${esc(n.label)}</a>`
-          )
-          .join("");
-    }
-
-    /* 2. Hero Metadata */
-    const heroMount = document.getElementById("hero-header-mount");
-    if (heroMount) {
-      const meta = cfg.meta || {};
-      const badgeText = meta.venueBadge || cfg.badge || "Technical Report";
-      const fullTitle = meta.title || cfg.title || "Imago";
-      const colonIdx = fullTitle.indexOf(":");
-      const titleHtml =
-        colonIdx > 0
-          ? `<em>${esc(fullTitle.slice(0, colonIdx + 1))}</em>${esc(fullTitle.slice(colonIdx + 1))}`
-          : esc(fullTitle);
-      const subtitleText = meta.subtitle || cfg.tagline || "";
-      const affilText = meta.affiliation || cfg.affiliationNote || "";
-
-      const authorsHtml = (cfg.authors || [])
-        .map((a) => {
-          const star = a.corresponding ? "<sup>*</sup>" : "";
-          return a.url
-            ? `<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.name)}${star}</a>`
-            : `<span>${esc(a.name)}${star}</span>`;
-        })
-        .join('<span class="sep">·</span>');
-
-      const btnsHtml = (cfg.links || [])
-        .filter((l) => l.enabled !== false)
-        .map((l) => {
-          const href = l.url || l.href || "#";
-          const isAnchor = href.startsWith("#");
-          const soonBadge = l.note || l.badge
-            ? `<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:rgba(148,163,184,0.22);font-weight:700">${esc(
-                l.note || l.badge
-              )}</span>`
-            : "";
-          return `<a class="btn-pill ${l.primary ? "primary" : ""}" href="${esc(href)}" ${
-            isAnchor ? "" : 'target="_blank" rel="noopener"'
-          }>${ICONS[l.icon] || ""}${esc(l.label)}${soonBadge}</a>`;
-        })
-        .join("");
-
-      heroMount.innerHTML = `
-        <div class="hero-badge"><span class="dot"></span>${esc(badgeText)}</div>
-        <h1 class="hero-title">${titleHtml}</h1>
-        <p class="hero-tagline">${esc(subtitleText)}</p>
-        <div class="author-row">${authorsHtml}</div>
-        <div class="affil-row">${esc(affilText)}${
-        cfg.correspondingEmail ? ` · <code>${esc(cfg.correspondingEmail)}</code>` : ""
-      }</div>
-        <div class="action-row">${btnsHtml}</div>
-      `;
-    }
-
-    /* 3. FAQs */
-    const faqHost = document.getElementById("faq-mount");
-    if (faqHost && window.PAPER_DATA && window.PAPER_DATA.faqs) {
-      faqHost.innerHTML = window.PAPER_DATA.faqs
-        .map(
-          (f, i) => `
-          <details class="faq-item" ${i === 0 ? "open" : ""}>
-            <summary>${esc(f.q)}</summary>
-            <div class="faq-ans">${esc(f.a)}</div>
-          </details>`
-        )
-        .join("");
-    }
-
-    /* 4. BibTeX */
-    const bibPre = document.getElementById("bibtex-code");
-    const bibBtn = document.getElementById("btn-copy-bib");
-    if (bibPre) bibPre.textContent = cfg.bibtex.trim();
-    if (bibBtn && bibPre) {
-      bibBtn.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(cfg.bibtex.trim());
-          bibBtn.textContent = "✓ Copied";
-          setTimeout(() => {
-            bibBtn.textContent = "Copy BibTeX";
-          }, 1800);
-        } catch (_) {
-          const range = document.createRange();
-          range.selectNodeContents(bibPre);
-          const sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-        }
-      });
-    }
-
-    /* 5. Custom Declarative Modules (Future Extensibility Hook) */
-    const customHost = document.getElementById("custom-modules-mount");
-    if (customHost && Array.isArray(cfg.customModules) && cfg.customModules.length) {
-      customHost.innerHTML = cfg.customModules
-        .map(
-          (m) => `
-          <section class="sec" id="${esc(m.id || "")}">
-            <div class="wrap">
-              ${m.eyebrow ? `<span class="sec-eyebrow">${esc(m.eyebrow)}</span>` : ""}
-              <h2 class="sec-title">${esc(m.title)}</h2>
-              ${m.html || ""}
-            </div>
-          </section>`
-        )
-        .join("");
-    }
-
-    /* 6. Scroll-Spy + Reading Progress Bar */
-    const prog = document.getElementById("reading-progress");
-    const secIds = cfg.nav.map((n) => n.id);
-
-    function onScroll() {
-      const docH = document.documentElement.scrollHeight - window.innerHeight;
-      if (prog && docH > 0) {
-        prog.style.width = `${Math.min(100, Math.max(0, (window.scrollY / docH) * 100)).toFixed(1)}%`;
-      }
-      let activeId = secIds[0];
-      const y = window.scrollY + 150;
-      secIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el && el.offsetTop <= y) activeId = id;
-      });
-      document.querySelectorAll("[data-nav], [data-toc]").forEach((a) => {
-        const id = a.dataset.nav || a.dataset.toc;
-        a.classList.toggle("active", id === activeId);
-      });
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+  function header() {
+    document.getElementById("authors").innerHTML = S.authors
+      .map((a) => `<span>${a.url ? `<a href="${a.url}">${I.esc(a.name)}</a>` : I.esc(a.name)}</span>`).join(" ");
+    document.getElementById("affil").textContent = S.affiliation;
+    document.getElementById("foot-affil").textContent = S.affiliation;
+    const live = S.links.filter((l) => l.url), soon = S.links.filter((l) => !l.url);
+    const links = document.getElementById("links");
+    const list = (xs) => xs.length < 3 ? xs.join(" and ") : xs.slice(0, -1).join(", ") + ", and " + xs[xs.length - 1];
+    links.innerHTML = live.map((l) => `<a class="btn${l.primary ? " primary" : ""}" href="${l.url}">${ICON[l.icon] || ""}${I.esc(l.label)}</a>`).join("") +
+      (soon.length ? `<span class="soon-note">${I.esc(list(soon.map((l) => l.label)))}: coming soon</span>` : "");
+    document.getElementById("bibtex").textContent = S.bibtex;
+    const copy = document.querySelector(".bib .copy");
+    copy.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(S.bibtex); copy.textContent = "Copied"; } catch (e) { copy.textContent = "Select and copy"; }
+      setTimeout(() => (copy.textContent = "Copy"), 1600);
+    });
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    mountShell();
-    if (window.ImagoAnim) window.ImagoAnim.init();
-    if (window.ImagoCharts) window.ImagoCharts.init();
-    if (window.ImagoTables) window.ImagoTables.init();
-    if (window.ImagoQualitative) window.ImagoQualitative.init();
-  });
+  function math() {
+    if (!window.katex) return;
+    document.querySelectorAll("[data-tex]").forEach((el) => {
+      const tex = window.innerWidth < 700 && el.dataset.texNarrow ? el.dataset.texNarrow : el.dataset.tex;
+      try { window.katex.render(tex, el, { displayMode: true, throwOnError: false }); } catch (e) { /* keep the plain-text fallback */ }
+    });
+  }
+
+  /* contents: side list (wide screens) and sticky tabs (narrow); a section is current once its top passes 30% of the viewport */
+  function navigation() {
+    const ids = ["top", "evaluation", "reward", "corpus", "imago", "citation"];
+    const secs = ids.map((id) => document.getElementById(id));
+    const tocLinks = [...document.querySelectorAll(".toc a")], tabLinks = [...document.querySelectorAll(".tabs a")];
+    const prog = document.querySelector(".toc .prog");
+    let cur = -1;
+    function update() {
+      const y = window.innerHeight * 0.3;
+      let k = 0;
+      secs.forEach((s, i) => { if (s && s.getBoundingClientRect().top < y) k = i; });
+      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) k = secs.length - 1;
+      if (k === cur) return;
+      cur = k;
+      tocLinks.forEach((a, i) => { a.classList.toggle("on", i === k); a.classList.toggle("done", i < k); });
+      tabLinks.forEach((a, i) => a.classList.toggle("on", i === k));
+      const a = tocLinks[k];
+      if (a && prog) prog.style.height = a.offsetTop + a.offsetHeight / 2 - 6 + "px";
+      const t = tabLinks[k];
+      if (t && t.parentElement.parentElement.scrollWidth > t.parentElement.parentElement.clientWidth) t.scrollIntoView({ block: "nearest", inline: "center" });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  }
+
+  header();
+  math();
+  I.numberFigures();
+  navigation();
+  const start = () => I.mountFigures();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(start); else start();
 })();
