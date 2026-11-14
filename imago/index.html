@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imago: Maturing Visual Generation with Reinforcement Learning</title>
+  <meta
+    name="description"
+    content="Imago systematically studies online RL for text-to-image generation across reward design, scene-graph prompt corpus construction, and sequential short-to-long scheduling."
+  />
+  <meta property="og:title" content="Imago: Maturing Visual Generation with Reinforcement Learning" />
+  <meta
+    property="og:description"
+    content="Zero-shot graded MLLM rewards, balanced scene-graph prompt corpora, and sequential short-to-long RL training mature compact 4B and 6B diffusion generators."
+  />
+  <meta property="og:type" content="website" />
+
+  <!-- Academic Typography: Newsreader (Serif), Inter (Sans), JetBrains Mono (Numeric/Code) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,500;1,6..72,700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+  <!-- Sticky Top Navigation Bar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top"><em>Imago</em> · Visual RL</a>
+      <nav class="top-nav" id="top-nav-links" aria-label="Section navigation"></nav>
+    </div>
+    <div class="reading-progress" id="reading-progress"></div>
+  </header>
+
+  <!-- Wide-Screen Left Margin Table of Contents (>=1490px) -->
+  <aside class="side-toc" id="side-toc" aria-label="Table of contents"></aside>
+
+  <!-- ======================================================================
+       HERO & ANIMATED RESEARCH OVERVIEW
+       ====================================================================== -->
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <div id="hero-header-mount"></div>
+
+        <!-- Animated 3-Pillar Research Overview Card -->
+        <div class="viz-card" style="margin-top: 8px">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Interactive Overview</span>
+              <h3>Three Design Questions for Online Text-to-Image RL</h3>
+            </div>
+            <button type="button" class="replay-btn" id="btn-replay-teaser">↻ Replay</button>
+          </div>
+          <div class="viz-body">
+            <div class="anim-stage" id="teaser-anim"></div>
+          </div>
+          <div class="viz-foot">
+            Click any column to jump directly to its controlled experiments. Under fixed <b>DiffusionNFT</b> rollouts on <b>FLUX.2-Klein-Base-4B</b> and <b>Z-Image</b>, we isolate what reward signal works (§4), how training prompts should be structured (§5), and how prompt lengths should be scheduled (§6).
+          </div>
+        </div>
+
+        <!-- Key Headline Summary Cards -->
+        <div class="summary-grid">
+          <div class="summary-card">
+            <span class="sc-eyebrow">§4 · Reward Signal</span>
+            <div class="sc-stat">r = 0.96–0.99</div>
+            <div class="sc-desc">
+              Zero-shot graded <b>PromptScore</b> tracks compositional MLLM judgment from 9 to 539 words without preference reward hacking or strict-binary collapse.
+            </div>
+          </div>
+          <div class="summary-card">
+            <span class="sc-eyebrow">§5 · Prompt Corpus</span>
+            <div class="sc-stat">300K Prompts</div>
+            <div class="sc-desc">
+              <b>Imago-Short</b> (150K, ~30w) and balanced scene-graph <b>Imago-Long</b> (150K, ~200w) outperform entity-, attribute-, and relation-skewed expansions.
+            </div>
+          </div>
+          <div class="summary-card">
+            <span class="sc-eyebrow">§6 · Matured Models</span>
+            <div class="sc-stat">+8.7% / +5.0%</div>
+            <div class="sc-desc">
+              <b>Imago-4B</b> beats 12B–20B open models, and <b>Imago-6B</b> surpasses 32B <b>FLUX.2-dev</b> across all five compositional benchmarks while raising PickScore.
+            </div>
+          </div>
+        </div>
+
+        <!-- Abstract / Motivation Prose -->
+        <div class="prose" style="margin-top: 26px">
+          <p>
+            Recent text-to-image (T2I) models generate sharp, plausible imagery yet still fail to bind attributes, resolve spatial relations, or coordinate multi-object scenes as prompt descriptions grow denser. While online reinforcement learning (RL) has become central to post-training language models, visual RL recipes remain fragmented across coupled choices of reward models, prompt sets, and optimization schedules.
+          </p>
+          <p>
+            In <b>Imago</b>, we decouple and study the core components that govern online T2I RL—<b>reward design</b> and <b>prompt corpus construction</b>—under a single controlled testbed: online <b>DiffusionNFT</b> without classifier-free guidance or explicit KL regularization across two distinct flow-matching backbones (<b>FLUX.2-Klein-Base-4B</b> and <b>Z-Image</b>, 6B). Combining our findings yields <b>Imago-4B</b> and <b>Imago-6B</b>, demonstrating that principled RL post-training substantially matures compact visual generators.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 3: EVALUATION PROTOCOL & CONTROLLED TESTBED
+         ====================================================================== -->
+    <section class="sec" id="evaluation">
+      <div class="wrap">
+        <span class="sec-eyebrow">§3 · Evaluation &amp; Testbed</span>
+        <h2 class="sec-title">Measuring Compositional Adherence &amp; Visual Appeal</h2>
+        <div class="prose">
+          <p>
+            Evaluating RL post-training requires separating two distinct axes: <b>compositional prompt adherence</b> across diverse prompt lengths and <b>perceptual visual appeal</b>. If an evaluator conflates aesthetics with alignment—or saturates on short captions—it masks reward hacking.
+          </p>
+          <p>
+            To select an informative visual appeal metric, we evaluate 19 baseline T2I models across four human-preference scorers: <b>PickScore</b>, <b>ImageReward</b>, <b>HPSv3</b>, and <b>UnifiedReward</b>. Because PickScore exhibits the lowest off-diagonal redundancy (<i>r̄</i> = 0.51 vs. 0.62–0.69), we pair <b>PickScore</b> on DrawBench with <b>Qwen3.5-27B</b> judging across <b>seven compositional benchmarks</b> spanning three length regimes: Short (&lt;100w), Medium (100–300w), and Long (&gt;300w).
+          </p>
+        </div>
+
+        <!-- Dual Interactive Card matching Paper Fig. 1 -->
+        <div class="viz-card">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figure 1 · Interactive</span>
+              <h3>Preference-Reward Redundancy &amp; 7-Benchmark Compositional Suite</h3>
+            </div>
+          </div>
+          <div class="viz-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 22px; align-items: start">
+              <div id="viz-pref-pairgrid"></div>
+              <div id="viz-bench-overview"></div>
+            </div>
+          </div>
+          <div class="viz-foot">
+            <b>Left:</b> Pairwise Pearson <i>r</i> and Spearman <i>ρ</i> across pooled (model, benchmark) evaluations; click any off-diagonal cell to inspect its z-score scatter. <b>Right:</b> Average prompt length vs. normalized MLLM-judge score across all 19 baseline models; click any benchmark bubble to inspect its evaluation protocol and top-ranked baselines.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 4: REWARD DESIGN FOR TEXT-TO-IMAGE RL
+         ====================================================================== -->
+    <section class="sec" id="reward">
+      <div class="wrap">
+        <span class="sec-eyebrow">§4 · Reward Design</span>
+        <h2 class="sec-title">What Makes an Effective Reward Signal for T2I RL?</h2>
+        <div class="prose">
+          <p>
+            We compare classical alignment metrics (<b>CLIPScore</b>), human-preference models (<b>HPSv3</b>, <b>UnifiedReward</b>), generative prompt-reconstruction likelihood (<b>SpectraReward</b>), and zero-shot MLLM discriminative scoring across both <b>benchmark-level correlation</b> (19 baseline T2I models) and <b>controlled RL optimization</b> (500 steps on FLUX.2-Klein-Base-4B and 300 steps on Z-Image). Notably, <b>UnifiedReward</b> shares the exact <b>Qwen3.5-9B</b> backbone as our zero-shot reward, directly isolating the effect of human-preference fine-tuning.
+          </p>
+          <p>
+            For our primary discriminative reward, <b>PromptScore</b>, a frozen <b>Qwen3.5-9B</b> model scores image–prompt alignment on an integer rubric <i>s</i> ∈ {1, …, 10}; for generative scoring, <b>SpectraReward</b> averages log-likelihood across the <i>L</i> prompt tokens conditioned on the image:
+          </p>
+        </div>
+
+        <div class="math-block">
+          <i>r</i><sub>PS</sub>(<i>x</i>, <i>c</i>) = <i>s</i> / 10 ∈ [0.1, 1.0], &nbsp;&nbsp;&nbsp;&nbsp; <i>r</i><sub>SR</sub>(<i>x</i>, <i>c</i>) = (1 / <i>L</i>) ∑<sub><i>l</i>=1..<i>L</i></sub> log <i>p<sub>θ</sub></i>(<i>c<sub>l</sub></i> | <i>x</i>, <i>c</i><sub>&lt;<i>l</i></sub>)
+        </div>
+
+        <!-- Interactive Fig. 2 & Fig. 3 Explorer -->
+        <div class="viz-card">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figures 2 &amp; 3 · Interactive</span>
+              <h3>Reward-vs.-Judge Correlation &amp; 19-Model Scatter Explorer</h3>
+            </div>
+          </div>
+          <div class="viz-body" id="viz-reward-align"></div>
+          <div class="viz-foot">
+            Switch between <b>Candidate Rewards (Fig. 2)</b> and <b>Graded vs. Strict Binary &amp; Gemma (Fig. 3)</b>, toggle <b>Pearson <i>r</i> / Spearman <i>ρ</i></b>, and click any benchmark column on the left to inspect all 19 T2I models on the right. Notice how preference models turn negative on short compositional benchmarks, while strict binary collapses to zero across all 19 models on 539-word <i>LongBench-T2I</i>.
+          </div>
+        </div>
+
+        <div class="insight-box">
+          <strong>Takeaway 1 — Graded Zero-Shot MLLM Scoring Eliminates Reward Collapse &amp; Preference Hacking:</strong>
+          Human-preference tuning biases rewards toward broad aesthetic shortcuts (even on a matched Qwen3.5-9B backbone), while strict binary scoring collapses variance on dense prompts. Grading partial satisfaction from 1 to 10 via zero-shot <b>PromptScore</b> achieves <i>r</i> = 0.96–0.99 across all seven benchmarks—confirmed independently with <b>Gemma-4-E4B-it</b>.
+        </div>
+
+        <!-- Interactive Table 1 + Table 2 -->
+        <div class="viz-card" style="margin-top: 26px">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Tables 1 &amp; 2 · Sortable</span>
+              <h3>Controlled RL Optimization Across Candidate Rewards</h3>
+            </div>
+          </div>
+          <div class="viz-body" id="tbl-reward-rl"></div>
+        </div>
+
+        <!-- Interactive Fig. 4: Reward Hacking Filmstrip + Slider -->
+        <div class="viz-card" style="margin-top: 26px">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figure 4 · Qualitative Studio</span>
+              <h3>Visualizing Reward Hacking Under Controlled RL</h3>
+            </div>
+          </div>
+          <div class="viz-body" id="studio-reward-hack"></div>
+          <div class="viz-foot">
+            Click any baseline card (or switch to <b>Interactive Drag Slider</b>) to compare directly against <b>PromptScore</b>. Optimizing HPSv3 hallucinates unprompted human portraits inside uninhabited street scenes, whereas PromptScore improves compositional accuracy while organically raising PickScore.
+          </div>
+        </div>
+
+        <!-- Section 4.2: Discriminative vs. Generative MLLM Reward -->
+        <div class="prose" style="margin-top: 32px">
+          <h3>§4.2 &nbsp;Discriminative Rubric vs. Generative Prompt Reconstruction</h3>
+          <p>
+            Comparing standalone <b>PromptScore</b> and <b>SpectraReward</b> with the same frozen <b>Qwen3.5-9B</b> backbone reveals complementary length behavior: token-level prompt log-likelihood slightly leads on short prompts where nearly every word denotes a concrete object or attribute, whereas explicit rubric judgment scales better to long prompts where averaging across hundreds of tokens dilutes individual entity or relation omissions.
+          </p>
+        </div>
+
+        <div class="viz-card">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figure 5 · Interactive</span>
+              <h3>PromptScore vs. SpectraReward Across Prompt-Length Regimes</h3>
+            </div>
+          </div>
+          <div class="viz-body" id="viz-spectra"></div>
+        </div>
+
+        <!-- Section 4.3: Scaling the Reward Model Backbone -->
+        <div class="prose" style="margin-top: 32px">
+          <h3>§4.3 &nbsp;Scaling the Reward Backbone (4B → 320B MoE)</h3>
+          <p>
+            Does a larger MLLM automatically yield a stronger RL reward? Keeping the PromptScore rubric and training budget fixed, we scale the frozen reward model across five backbones spanning two orders of magnitude: <b>Qwen3.5-4B</b>, <b>Qwen3.5-9B</b>, <b>Qwen3.5-27B</b>, <b>Gemma-4-31B</b>, and <b>GLM-5.3-Flash-320B-A18B</b>. Larger backbones do not consistently produce stronger policies—even <b>Qwen3.5-4B</b> already reaches <i>r̄</i> = 0.986, and scaling to 320B yields no systematic downstream advantage over 9B or 31B.
+          </p>
+        </div>
+
+        <div class="viz-card">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figure 6 &amp; Table 3 · Interactive</span>
+              <h3>Reward Backbone Scaling Across Five MLLM Sizes</h3>
+            </div>
+          </div>
+          <div class="viz-body">
+            <div id="viz-scaling"></div>
+            <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid #eef2f6" id="tbl-scaling-corr"></div>
+          </div>
+        </div>
+
+        <div class="insight-box">
+          <strong>Takeaway 2 — Compact 4B–9B MLLMs Suffice as Compositional Rewards:</strong>
+          Verifying explicit visual alignment is far less capacity-intensive than open-ended multimodal reasoning. A frozen <b>Qwen3.5-9B</b> server captures the full optimization signal while avoiding multi-GPU 27B–320B inference overhead.
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 5: PROMPT CORPUS CONSTRUCTION & CURRICULUM
+         ====================================================================== -->
+    <section class="sec" id="corpus">
+      <div class="wrap">
+        <span class="sec-eyebrow">§5 · Prompt Corpus &amp; Schedule</span>
+        <h2 class="sec-title">Structuring &amp; Scheduling Training Prompts</h2>
+        <div class="prose">
+          <p>
+            Even with a reliable reward, RL can only refine compositional behaviors that its training prompts exercise. Starting from ~3M <b>Fine-T2I</b> captions, we deduplicate embeddings with <b>Qwen3-Embedding</b> and filter ungrounded descriptions with <b>Qwen3.5-27B</b> to curate two 150K-prompt corpora:
+          </p>
+          <ul>
+            <li><b>Imago-Short (150K, ~30 words):</b> Concise, visually grounded descriptions targeting crisp local attribute binding, spatial positioning, numeracy, and rendered text.</li>
+            <li><b>Imago-Long (150K, ~200 words):</b> Multi-sentence scene specifications expanded via Qwen3.5-27B to balance all three objective scene-graph primitives—<b>entities</b> (distinct objects), <b>attributes</b> (intrinsic visual properties), and <b>relations</b> (spatial &amp; action interactions)—without stylistic filler.</li>
+          </ul>
+          <p>
+            To test whether scene-graph balance matters independently of word count, we expand identical seed scenes into four length-matched (~200-word) corpora: <b>Balanced</b>, <b>Entity-Centric</b>, <b>Attribute-Centric</b>, and <b>Relation-Centric</b>.
+          </p>
+        </div>
+
+        <!-- Interactive Fig. 7: Scene-Graph Prompt Studio -->
+        <div class="viz-card">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figure 7 · Scene-Graph Studio</span>
+              <h3>Interactive Prompt Expansion &amp; Primitive Highlighter</h3>
+            </div>
+          </div>
+          <div class="viz-body" id="studio-prompt"></div>
+          <div class="viz-foot">
+            Switch between the 5 prompt variants from a shared seed scene and filter highlighted spans by <b>Entities</b>, <b>Attributes</b>, or <b>Relations</b> to see how skewed expansions overload single axes while <b>Balanced</b> coordinates all three.
+          </div>
+        </div>
+
+        <!-- Interactive Fig. 8: Prompt Design Relative Gain -->
+        <div class="viz-card" style="margin-top: 26px">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figure 8 · Interactive</span>
+              <h3>Balanced Scene-Graph Prompts Outperform Skewed Expansions</h3>
+            </div>
+          </div>
+          <div class="viz-body" id="viz-prompt-type"></div>
+          <div class="viz-foot">
+            Relative gain (%) over each base model under controlled DiffusionNFT training. Click any legend chip to isolate a prompt design: <b>Balanced</b> achieves the highest average gain on both FLUX.2-Klein-Base-4B (+6.8%) and Z-Image (+3.1%).
+          </div>
+        </div>
+
+        <!-- Section 5.3: Prompt Length & Curriculum Scheduling -->
+        <div class="prose" style="margin-top: 32px">
+          <h3>§5.3–5.4 &nbsp;Prompt Length Regimes &amp; Sequential Short → Long Scheduling</h3>
+          <p>
+            Training solely on <b>Imago-Short</b> sharpens local binding on short prompts (+5.0% on CompBench for FLUX.2-4B) but leaves multi-sentence composition behind (+8.8% vs. +14.3% on LongBench). Conversely, training solely on <b>Imago-Long</b> strengthens paragraph-level coordination while under-optimizing short-prompt precision.
+          </p>
+          <p>
+            Under an identical compute budget, <b>sequentially transitioning from Imago-Short to Imago-Long</b> with a midpoint optimizer/EMA reset consistently outperforms uniform joint mixing (<b>Imago-Short ∪ Long</b>) and reverse <b>Long → Short</b> ordering: Stage 1 establishes reliable local binding before Stage 2 scales global multi-entity composition.
+          </p>
+        </div>
+
+        <!-- Interactive Fig. 9 + Tab. 4 -->
+        <div class="viz-card">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figure 9 &amp; Table 4 · Interactive</span>
+              <h3>Sequential Short → Long Curriculum Captures Both Regimes</h3>
+            </div>
+          </div>
+          <div class="viz-body">
+            <div id="viz-curriculum"></div>
+            <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid #eef2f6" id="tbl-curriculum"></div>
+          </div>
+        </div>
+
+        <div class="insight-box">
+          <strong>Takeaway 3 — Curriculum Ordering Resolves Length Specialization:</strong>
+          Balanced scene-graph structure maximizes transfer per word, and staging <b>Short → Long</b> preserves crisp local binding while scaling global multi-object composition—achieving the highest LongBench-T2I scores across both backbones.
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 6: IMAGO UNIFIED RECIPE & BENCHMARK LEADERBOARD
+         ====================================================================== -->
+    <section class="sec" id="imago">
+      <div class="wrap">
+        <span class="sec-eyebrow">§6 · Imago Models &amp; Results</span>
+        <h2 class="sec-title">Unifying Reward, Corpus &amp; Schedule into Imago-4B &amp; Imago-6B</h2>
+        <div class="prose">
+          <p>
+            Combining our findings—online <b>DiffusionNFT</b> without CFG or explicit KL penalty, high-rank LoRA (<i>r</i> = 256), zero-shot <b>PromptScore (Qwen3.5-9B)</b>, and <b>Stage 1 Imago-Short → Stage 2 Imago-Long</b>—produces <b>Imago-4B</b> (from FLUX.2-Klein-Base-4B, 500 + 500 steps) and <b>Imago-6B</b> (from Z-Image, 300 + 300 steps) on a single 8 × NVIDIA B200 node.
+          </p>
+        </div>
+
+        <!-- Animated Pipeline Schematic -->
+        <div class="viz-card">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Animated Architecture</span>
+              <h3>The Imago Two-Stage DiffusionNFT Training Loop</h3>
+            </div>
+            <button type="button" class="replay-btn" id="btn-replay-pipeline">↻ Replay</button>
+          </div>
+          <div class="viz-body">
+            <div class="anim-stage" id="pipeline-anim"></div>
+            <details style="margin-top: 14px">
+              <summary style="cursor: pointer; font-size: 13px; font-weight: 650; color: #1d4ed8; user-select: none">
+                ▸ View Complete Imago-4B &amp; Imago-6B Training Hyperparameters (Appendix Table 7)
+              </summary>
+              <div style="margin-top: 12px" id="tbl-hyperparams"></div>
+            </details>
+          </div>
+        </div>
+
+        <!-- Main 23-Model Leaderboard (Table 5) -->
+        <div class="viz-card" style="margin-top: 26px">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Table 5 · Interactive Leaderboard</span>
+              <h3>Comparison Against 21 Open-Source &amp; Proprietary T2I Models</h3>
+            </div>
+          </div>
+          <div class="viz-body" id="tbl-leaderboard"></div>
+          <div class="viz-foot">
+            <b>Imago-4B</b> achieves an <b>+8.7%</b> average relative compositional gain over FLUX.2-Klein-Base-4B (e.g., 2.880 → 3.312 on LongBench-T2I; 71.63 → 77.98 on SpatialGenEval), outperforming 12B–20B open-source models. <b>Imago-6B</b> gains <b>+5.0%</b> over Z-Image, beating 32B <b>FLUX.2-dev</b> on all five compositional benchmarks and surpassing proprietary <b>Nano-Banana</b> on SpatialGenEval (<b>81.90</b>) and T2I-CoReBench (<b>94.19</b>) while lifting PickScore to <b>23.08</b>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 6.3: INTERACTIVE QUALITATIVE GALLERY (FIGS. 10, 11, 12)
+         ====================================================================== -->
+    <section class="sec" id="gallery">
+      <div class="wrap">
+        <span class="sec-eyebrow">§6.3 · Qualitative Inspection</span>
+        <h2 class="sec-title">Interactive Before / After Visual Comparisons</h2>
+        <div class="prose">
+          <p>
+            Explore side-by-side generations from the base models and <b>Imago-4B / Imago-6B</b> under identical random seeds and sampling steps. Drag the split curtain across any image to inspect how RL post-training resolves attribute swaps, counting errors, spatial inversions, and flat lighting without aesthetic reward hacking.
+          </p>
+        </div>
+
+        <!-- Fig. 10: Compositional Adherence Across Short / Medium / Long -->
+        <div class="viz-card">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figure 10 · Compositional Adherence</span>
+              <h3>Resolving Short, Medium &amp; Long Compositional Constraints</h3>
+            </div>
+          </div>
+          <div class="viz-body" id="studio-comp"></div>
+          <div class="viz-foot">
+            Red dashed boxes mark failure regions in the base model; green dashed boxes mark resolved constraints in <b>Imago</b>. Toggle diagnostic boxes on/off or open full-screen side-by-side zoom.
+          </div>
+        </div>
+
+        <!-- Figs. 11 & 12: Multi-Aspect Visual Appeal Gallery -->
+        <div class="viz-card" style="margin-top: 28px">
+          <div class="viz-head">
+            <div class="viz-head-title">
+              <span class="viz-badge">Figures 11 &amp; 12 · Visual Appeal</span>
+              <h3>Organic Gains in Lighting, Material Depth &amp; Artistic Style</h3>
+            </div>
+          </div>
+          <div class="viz-body" id="studio-appeal"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optional Declarative Extension Slot (populated from SITE_CONFIG.customModules) -->
+    <div id="custom-modules-mount"></div>
+
+    <!-- ======================================================================
+         SECTION 7: KEY QUESTIONS & FAQ
+         ====================================================================== -->
+    <section class="sec" id="faq">
+      <div class="wrap">
+        <span class="sec-eyebrow">Discussion &amp; Details</span>
+        <h2 class="sec-title">Frequently Asked Questions</h2>
+        <div class="faq-list" id="faq-mount"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 8: BIBTEX CITATION
+         ====================================================================== -->
+    <section class="sec" id="citation">
+      <div class="wrap">
+        <span class="sec-eyebrow">Reference</span>
+        <h2 class="sec-title">Citation</h2>
+        <div class="prose">
+          <p>If you find <b>Imago</b>, <b>PromptScore</b>, or our 300K compositional prompt corpora (<b>Imago-Short</b> &amp; <b>Imago-Long</b>) useful in your research, please consider citing:</p>
+        </div>
+        <div class="bib-card">
+          <button type="button" class="bib-copy-btn" id="btn-copy-bib">Copy BibTeX</button>
+          <pre id="bibtex-code"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <b>Imago: Maturing Visual Generation with Reinforcement Learning</b> · Built with a modular declarative data pipeline for seamless paper updates.
+    </div>
+  </footer>
+
+  <!-- Declarative Config & Ground-Truth Paper Data -->
+  <script src="static/data/site-config.js"></script>
+  <script src="static/data/paper-data.js"></script>
+
+  <!-- Modular Interactive Engines -->
+  <script src="static/js/anim.js"></script>
+  <script src="static/js/charts.js"></script>
+  <script src="static/js/tables.js"></script>
+  <script src="static/js/qualitative.js"></script>
+  <script src="static/js/main.js"></script>
+</body>
+</html>
