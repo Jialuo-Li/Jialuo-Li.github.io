@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Imago · emblem candidates</title>
+<style>
+@font-face { font-family: "Libertinus Serif"; src: url("../fonts/LibertinusSerif-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Libertinus Serif"; src: url("../fonts/LibertinusSerif-Italic.woff2") format("woff2"); font-weight: 400; font-style: italic; }
+@font-face { font-family: "Libertinus Serif"; src: url("../fonts/LibertinusSerif-Semibold.woff2") format("woff2"); font-weight: 600; font-style: normal; }
+@font-face { font-family: "Libertinus Serif"; src: url("../fonts/LibertinusSerif-SemiboldItalic.woff2") format("woff2"); font-weight: 600; font-style: italic; }
+@font-face { font-family: "Libertinus Sans"; src: url("../fonts/LibertinusSans-Regular.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Libertinus Sans"; src: url("../fonts/LibertinusSans-Bold.woff2") format("woff2"); font-weight: 700; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #f5f6f8; color: #17191c; font-family: "Libertinus Sans", system-ui, sans-serif; }
+header { max-width: 1180px; margin: 0 auto; padding: 36px 24px 4px; }
+header h1 { font-family: "Libertinus Serif", serif; font-weight: 600; font-size: 30px; margin: 0 0 6px; }
+header p { margin: 0; color: #5d646e; font-size: 16px; line-height: 1.55; }
+.grid { max-width: 1180px; margin: 0 auto; padding: 20px 24px 64px; display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+.card { background: #fff; border: 1px solid #e2e5ea; border-radius: 16px; padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 12px; }
+.card h2 { margin: 0; font-size: 18px; font-weight: 700; display: flex; gap: 10px; align-items: baseline; }
+.card h2 .id { color: #1f5fcf; }
+.card h2 .en { color: #8a919c; font-weight: 400; font-size: 14px; }
+.idea { margin: 0; color: #4a515b; font-size: 14.5px; line-height: 1.55; min-height: 66px; }
+.stage { position: relative; height: 176px; display: grid; place-items: center; border-radius: 12px; cursor: pointer;
+  background: radial-gradient(120% 90% at 50% 0%, #fbfcfe 0%, #f3f5f9 100%); border: 1px solid #eef0f4; }
+.stage svg { height: 136px; width: auto; overflow: visible; }
+.stage .rp { position: absolute; right: 10px; bottom: 7px; font-size: 12px; color: #9aa1ab; }
+.hero { font-family: "Libertinus Serif", serif; text-align: center; padding: 6px 0 0; }
+.hero .t { font-weight: 600; font-size: 44px; line-height: 1.15; white-space: nowrap; }
+.hero .t .nm { font-style: italic; }
+.hero .t .mk { display: inline-block; height: .9em; vertical-align: -.12em; margin-right: .14em; }
+.hero .t .mk svg { height: 100%; width: auto; display: block; overflow: visible; }
+.hero .t .mk.tall { height: 1.06em; vertical-align: -.2em; }
+.hero .t .o { display: inline-block; height: .454em; width: .445em; vertical-align: -.01em; margin: 0 -.01em 0 .072em; }
+.hero .t .o svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.hero .s { font-size: 16px; color: #33383f; margin-top: 2px; }
+.sizes { display: flex; align-items: center; gap: 14px; padding-top: 12px; border-top: 1px solid #eef0f3; color: #8a919c; font-size: 12px; }
+.sizes .ic { display: block; overflow: visible; }
+.tab { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px 7px 10px; background: #e9ecf1; border-radius: 10px 10px 0 0; font-size: 13px; color: #33383f; }
+.tab svg { width: 16px; height: 16px; display: block; }
+</style>
+</head>
+<body>
+<header>
+  <h1><i>Imago</i> 标志候选</h1>
+  <p>每张卡片依次是：大图（点击可重播载入动画）、放进标题里的实际效果、16/24/32/48 px 和浏览器标签页上的样子。按我的推荐从前往后排，我最推荐 A、B、C。选好后告诉我编号；也可以说想把哪几个的元素组合起来。</p>
+</header>
+<div class="grid" id="grid"></div>
+<script src="../vendor/d3.min.js"></script>
+<script src="emblems.js"></script>
+</body>
+</html>
