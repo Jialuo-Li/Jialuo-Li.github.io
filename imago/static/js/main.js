@@ -4,11 +4,27 @@
   const I = window.Imago, S = window.SITE;
   const BRAND = { arxiv: "#b31b1b", github: "#17191c", hf: "#ff9d00", paper: "#1f5fcf", quote: "#1f5fcf" };
 
+  /* the emblem's facets are placed one by one when the page opens, as an image is composed from its parts;
+     a click places them again */
+  function emblem() {
+    const host = document.querySelector(".hero .emblem");
+    host.innerHTML = I.icon("emblem");
+    const facets = d3.select(host).selectAll(".f"), N = facets.size();
+    const assemble = () => {
+      if (I.reduced) return;
+      facets.interrupt().attr("opacity", 0).transition()
+        .delay((_, i) => I.dur(80 + ((i * 37) % N) * 26)).duration(I.dur(420)).ease(d3.easeCubicOut).attr("opacity", 1);
+    };
+    host.addEventListener("click", assemble);
+    assemble();
+  }
+
   function header() {
     document.getElementById("authors").innerHTML = S.authors
       .map((a) => `<span>${a.url ? `<a href="${a.url}">${I.esc(a.name)}</a>` : I.esc(a.name)}</span>`).join(" ");
     document.getElementById("affil").textContent = S.affiliation;
     document.getElementById("foot-affil").textContent = S.affiliation;
+    emblem();
     // every link is a button; one without a url says "coming soon" when hovered or clicked
     const links = document.getElementById("links");
     links.innerHTML = S.links.map((l) => {
@@ -100,10 +116,12 @@
       const fn = fig.querySelector(".fn") ? fig.querySelector(".fn").textContent : "";
       const title = fig.querySelector(".fig-title") ? fig.querySelector(".fig-title").textContent.replace(fn, "").trim() : "";
       const lead = fig.querySelector("figcaption b") ? fig.querySelector("figcaption b").innerHTML : "";
+      const pw = Math.min(340, window.innerWidth - 16);
+      pop.style.width = pw + "px";
       pop.innerHTML = `<div class="rp-h"><span class="rp-fn">${fn}</span>${I.esc(title)}</div><div class="rp-thumb"></div>${lead ? `<div class="rp-cap">${lead}</div>` : ""}`;
       const thumb = pop.querySelector(".rp-thumb");
       if (src && src.offsetWidth) {
-        const W = 312, s = W / src.offsetWidth;
+        const W = pw - 28, s = W / src.offsetWidth;
         const legend = fig.querySelector(".legend");
         const wrap = document.createElement("div");
         wrap.className = "rp-scale";
@@ -118,7 +136,7 @@
         thumb.style.height = Math.min(200, Math.ceil(wrap.scrollHeight * s)) + "px";
         thumb.classList.toggle("cut", wrap.scrollHeight * s > 200);
       } else thumb.remove();
-      const r = a.getBoundingClientRect(), pw = 340;
+      const r = a.getBoundingClientRect();
       let x = Math.min(Math.max(8, r.left + r.width / 2 - pw / 2), window.innerWidth - pw - 8);
       pop.style.left = x + "px";
       pop.classList.add("on");

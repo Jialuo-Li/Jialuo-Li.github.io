@@ -1,5 +1,6 @@
 /* Icons: one inline-SVG set for the page. Brand marks (GitHub, arXiv, Hugging Face) are Simple Icons paths (CC0);
-   the others are drawn here on a 24-unit grid with 1.8-unit round strokes. Imago.icon(name, cls) returns the markup. */
+   the others are drawn here on a 24-unit grid with 1.8-unit round strokes. Imago.icon(name, cls) returns the markup;
+   Imago.icon("emblem") returns the Imago mark. */
 (function () {
   "use strict";
   const I = (window.Imago = window.Imago || {});
@@ -26,8 +27,40 @@
     corpus: S('<circle cx="12" cy="6.2" r="2.5"/><circle cx="6.2" cy="17.4" r="2.5"/><circle cx="17.8" cy="17.4" r="2.5"/><path d="M10.9 8.4l-3.6 6.8M13.1 8.4l3.6 6.8M8.7 17.4h6.6"/>'),
     image: S('<rect x="3" y="5.5" width="15.5" height="14" rx="2.4"/><path d="M3 16.4l4.4-4.4a1.6 1.6 0 0 1 2.3 0l4.7 4.7"/><path d="M12.7 14.9l1.3-1.3a1.6 1.6 0 0 1 2.3 0l2.2 2.2"/><path d="M20 1.8l.75 1.75 1.75.75-1.75.75L20 6.8l-.75-1.75-1.75-.75 1.75-.75z" fill="currentColor" stroke="none"/>'),
   };
+  /* The Imago mark: a low-poly landscape (sky, sun, mountains, meadow) composed of triangular facets in a round
+     medallion, after the paper's theme of compositional generation. Facets carry class "f" so the page can place them
+     one by one; each call gets its own clip id. */
+  const P = {
+    A0: [0, 0], A1: [20, 0], A2: [40, 0], A3: [64, 0],
+    B0: [0, 16], B1: [14, 12], B2: [30, 17], B3: [44, 9], B4: [64, 15],
+    C0: [0, 34], C1: [12, 27], C2: [22, 33], C3: [34, 23], C4: [46, 32], C5: [56, 26], C6: [64, 31],
+    D0: [0, 44], D1: [14, 42], D2: [28, 45], D3: [42, 41], D4: [54, 44], D5: [64, 42],
+    E0: [0, 64], E1: [16, 64], E2: [32, 64], E3: [48, 64], E4: [64, 64],
+  };
+  const FACETS = [
+    ["A0 A1 B1", "#c7dbff"], ["A0 B1 B0", "#bcd3ff"], ["A1 A2 B2", "#d2e0ff"], ["A1 B2 B1", "#c5d8ff"], ["A2 A3 B3", "#e6dcfb"], ["A2 B3 B2", "#dcd9fd"], ["A3 B4 B3", "#efdcf4"],
+    ["B0 B1 C1", "#d6e2ff"], ["B0 C1 C0", "#cddcff"], ["B1 B2 C2", "#dfe5ff"], ["B1 C2 C1", "#d3e0ff"], ["B2 C3 C2", "#e5e4fb"], ["B2 B3 C3", "#ffe4cc"],
+    ["B3 C4 C3", "#ffdcbd"], ["B3 B4 C5", "#ffe3c9"], ["B3 C5 C4", "#ffd7b5"], ["B4 C6 C5", "#ffe8d6"],
+    ["C0 C1 D1", "#79a8f8"], ["C0 D1 D0", "#5b93f5"], ["C1 C2 D1", "#4b89f5"], ["C2 D2 D1", "#3b82f6"], ["C2 C3 D2", "#86b0f9"], ["C3 D3 D2", "#3a7cee"],
+    ["C3 C4 D3", "#2f6fe0"], ["C4 D4 D3", "#4a8af4"], ["C4 C5 D4", "#6c9ff8"], ["C5 C6 D5", "#3a7bea"], ["C5 D5 D4", "#4f8ef5"],
+    ["D0 D1 E1", "#6fd394"], ["D0 E1 E0", "#5cc985"], ["D1 D2 E2", "#4cc47a"], ["D1 E2 E1", "#3fb45a"], ["D2 D3 E3", "#57c27f"], ["D2 E3 E2", "#3aa957"],
+    ["D3 D4 E3", "#69cf8f"], ["D4 E4 E3", "#48bb72"], ["D4 D5 E4", "#5fcf8a"],
+  ];
+  const tri = ([t, c]) => `<path class="f" d="M${t.split(" ").map((k) => P[k].join(" ")).join("L")}Z" fill="${c}" stroke="${c}" stroke-width=".35"/>`;
+  const SUN = Array.from({ length: 12 }, (_, i) => {
+    const a = (i * Math.PI) / 6, b = ((i + 1) * Math.PI) / 6, c = i % 2 ? "#ffb95c" : "#ffcb6e";
+    const at = (t) => `${(44 + 6.9 * Math.cos(t)).toFixed(2)} ${(15.5 + 6.9 * Math.sin(t)).toFixed(2)}`;
+    return `<path class="f" d="M44 15.5L${at(a)}L${at(b)}Z" fill="${c}" stroke="${c}" stroke-width=".3"/>`;
+  }).join("");
+  const MARK = FACETS.slice(0, 17).map(tri).join("") + SUN + FACETS.slice(17).map(tri).join("");
+  let marks = 0;
+  const emblem = () => {
+    const u = `imago-mark-${++marks}`;
+    return `<svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><defs><clipPath id="${u}"><circle cx="32" cy="32" r="29.5"/></clipPath></defs>
+      <g clip-path="url(#${u})">${MARK}</g><circle cx="32" cy="32" r="29.5" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="1.6"/></svg>`;
+  };
   I.icon = (name, cls) => {
-    const s = ICONS[name] || "";
+    const s = name === "emblem" ? emblem() : ICONS[name] || "";
     return cls ? s.replace("<svg ", `<svg class="${cls}" `) : s;
   };
 })();
