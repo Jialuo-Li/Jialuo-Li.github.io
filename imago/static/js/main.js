@@ -4,42 +4,11 @@
   const I = window.Imago, S = window.SITE;
   const BRAND = { arxiv: "#b31b1b", github: "#17191c", hf: "#ff9d00", paper: "#1f5fcf", quote: "#1f5fcf" };
 
-  /* The mark's wings are generated from noise when the page opens (x_t = (1 - t) x_0 + t eps, t from 1 to 0), then it
-     flaps. Hovering flaps it and recalls the imago from Sec. 1; a click samples new noise and generates the wings again. */
-  function emblem() {
-    const host = document.querySelector(".hero .emblem");
-    host.innerHTML = I.icon("emblem");
-    const eps = host.querySelector(".eps"), noise = host.querySelector("feTurbulence");
-    const flap = () => {
-      if (I.reduced) return;
-      host.classList.remove("flap");
-      void host.offsetWidth;
-      host.classList.add("flap");
-    };
-    host.addEventListener("animationend", (e) => { if (e.animationName === "flap") host.classList.remove("flap"); });
-    const generate = (fresh) => {
-      if (I.reduced) return;
-      noise.setAttribute("seed", 1 + Math.floor(Math.random() * 9999));
-      let t = d3.select(eps).interrupt();
-      t = fresh ? t.attr("opacity", 1).transition().delay(I.dur(250)) : t.transition().duration(220).attr("opacity", 1).transition();
-      t.duration(I.dur(1300)).ease(d3.easeCubicInOut).attr("opacity", 0).on("end", flap);
-    };
-    const card = `<div class="tc-h"><i>imago</i></div><p class="tc-q">The final adult stage of metamorphosis at which a creature's latent structure reaches its fully expressed form.</p><div class="tc-note">Click to generate the wings again</div>`;
-    I.interactEl(host, {
-      enter(ev) { flap(); I.tip.show(card, ev); },
-      move(ev) { I.tip.move(ev); },
-      leave() { I.tip.hide(); },
-    });
-    host.addEventListener("click", () => generate(false));
-    generate(true);
-  }
-
   function header() {
     document.getElementById("authors").innerHTML = S.authors
       .map((a) => `<span>${a.url ? `<a href="${a.url}">${I.esc(a.name)}</a>` : I.esc(a.name)}</span>`).join(" ");
     document.getElementById("affil").textContent = S.affiliation;
     document.getElementById("foot-affil").textContent = S.affiliation;
-    emblem();
     // every link is a button; one without a url says "coming soon" when hovered or clicked
     const links = document.getElementById("links");
     links.innerHTML = S.links.map((l) => {
