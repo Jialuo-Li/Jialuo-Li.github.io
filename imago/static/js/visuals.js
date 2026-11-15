@@ -7,6 +7,7 @@
   const REG = { short: "var(--short)", medium: "var(--medium)", long: "var(--long)" };
   const cap = (s) => s[0].toUpperCase() + s.slice(1);
   const segHtml = (segs, cls) => segs.map((s) => (s.k ? `<span class="${cls(s.k)}">${I.esc(s.t)}</span>` : I.esc(s.t))).join("");
+  const zoomBadge = () => `<span class="zoom-badge" aria-hidden="true">${I.icon("zoom")}</span>`;
 
   /* ---------------------------------------------------------------- reward hacking (2 x 5) */
   I.register("rewardHacking", (el) => {
@@ -24,8 +25,15 @@
       h += `<p class="prompt"><span class="pm">${r.model}: </span>“${I.esc(r.prompt)}”</p>`;
     });
     grid.innerHTML = h;
+    const heads = grid.querySelectorAll(".colhead");
     grid.querySelectorAll(".shot").forEach((s) => {
       I.reveal(s);
+      s.insertAdjacentHTML("beforeend", zoomBadge());
+      // hovering an image: the others fade and its reward's column head is marked
+      I.interactEl(s, {
+        enter() { grid.classList.add("focusing"); s.classList.add("on"); heads[+s.dataset.c].classList.add("on"); },
+        leave() { grid.classList.remove("focusing"); s.classList.remove("on"); heads[+s.dataset.c].classList.remove("on"); },
+      });
       s.addEventListener("click", () => {
         const r = rows[+s.dataset.r], c = +s.dataset.c;
         const pick = (c === 0 ? [0, n - 1] : [0, c]).map((k) => r.items[k]);
@@ -66,11 +74,15 @@
       ch.style.transitionDelay = `${I.dur(ms)}ms`;
     }));
     mount.querySelectorAll(".fade-in").forEach((n) => I.reveal(n));
-    // hovering a key entry isolates that primitive in every card
-    mount.querySelectorAll(".sg-key .chip").forEach((k) => {
-      const kind = ["entity", "attribute", "relation"].find((x) => k.classList.contains(x));
-      k.addEventListener("pointerenter", () => grid.classList.add("focus-" + kind));
-      k.addEventListener("pointerleave", () => grid.classList.remove("focus-" + kind));
+    // hovering a key entry, or any highlighted phrase, isolates that primitive in every card
+    const kindOf = (n) => ["entity", "attribute", "relation"].find((x) => n.classList.contains(x));
+    const keyChip = (kind) => mount.querySelector(`.sg-key .chip.${kind}`);
+    mount.querySelectorAll(".sg-key .chip, .dgrid .chip").forEach((k) => {
+      const kind = kindOf(k);
+      I.interactEl(k, {
+        enter() { grid.classList.add("focus-" + kind); keyChip(kind).classList.add("on"); },
+        leave() { grid.classList.remove("focus-" + kind); keyChip(kind).classList.remove("on"); },
+      });
     });
     const paint = () => { grid.classList.remove("paint"); setTimeout(() => grid.classList.add("painted"), I.dur(paintMs)); };
     if (I.reduced) paint();
@@ -114,6 +126,12 @@
     mount.querySelectorAll(".shot").forEach((s, idx) => {
       s.querySelectorAll(".callout").forEach((c, k) => (c.style.transitionDelay = `${I.dur(450 + (idx % 4) * 90 + k * 140)}ms`));
       I.reveal(s);
+      s.insertAdjacentHTML("beforeend", zoomBadge());
+      const half = s.closest(".cp-half");
+      I.interactEl(s, {
+        enter() { half.classList.add("hl-on"); s.classList.add("pulse"); },
+        leave() { half.classList.remove("hl-on"); s.classList.remove("pulse"); },
+      });
       s.addEventListener("click", () => {
         const c = find(+s.dataset.k ? "6b" : "4b", rows[+s.dataset.r]);
         I.lightbox.open({
@@ -137,7 +155,7 @@
       mount.innerHTML = `<div class="pairs"><div class="pairs-head"><span>${A.baseName}</span><span class="ours"><i>Imago</i>${A.oursName.slice(5)}</span></div>${pairs.map((p, i) =>
         `<div class="pair-row">${p.map((t) => `<figure class="shot fade-in" style="aspect-ratio:${t.w * A.aspect / t.h};transition-delay:${I.dur(i * 60)}ms"><img src="${t.img}" alt="${t.side === "ours" ? A.oursName : A.baseName}" loading="lazy" decoding="async"></figure>`).join("")}</div>`).join("")}</div>`;
       mount.querySelectorAll(".pair-row").forEach((row, i) => {
-        row.querySelectorAll(".shot").forEach((s) => I.reveal(s));
+        row.querySelectorAll(".shot").forEach((s) => { I.reveal(s); s.insertAdjacentHTML("beforeend", zoomBadge()); });
         row.addEventListener("click", () => zoom(pairs[i]));
       });
     }
@@ -151,6 +169,7 @@
       const mosaic = mount.querySelector(".mosaic");
       mosaic.querySelectorAll(".tile").forEach((t) => {
         I.reveal(t);
+        t.insertAdjacentHTML("beforeend", zoomBadge());
         t.addEventListener("pointerenter", () => {
           mosaic.classList.add("pairing");
           mosaic.querySelectorAll(`.tile[data-pair="${t.dataset.pair}"]`).forEach((p) => p.classList.add("pair-on"));

@@ -1,5 +1,6 @@
 /* Page settings that are not paper data: authors, links and the BibTeX entry.
-   Links without a url are listed as "coming soon" under the buttons; add the url when it is public. */
+   Every link is a button; while its url is empty the button shows "coming soon". Fill in the url when it is public.
+   icon: paper, arxiv, github, hf or quote (static/js/icons.js). */
 window.SITE = {
   authors: [
     { name: "Jialuo Li", url: "https://jialuo-li.github.io/" },
@@ -11,11 +12,11 @@ window.SITE = {
   ],
   affiliation: "Georgia Tech",
   links: [
-    { label: "Paper", icon: "paper", url: null, primary: true },
-    { label: "arXiv", icon: "arxiv", url: null },
-    { label: "Code", icon: "code", url: null },
-    { label: "Models", icon: "hf", url: null },
-    { label: "Data", icon: "data", url: null },
+    { label: "Paper", icon: "paper", url: "", primary: true },
+    { label: "arXiv", icon: "arxiv", url: "" },
+    { label: "Code", icon: "github", url: "" },
+    { label: "Models", icon: "hf", url: "" },
+    { label: "Data", icon: "hf", url: "" },
     { label: "BibTeX", icon: "quote", url: "#citation" },
   ],
   bibtex: `@article{li2026imago,

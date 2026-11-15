@@ -25,13 +25,13 @@
   I.sleep = (ms) => new Promise((r) => setTimeout(r, I.dur(ms)));
   I.uiDur = (ms) => (I.reduced ? 0 : ms);
 
-  /* ------------------------------------------------------------ tooltip */
+  /* ------------------------------------------------------------ tooltip card */
   const tip = document.getElementById("tip");
   I.tip = {
     show(html, ev) { tip.innerHTML = html; tip.classList.add("on"); this.move(ev); },
     move(ev) {
       if (!ev) return;
-      const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+      const pad = 16, w = tip.offsetWidth, h = tip.offsetHeight;
       let x = ev.clientX + pad, y = ev.clientY + pad;
       if (x + w > window.innerWidth - 8) x = ev.clientX - w - pad;
       if (y + h > window.innerHeight - 8) y = ev.clientY - h - pad;
@@ -40,12 +40,69 @@
     },
     hide() { tip.classList.remove("on"); },
   };
-  /* attach tooltip handlers to a d3 selection; html(d) builds the content */
-  I.hover = (sel, html, onEnter, onLeave) => sel
-    .on("pointerenter", function (ev, d) { I.tip.show(html(d, this), ev); onEnter && onEnter.call(this, d); })
-    .on("pointermove", (ev) => I.tip.move(ev))
-    .on("pointerleave", function (ev, d) { I.tip.hide(); onLeave && onLeave.call(this, d); });
+  /* tooltip content: a title with a colour swatch, a subtitle, rows of label and value (each with an optional colour
+     dot and a bar in [0, 1]; on = emphasised) and a note */
+  I.card = ({ title = "", sub = "", color = null, rows = [], note = "" }) => {
+    let h = `<div class="tc-h">${color ? `<i class="tc-sw" style="background:${color}"></i>` : ""}<span>${title}</span></div>`;
+    if (sub) h += `<div class="tc-sub">${sub}</div>`;
+    if (rows.length) {
+      const bars = rows.some((r) => r.bar != null);
+      h += `<div class="tc-rows${bars ? " has-bars" : ""}">` + rows.map((r) => `<div class="tc-r${r.on ? " on" : ""}">` +
+        `<span class="k">${r.color ? `<i class="tc-dot" style="background:${r.color}"></i>` : ""}<span class="kt">${r.k}</span></span>` +
+        (bars ? `<span class="tc-bar">${r.bar != null ? `<i style="width:${(Math.max(0, Math.min(1, r.bar)) * 100).toFixed(1)}%${r.color ? `;background:${r.color}` : ""}"></i>` : ""}</span>` : "") +
+        `<span class="v">${r.v}</span></div>`).join("") + "</div>";
+    }
+    if (note) h += `<div class="tc-note">${note}</div>`;
+    return h;
+  };
+
+  /* Hover, with touch: a mouse or pen hovers; a finger taps to show the same highlight and taps elsewhere to clear it.
+     h = { enter(ev, d), move(ev, d), leave(ev, d), sticky } (sticky: a second tap on the same mark updates rather than
+     clears, as for a crosshair). Works on d3 selections (I.interact) and on elements (I.interactEl). */
+  let lastPointer = "mouse", active = null;
+  document.addEventListener("pointerdown", (e) => { lastPointer = e.pointerType || "mouse"; }, true);
+  document.addEventListener("click", (e) => {
+    if (lastPointer !== "touch" || !active || e.imagoHandled) return;
+    active.off();
+    active = null;
+  });
+  function bind(on, h) {
+    on("pointerenter", function (ev, d) { if (ev.pointerType !== "touch") h.enter && h.enter.call(this, ev, d); });
+    on("pointermove", function (ev, d) { if (ev.pointerType !== "touch") h.move && h.move.call(this, ev, d); });
+    on("pointerleave", function (ev, d) { if (ev.pointerType !== "touch") h.leave && h.leave.call(this, ev, d); });
+    on("click", function (ev, d) {
+      if (lastPointer !== "touch") return;
+      ev.imagoHandled = true;
+      const node = this, again = active && active.node === node && active.d === d;
+      if (active) { active.off(); active = null; }
+      if (again && !h.sticky) return;
+      h.enter && h.enter.call(node, ev, d);
+      h.move && h.move.call(node, ev, d);
+      active = { node, d, off: () => h.leave && h.leave.call(node, ev, d) };
+    });
+  }
+  I.interact = (sel, h) => { bind((type, fn) => sel.on(type + ".ix", fn), h); return sel; };
+  I.interactEl = (el, h) => { bind((type, fn) => el.addEventListener(type, function (ev) { fn.call(this, ev); }), h); return el; };
+  /* attach a tooltip (and optional enter / leave effects) to a d3 selection; html(d) builds the content */
+  I.hover = (sel, html, onEnter, onLeave) => I.interact(sel, {
+    enter(ev, d) { I.tip.show(html(d, this), ev); onEnter && onEnter.call(this, d); },
+    move(ev) { I.tip.move(ev); },
+    leave(ev, d) { I.tip.hide(); onLeave && onLeave.call(this, d); },
+  });
   window.addEventListener("scroll", () => I.tip.hide(), { passive: true });
+
+  /* a short message at the bottom of the screen */
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.setAttribute("role", "status");
+  document.body.appendChild(toast);
+  let toastT = null;
+  I.toast = (html) => {
+    toast.innerHTML = html;
+    toast.classList.add("on");
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toast.classList.remove("on"), 1700);
+  };
 
   /* ------------------------------------------------------------ lightbox */
   const lb = document.getElementById("lightbox");
