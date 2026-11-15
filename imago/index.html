@@ -22,10 +22,10 @@
   <ol>
     <span class="prog"></span>
     <li><a href="#top">Overview</a></li>
-    <li><a href="#evaluation"><span class="n">§3</span>Evaluation</a></li>
-    <li><a href="#reward"><span class="n">§4</span>Reward</a></li>
-    <li><a href="#corpus"><span class="n">§5</span>Prompt corpus</a></li>
-    <li><a href="#imago"><span class="n">§6</span><i>Imago</i></a></li>
+    <li><a href="#evaluation">Evaluation</a></li>
+    <li><a href="#reward">Reward</a></li>
+    <li><a href="#corpus">Prompt corpus</a></li>
+    <li><a href="#imago"><i>Imago</i></a></li>
     <li><a href="#citation">BibTeX</a></li>
   </ol>
 </nav>
@@ -43,10 +43,10 @@
 <nav class="tabs" aria-label="Sections">
   <ol>
     <li><a href="#top">Overview</a></li>
-    <li><a href="#evaluation">§3 Evaluation</a></li>
-    <li><a href="#reward">§4 Reward</a></li>
-    <li><a href="#corpus">§5 Corpus</a></li>
-    <li><a href="#imago">§6 <i>Imago</i></a></li>
+    <li><a href="#evaluation">Evaluation</a></li>
+    <li><a href="#reward">Reward</a></li>
+    <li><a href="#corpus">Corpus</a></li>
+    <li><a href="#imago"><i>Imago</i></a></li>
     <li><a href="#citation">BibTeX</a></li>
   </ol>
 </nav>
@@ -74,9 +74,9 @@
   <p class="epigraph">Designing the reward signal and the training environment is as essential to effective reinforcement learning as refining the optimization algorithm.</p>
 </section>
 
-<!-- ===================================================================== §3 evaluation -->
+<!-- ===================================================================== evaluation -->
 <section class="sec" id="evaluation" data-icon="evaluate">
-  <p class="kicker"><span class="num">§3</span><span>How should RL recipes be evaluated?</span></p>
+  <p class="kicker"><span>How should RL recipes be evaluated?</span></p>
   <h2>Evaluating compositional capability and visual appeal</h2>
   <p>We evaluate models along two dimensions: <em>compositional capability</em>, how faithfully an image follows its prompt, and <em>visual appeal</em>, its overall perceptual quality. Widely used compositional benchmarks such as GenEval and DPG-Bench rely on short prompts like “a red dog” and have begun to saturate on modern models.</p>
 
@@ -105,13 +105,13 @@
   </figure>
 </section>
 
-<!-- ===================================================================== §4 reward -->
+<!-- ===================================================================== reward -->
 <section class="sec" id="reward" data-icon="reward">
-  <p class="kicker"><span class="num">§4</span><span>Which reward should guide RL?</span></p>
+  <p class="kicker"><span>Which reward should guide RL?</span></p>
   <h2>A zero-shot PromptScore outperforms preference-trained rewards</h2>
   <p>A reward must first track the target, and a good evaluator is not necessarily a good training signal. We therefore examine candidate rewards from both sides: as evaluators, by how closely they track the compositional benchmarks, and as RL rewards, by the models they train.</p>
 
-  <h3><span class="kn">4.1</span>As an evaluator: does it track compositional capability?</h3>
+  <h3>As an evaluator: does it track compositional capability?</h3>
   <p>For each benchmark, we correlate a reward's mean score with the benchmark score across the 19 models. We compare four preference-trained rewards (HPSv3, PickScore, ImageReward, and UnifiedReward) with two zero-shot ones: CLIPScore and <b>PromptScore</b>, which asks Qwen3.5-9B to grade prompt–image alignment from 1 to 10. UnifiedReward shares PromptScore's Qwen3.5-9B backbone and differs mainly in preference tuning, so this pair isolates the effect of that tuning.</p>
 
   <div class="template">
@@ -142,7 +142,7 @@
     <figcaption><b>Graded scoring, not the backbone, keeps the correlation high.</b> Starting from graded Qwen3.5-9B, one component is changed at a time: binary scoring, or Gemma-4-E4B as the backbone. Panels as in <a class="ref" data-ref="fig-align"></a>. On LongBench-T2I, binary scoring gives every image the same score, so its correlation is undefined there.</figcaption>
   </figure>
 
-  <h3><span class="kn">4.2</span>As a training signal: does a better evaluator train a better model?</h3>
+  <h3>As a training signal: does a better evaluator train a better model?</h3>
   <p>We next use four of these rewards for RL and hold everything else fixed: DiffusionNFT fine-tunes FLUX.2-Klein-Base-4B for 500 steps and Z-Image for 300 steps, with neither classifier-free guidance (CFG) nor KL regularization during training. PromptScore trains the best model on all seven benchmarks for both base models (<a class="ref" data-ref="tab-reward"></a>), mirroring its correlations: the reward that tracks the benchmarks better also trains the better generator.</p>
 
   <figure id="tab-reward" data-fig="rewardTable" class="is-table">
@@ -181,7 +181,7 @@
     <figcaption><b>PromptScore trails on short prompts and leads on long ones.</b> Mean relative gain over the base model in each prompt-length regime. Both rewards use the same frozen Qwen3.5-9B under identical optimization settings.</figcaption>
   </figure>
 
-  <h3><span class="kn">4.3</span>Does a larger reward model help?</h3>
+  <h3>Does a larger reward model help?</h3>
   <p>Under the same settings, we vary PromptScore's backbone: Qwen3.5 at 4B, 9B, and 27B, plus Gemma-4-31B and GLM-5.3-Flash (320B total, 18B active). Every backbone improves both base models substantially, but larger ones do not help consistently. Gemma-4-31B gives the strongest overall results, the 320B GLM-5.3-Flash performs on par with or below it, and within Qwen3.5, scaling from 4B to 27B yields no consistent improvement (<a class="ref" data-ref="fig-scale"></a>). Benchmark correlation does not grow with size either: all five backbones reach a mean <i>r</i> between 0.972 and 0.987, and the 4B backbone already reaches 0.986.</p>
 
   <figure id="fig-scale" data-fig="scaling">
@@ -199,13 +199,13 @@
   </aside>
 </section>
 
-<!-- ===================================================================== §5 corpus -->
+<!-- ===================================================================== corpus -->
 <section class="sec" id="corpus" data-icon="corpus">
-  <p class="kicker"><span class="num">§5</span><span>What prompts should RL train on?</span></p>
+  <p class="kicker"><span>What prompts should RL train on?</span></p>
   <h2>The prompt corpus is the RL environment</h2>
   <p>In RL for text-to-image generation, the prompt corpus defines what the generator explores, yet existing pipelines draw prompts from heterogeneous, uncontrolled pools. We construct controlled corpora that vary in prompt design and prompt length, and isolate how each affects the trained model.</p>
 
-  <h3><span class="kn">5.1</span>Building controlled prompt environments</h3>
+  <h3>Building controlled prompt environments</h3>
   <p>Following scene-graph representations, we decompose prompts into <span class="sg entity">entities</span> (objects present), <span class="sg attribute">attributes</span> (verifiable visual properties), and <span class="sg relation">relations</span> (spatial, physical, or structural interactions). We leave out holistic modifiers such as style and mood, which lack grounded visual referents, so that failures stem from composition rather than stylistic ambiguity. The corpus is built in two phases: we curate short prompts into <i>Imago</i>-Short, then expand each one into four longer prompts with Qwen3.5-27B, each following a different design.</p>
 
   <figure id="fig-designs" data-fig="designs">
@@ -222,8 +222,8 @@
     <figcaption><b>Each design concentrates on a different primitive.</b> A seed prompt from <i>Imago</i>-Short and its four long expansions, abridged ([…]) as in the paper, with entities, attributes, and relations highlighted. The balanced design spreads its detail across all three. Images are synthesized by Nano-Banana for visualization.</figcaption>
   </figure>
 
-  <h3><span class="kn">5.2</span>Effects of prompt design and prompt length</h3>
-  <p>We fine-tune both base models on each design with graded PromptScore and the RL setup of §4. The balanced design delivers the most consistent gains on both base models (<a class="ref" data-ref="fig-design-gain"></a>). We attribute this to its symmetry: spreading detail evenly across entities, attributes, and relations encourages the model to acquire these skills jointly rather than favoring one axis. We adopt the balanced corpus as <b><i>Imago</i>-Long</b>.</p>
+  <h3>Effects of prompt design and prompt length</h3>
+  <p>We fine-tune both base models on each design with graded PromptScore, using the same RL setup as in the reward comparison. The balanced design delivers the most consistent gains on both base models (<a class="ref" data-ref="fig-design-gain"></a>). We attribute this to its symmetry: spreading detail evenly across entities, attributes, and relations encourages the model to acquire these skills jointly rather than favoring one axis. We adopt the balanced corpus as <b><i>Imago</i>-Long</b>.</p>
 
   <figure id="fig-design-gain" data-fig="designGain">
     <div class="fig-head">
@@ -237,7 +237,7 @@
 
   <p>Prompt length matters as well. Trained on <i>Imago</i>-Short, the models are stronger on concise benchmarks that emphasize direct attribute binding, such as TIIF-Bench; trained on <i>Imago</i>-Long, they excel on the detailed prompts of LongBench-T2I. Training on a single length regime cannot improve benchmarks of all lengths uniformly.</p>
 
-  <h3><span class="kn">5.3</span>Sequential training: from short binding to long composition</h3>
+  <h3>Sequential training: from short binding to long composition</h3>
   <p>To let one model inherit the strengths of both corpora, we compare two schedules with the same number of training steps. <b>Joint</b> training samples uniformly from both corpora throughout; <b>sequential</b> training uses <i>Imago</i>-Short for the first half of the steps and then switches to <i>Imago</i>-Long. Joint mixing does not reliably match the better single-corpus run on each benchmark. Sequential training achieves the highest LongBench-T2I score on both base models, surpassing training on <i>Imago</i>-Long alone, while remaining competitive on short prompts (<a class="ref" data-ref="fig-schedule"></a>).</p>
 
   <figure id="fig-schedule" data-fig="schedule">
@@ -257,9 +257,9 @@
   </aside>
 </section>
 
-<!-- ===================================================================== §6 imago -->
+<!-- ===================================================================== imago -->
 <section class="sec" id="imago" data-icon="image">
-  <p class="kicker"><span class="num">§6</span><span>What does the combined recipe achieve?</span></p>
+  <p class="kicker"><span>What does the combined recipe achieve?</span></p>
   <h2><i>Imago</i>: an online RL recipe for compositional generation</h2>
   <p><i>Imago</i> combines these findings without modifying the generator's architecture. Graded PromptScore from Qwen3.5-9B is the only reward; prompts follow the sequential schedule from <i>Imago</i>-Short to <i>Imago</i>-Long; and DiffusionNFT optimizes LoRA adapters without CFG or KL regularization. Applied to FLUX.2-Klein-Base-4B and Z-Image, it produces <i>Imago</i>-4B and <i>Imago</i>-6B.</p>
 
@@ -314,7 +314,7 @@
 
 <!-- ===================================================================== citation -->
 <section class="sec" id="citation" data-icon="quote">
-  <p class="kicker"><span class="num">Cite</span></p>
+  <p class="kicker"><span>Cite</span></p>
   <h2>BibTeX</h2>
   <div class="bib"><pre id="bibtex"></pre><button class="copy" type="button">Copy</button></div>
 </section>
