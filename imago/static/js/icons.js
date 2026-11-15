@@ -1,5 +1,6 @@
 /* Icons: one inline-SVG set for the page. Brand marks (GitHub, arXiv, Hugging Face) are Simple Icons paths (CC0);
-   the others are drawn here on a 24-unit grid with 1.8-unit round strokes. Imago.icon(name, cls) returns the markup. */
+   the others are drawn here on a 24-unit grid with 1.8-unit round strokes. Imago.icon(name, cls) returns the markup;
+   Imago.icon("emblem") returns the Imago mark. */
 (function () {
   "use strict";
   const I = (window.Imago = window.Imago || {});
@@ -26,12 +27,36 @@
     corpus: S('<circle cx="12" cy="6.2" r="2.5"/><circle cx="6.2" cy="17.4" r="2.5"/><circle cx="17.8" cy="17.4" r="2.5"/><path d="M10.9 8.4l-3.6 6.8M13.1 8.4l3.6 6.8M8.7 17.4h6.6"/>'),
     image: S('<rect x="3" y="5.5" width="15.5" height="14" rx="2.4"/><path d="M3 16.4l4.4-4.4a1.6 1.6 0 0 1 2.3 0l4.7 4.7"/><path d="M12.7 14.9l1.3-1.3a1.6 1.6 0 0 1 2.3 0l2.2 2.2"/><path d="M20 1.8l.75 1.75 1.75.75-1.75.75L20 6.8l-.75-1.75-1.75-.75 1.75-.75z" fill="currentColor" stroke="none"/>'),
   };
-  /* the Imago mark: an image frame holding a scene graph whose nodes carry the paper's entity, attribute and relation colours */
-  const EMBLEM = `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="1.5" y="1.5" width="45" height="45" rx="12.5" fill="#17191c"/>
-    <path d="M24 15.6L15.6 31.2M24 15.6l8.4 15.6M15.6 31.2h16.8" fill="none" stroke="#fff" stroke-opacity=".42" stroke-width="2.2" stroke-linecap="round"/>
-    <circle cx="24" cy="15.6" r="5.6" fill="#4b8ff7"/><circle cx="15.6" cy="31.2" r="4.9" fill="#3fb45a"/><circle cx="32.4" cy="31.2" r="4.9" fill="#f1a43a"/></svg>`;
+  /* The Imago mark. The paper takes its name from the imago, the final adult stage of metamorphosis (Sec. 1), so the
+     mark is a butterfly whose wings are one picture: sky, sun and mountains above, a meadow below. A noise layer clipped
+     to the wings lets the page generate them: with opacity t it blends picture x_0 and noise eps as
+     x_t = (1 - t) x_0 + t eps, the interpolation of Fig. 12. Each call gets its own ids. */
+  const FORE = "M30.4 27.4C27.6 20.4 19 10.8 9.8 8C5.7 6.8 3.1 9.3 3.5 13.5C4.1 20.4 7.7 27.4 14.1 31C19.2 33.8 25.6 33.9 30.4 32.5Z";
+  const HIND = "M30.4 34.5C25.4 34.4 19 35.9 15.1 40C11.6 43.7 11.4 50.5 14.9 53.6C18.4 56.7 23.6 54.4 26.4 49.6C28.5 46 30 40.6 30.4 36.4Z";
+  const WINGS = [FORE, HIND].map((d) => `<path d="${d}"/><path d="${d}" transform="matrix(-1 0 0 1 64 0)"/>`).join("");
+  const SCENE = `<path d="M0 0H64V34H0Z" fill="url(#@s)"/>
+      <circle cx="46" cy="15.5" r="7.4" fill="#fde68a" opacity=".55"/><circle cx="46" cy="15.5" r="4.6" fill="#fbbf24"/>
+      <path d="M8.5 17.2a3.2 3.2 0 0 1 6-1.4a2.4 2.4 0 0 1 3.4 2.2H8.6z" fill="#fff" opacity=".95"/>
+      <path d="M0 30L8 22.5L14 26.5L22 18.5L30 25L38 19.5L46 25.5L54 20.5L64 27V40H0Z" fill="#a9cbfb"/>
+      <path d="M0 34L10 26.5L18 31L26 25.5L34 31.5L42 26.5L52 31.5L60 27.5L64 30V40H0Z" fill="#5b9af8"/>
+      <path d="M0 33.4H64V64H0Z" fill="#9be8b4"/><path d="M0 41Q16 36.5 32 41T64 40.5V64H0Z" fill="#69d590"/><path d="M0 48Q18 43 34 48T64 47V64H0Z" fill="#3fbf6d"/>`;
+  const BODY = `<g fill="#1f5fcf"><path d="M31.1 21.4C29.7 16.6 27.1 13.2 23.9 11.8M32.9 21.4C34.3 16.6 36.9 13.2 40.1 11.8" fill="none" stroke="#1f5fcf" stroke-width="1.15" stroke-linecap="round"/>
+      <circle cx="23.7" cy="11.7" r="1.3"/><circle cx="40.3" cy="11.7" r="1.3"/><circle cx="32" cy="22.6" r="2.3"/><rect x="30.5" y="24.4" width="3" height="23" rx="1.5"/></g>`;
+  let marks = 0;
+  function emblem() {
+    const u = `imago-mark-${++marks}`;
+    const ch = (c) => `<feFunc${c} type="linear" slope="2.4" intercept="-.7"/>`;
+    return `<svg class="mark" viewBox="2.4 6.2 59.2 50.6" aria-hidden="true">
+      <defs><clipPath id="${u}-w">${WINGS}</clipPath>
+        <linearGradient id="${u}-s" x1="0" y1="6" x2="0" y2="33" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c3dbff"/><stop offset="1" stop-color="#f0f6ff"/></linearGradient>
+        <filter id="${u}-n" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="1" seed="7"/>
+          <feComponentTransfer>${["R", "G", "B"].map(ch).join("")}<feFuncA type="linear" slope="0" intercept="1"/></feComponentTransfer><feColorMatrix type="saturate" values=".55"/></filter></defs>
+      <g class="wings"><g clip-path="url(#${u}-w)">${SCENE.replace("@s", `${u}-s`)}<rect class="eps" width="64" height="64" filter="url(#${u}-n)" opacity="0"/></g>
+        <g fill="none" stroke="#2f6fe0" stroke-width="1" stroke-linejoin="round">${WINGS}</g></g>
+      ${BODY}</svg>`;
+  }
   I.icon = (name, cls) => {
-    const s = name === "emblem" ? EMBLEM : ICONS[name] || "";
+    const s = name === "emblem" ? emblem() : ICONS[name] || "";
     return cls ? s.replace("<svg ", `<svg class="${cls}" `) : s;
   };
 })();

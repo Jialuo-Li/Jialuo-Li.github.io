@@ -39,7 +39,7 @@
       <tr><th class="l" rowspan="2">Reward</th><th class="span" colspan="3"><span class="reg" style="color:var(--short)">Short</span></th>
       <th class="span" colspan="2"><span class="reg" style="color:var(--medium)">Medium</span></th><th class="span" colspan="2"><span class="reg" style="color:var(--long)">Long</span></th>
       <th class="span"><span class="reg">Appeal</span></th></tr>
-      <tr>${cols.map((c) => `<th>${c.replace(/-(?=[A-Z])/, "-<br>")}</th>`).join("")}<th>PickScore</th></tr></thead><tbody>`;
+      <tr>${cols.map((c) => `<th>${I.twoLine(c).join("<br>")}</th>`).join("")}<th>PickScore</th></tr></thead><tbody>`;
     Object.entries(P.rewardRL).forEach(([model, rows]) => {
       h += `<tr class="group"><td colspan="9">${model}</td></tr>`;
       const top = cols.map((_, j) => best(rows.map((r) => r.scores[j])));
@@ -83,7 +83,7 @@
       <tr><th class="l" rowspan="2">Model</th><th rowspan="2">Size</th><th class="span" colspan="3"><span class="reg" style="color:var(--short)">Short</span></th>
       <th class="span"><span class="reg" style="color:var(--medium)">Medium</span></th><th class="span"><span class="reg" style="color:var(--long)">Long</span></th>
       <th class="span"><span class="reg">Appeal</span></th></tr>
-      <tr>${cols.map((c) => `<th>${c.replace(/-(?=[A-Z])/, "-<br>")}</th>`).join("")}<th>PickScore</th></tr></thead><tbody>`;
+      <tr>${cols.map((c) => `<th>${I.twoLine(c).join("<br>")}</th>`).join("")}<th>PickScore</th></tr></thead><tbody>`;
     groups.forEach((g) => {
       h += `<tr class="group"><td colspan="8">${LABEL[g.name] || g.name}</td></tr>`;
       const top = cols.map((_, j) => best(g.rows.map((r) => r.scores[j])));

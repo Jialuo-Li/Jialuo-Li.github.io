@@ -14,6 +14,13 @@
   I.registry = {};
   I.register = (name, factory) => { I.registry[name] = factory; };
 
+  /* benchmark names on two lines, broken where the paper's table headers break them (\makecell{T2I\\CompBench}) */
+  const TWO_LINE = {
+    "T2I-CompBench": ["T2I", "CompBench"], "TIIF-Bench": ["TIIF", "Bench"], "SpatialGenEval": ["Spatial", "GenEval"],
+    "T2I-CoReBench": ["T2I", "CoReBench"], "LPD-Bench": ["LPD", "Bench"], "Arena-T2I-Hard": ["Arena-T2I", "Hard"],
+    "LongBench-T2I": ["LongBench", "T2I"],
+  };
+  I.twoLine = (name) => TWO_LINE[name] || [name];
   I.esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   I.fmt = (v, d = 2) => (v == null ? "–" : (+v).toFixed(d));
   I.pct = (v, d = 1) => (v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(d) + "%");

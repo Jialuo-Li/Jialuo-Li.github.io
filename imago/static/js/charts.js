@@ -9,11 +9,6 @@
   const REG = { short: "#3a8dde", medium: "#e59837", long: "#d94f4f" };
   const REGL = { short: "#a8d5ff", medium: "#ffd6a5", long: "#ffadad" };
   const BENCH = P.benchmarks;                     // seven benchmarks, by mean prompt length
-  const TWO_LINE = {
-    "T2I-CompBench": ["T2I-", "CompBench"], "TIIF-Bench": ["TIIF-", "Bench"], "SpatialGenEval": ["Spatial-", "GenEval"],
-    "T2I-CoReBench": ["T2I-", "CoReBench"], "LPD-Bench": ["LPD-", "Bench"], "Arena-T2I-Hard": ["Arena-", "T2I-Hard"],
-    "LongBench-T2I": ["LongBench-", "T2I"],
-  };
   const SHORTNAME = { "T2I-CompBench": "CompBench", "TIIF-Bench": "TIIF", "SpatialGenEval": "Spatial", "T2I-CoReBench": "CoReBench",
     "LPD-Bench": "LPD", "Arena-T2I-Hard": "Arena", "LongBench-T2I": "LongBench" };
   const light = (c, a) => d3.interpolateRgb(c, "#fff")(a);
@@ -38,7 +33,7 @@
 
   function twoLineTicks(g, names) {
     g.selectAll(".tick text").each(function (d, i) {
-      const t = d3.select(this), parts = TWO_LINE[names[i]] || [names[i]];
+      const t = d3.select(this), parts = I.twoLine(names[i]);
       t.text(null);
       parts.forEach((p, k) => t.append("tspan").attr("x", 0).attr("dy", k ? "1.15em" : "0.9em").text(p));
     });
@@ -555,7 +550,7 @@
         const g = svg.append("g").attr("transform", `translate(${px},${py})`);
         const t = g.append("text").attr("class", "ptitle").attr("x", pw / 2).attr("text-anchor", "middle").style("font-size", stacked ? "11px" : "12.5px").attr("fill", "#33383f");
         if (stacked) t.attr("y", -5).text(SHORTNAME[B.name]);
-        else (TWO_LINE[B.name] || [B.name]).forEach((q, k) => t.append("tspan").attr("x", pw / 2).attr("y", -19 + k * 14).text(q));
+        else I.twoLine(B.name).forEach((q, k) => t.append("tspan").attr("x", pw / 2).attr("y", -19 + k * 14).text(q));
         frames.push(g.append("rect").attr("class", "pframe").attr("width", pw).attr("height", pw).attr("fill", "#fff").attr("stroke", "#d5d9de"));
         g.append("line").attr("x1", sx(0.5)).attr("x2", sx(0.5)).attr("y1", 0).attr("y2", pw).attr("stroke", "#eef0f2");
         g.append("line").attr("y1", sy(0.5)).attr("y2", sy(0.5)).attr("x1", 0).attr("x2", pw).attr("stroke", "#eef0f2");
