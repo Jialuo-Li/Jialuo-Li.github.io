@@ -500,8 +500,8 @@
   /* ======================================================================== reward alignment (two figures)
      Top: the 19 models on each of the seven benchmarks (reward vs. benchmark score, both min-max normalized, with
      a linear fit per reward). Bottom: each reward's Pearson r per benchmark, in the same columns. */
-  const MARK = { CLIPScore: "s", HPSv3: "P", PickScore: "D", ImageReward: "*", UnifiedReward: "^", PromptScore: "o",
-    "Binary · Qwen3.5-9B": "X", "Graded · Gemma-4-E4B": "h", "Graded · Qwen3.5-9B": "o" };
+  const MARK = { CLIPScore: "s", HPSv3: "P", PickScore: "D", ImageReward: "*", UnifiedReward: "^", ProbScore: "o",
+    "Qwen3.5-9B": "o", "Gemma-4-E4B-it": "h", "GLM-5.3-Flash": "D" };
   // filled versions of matplotlib's "X" and hexagon markers, which d3 lacks (d3.symbolX is drawn by stroke only)
   const symbolXFill = { draw(c, size) {
     const r = Math.sqrt(size / 5) / 2, q = Math.SQRT1_2;
@@ -524,8 +524,9 @@
     const order = S.filter((s) => !s.highlight).concat(S.filter((s) => s.highlight));
     let api = null;
     const leg = legend(el, S.map((s) => ({ key: s.name, name: s.name, color: s.color, thick: s.highlight })), (key) => api && api.series(key));
-    const rDomain = groupKey === "classic" ? [-1, 1] : [0.7, 1];
-    const rTicks = groupKey === "classic" ? [-1, -0.5, 0, 0.5, 1] : [0.7, 0.8, 0.9, 1];
+    const rDomain = groupKey === "classic" ? [-1, 1] : [0.955, 1];
+    const rTicks = groupKey === "classic" ? [-1, -0.5, 0, 0.5, 1] : [0.96, 0.98, 1];
+    const rAxisFmt = groupKey === "classic" ? null : d3.format(".2f");
 
     function draw(build) {
       const Wc = Math.max(280, host.clientWidth);
@@ -594,7 +595,7 @@
       svg.append("g").attr("class", "grid").attr("transform", `translate(${x0},0)`)
         .call(d3.axisLeft(y).tickValues(rTicks).tickSize(-(x1 - x0)).tickFormat("")).call((g) => g.select(".domain").remove());
       if (rDomain[0] < 0) svg.append("line").attr("x1", x0).attr("x2", x1).attr("y1", y(0)).attr("y2", y(0)).attr("stroke", "#c8cdd4");
-      svg.append("g").attr("class", "axis").attr("transform", `translate(${x0},0)`).call(d3.axisLeft(y).tickValues(rTicks).tickSizeOuter(0));
+      svg.append("g").attr("class", "axis").attr("transform", `translate(${x0},0)`).call(d3.axisLeft(y).tickValues(rTicks).tickFormat(rAxisFmt).tickSizeOuter(0));
       if (stacked) svg.append("text").attr("class", "axis-title").attr("x", 2).attr("y", rTop - 12).text("Pearson r");
       else svg.append("text").attr("class", "axis-title").attr("text-anchor", "middle").attr("transform", `translate(14,${rTop + rH / 2}) rotate(-90)`).text("Pearson r");
       regimeStrip(svg, xc, half, x0, x1, rTop + rH + 2);
@@ -805,7 +806,7 @@
     return I.card({ title, sub, rows: rows.map(({ s, v }) => ({ k: s.tip || s.name || s.key, v: fmt(v), color: s.swatch || s.color, on: s.key === key, bar: Math.max(0, v) / top })) });
   }
 
-  /* ======================================================================== PromptScore vs SpectraReward */
+  /* ======================================================================== ProbScore vs SpectraReward */
   I.register("spectra", (el) => {
     const panels = el.querySelector(".panels");
     const D = P.spectra;
@@ -819,7 +820,7 @@
           yTitle: k === 0 ? "Relative gain over base (%)" : null, yFormat: (d) => d + "%",
           series: [
             { key: "SpectraReward", name: "SpectraReward", values: rs.SpectraReward, color: light("#00acc1", 0.45), swatch: "#00acc1", markerFill: light("#00acc1", 0.4), width: 2.6, marker: "v", markerSize: 85 },
-            { key: "PromptScore", name: "PromptScore", values: rs.PromptScore, color: BLUE, width: 4, marker: "o", markerSize: 110, top: true },
+            { key: "ProbScore", name: "ProbScore", values: rs.ProbScore, color: BLUE, width: 4, marker: "o", markerSize: 110, top: true },
           ],
         });
         api.model = model;
@@ -866,7 +867,7 @@
           svg.append("text").attr("x", m.l - 4).attr("y", H - m.b + 36).attr("text-anchor", "end").style("font-size", "11.5px").attr("fill", "#8c939c").text("r̄");
           svg.append("text").attr("class", "axis-title").attr("text-anchor", "middle").attr("transform", `translate(11,${(m.t + H - m.b) / 2}) rotate(-90)`).text("Normalized score");
         }
-        svg.append("text").attr("x", (m.l + W - m.r) / 2).attr("y", H - 6).attr("text-anchor", "middle").attr("class", "axis-title").text("PromptScore backbone");
+        svg.append("text").attr("x", (m.l + W - m.r) / 2).attr("y", H - 6).attr("text-anchor", "middle").attr("class", "axis-title").text("ProbScore backbone");
 
         const bw = x.bandwidth();
         const box = svg.append("g").selectAll("g").data(pn.boxes).join("g").attr("class", "box").attr("transform", (b) => `translate(${x(b.label)},0)`);

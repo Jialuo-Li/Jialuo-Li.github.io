@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Imago: Maturing Visual Generation with Reinforcement Learning</title>
-  <meta name="description" content="Imago is a reinforcement-learning post-training recipe for compositional text-to-image generation: a zero-shot PromptScore reward, a balanced scene-graph prompt corpus, and a short-to-long training schedule.">
+  <meta name="description" content="Imago is a reinforcement-learning post-training recipe for compositional text-to-image generation: a zero-shot ProbScore reward, a balanced scene-graph prompt corpus, and a short-to-long training schedule.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Imago: Maturing Visual Generation with Reinforcement Learning">
-  <meta property="og:description" content="A zero-shot PromptScore reward, a balanced scene-graph prompt corpus, and a short-to-long schedule turn FLUX.2-Klein-Base-4B and Z-Image into Imago-4B and Imago-6B.">
+  <meta property="og:description" content="A zero-shot ProbScore reward, a balanced scene-graph prompt corpus, and a short-to-long schedule turn FLUX.2-Klein-Base-4B and Z-Image into Imago-4B and Imago-6B.">
   <link rel="icon" href="static/img/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="static/fonts/LibertinusSerif-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="static/fonts/LibertinusSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -67,7 +67,7 @@
   <p class="findings-label">What we find</p>
   <ol class="findings">
     <li data-icon="evaluate"><b>Long prompts keep the benchmarks informative.</b> Across seven compositional benchmarks with prompts from about 9 to 539 words, the mean score of 19 models falls from 0.70–0.77 on short prompts to 0.55–0.62 on long ones. PickScore, the preference model least correlated with the others, measures visual appeal. <a class="jump" href="#evaluation">Evaluation&nbsp;↓</a></li>
-    <li data-icon="reward"><b>A small MLLM asked for a score is the best reward.</b> Zero-shot PromptScore, a 1–10 grade from Qwen3.5-9B, tracks all seven benchmarks (Pearson <i>r</i> = 0.96–0.99) and trains the best models without the reward hacking of preference-trained rewards. Larger reward backbones do not help. <a class="jump" href="#reward">Reward&nbsp;↓</a></li>
+    <li data-icon="reward"><b>A small MLLM's probability-weighted score is the best reward.</b> Zero-shot ProbScore, the 1–10 rating of Qwen3.5-9B weighted by its next-token probabilities, tracks all seven benchmarks (Pearson <i>r</i> = 0.97–0.99), holds across MLLM families, and trains the best models without the reward hacking of preference-trained rewards. Larger reward backbones do not help. <a class="jump" href="#reward">Reward&nbsp;↓</a></li>
     <li data-icon="corpus"><b>The prompt corpus shapes what RL teaches.</b> Prompts that balance entities, attributes, and relations give the strongest overall gains. Short and long prompts help in complementary ways; mixing them uniformly does not reliably combine the two, while training on short prompts first and long prompts second does. <a class="jump" href="#corpus">Prompt corpus&nbsp;↓</a></li>
     <li data-icon="image"><b><i>Imago</i> leads its size class and rivals far larger models.</b> <i>Imago</i>-4B and <i>Imago</i>-6B score highest in their size classes on all five compositional benchmarks while raising PickScore, and <i>Imago</i>-6B surpasses the 32B FLUX.2-dev on medium and long prompts. <a class="jump" href="#imago"><i>Imago</i>&nbsp;↓</a></li>
   </ol>
@@ -93,7 +93,7 @@
   </figure>
 
   <h3>A visual-appeal evaluator independent of the others</h3>
-  <p>Learned preference models are the usual measure of visual appeal. If the evaluator correlates with the model used as the RL reward, however, it favors models tuned on that same objective and can mask reward hacking. We score the outputs of the 19 models on all seven benchmarks with four preference models and correlate them pairwise over the pooled samples. PickScore is the least correlated with the others (<i>r̄</i> = 0.51, against 0.62–0.69), so we use it to measure visual appeal, on DrawBench prompts whose concise descriptions modern models reliably satisfy.</p>
+  <p>Learned preference models are the usual measure of visual appeal. If the evaluator correlates with the model used as the RL reward, however, it favors models tuned on that same objective and can mask reward hacking. We score the outputs of the 19 models on all seven benchmarks with four preference models and correlate them pairwise over the pooled samples. PickScore is the least correlated with the others (<i>r̄</i> = 0.51, against 0.62–0.69 for the rest), so we use it to measure visual appeal. Because preference evaluators remain sensitive to text alignment, we apply it to DrawBench prompts, whose concise descriptions modern models reliably satisfy, to isolate visual appeal from compositional failures.</p>
 
   <figure id="fig-pref" data-fig="prefEval">
     <div class="fig-head">
@@ -108,14 +108,16 @@
 <!-- ===================================================================== reward -->
 <section class="sec" id="reward" data-icon="reward">
   <p class="kicker"><span>Which reward should guide RL?</span></p>
-  <h2>A zero-shot PromptScore outperforms preference-trained rewards</h2>
-  <p>A reward must first track the target, and a good evaluator is not necessarily a good training signal. We therefore examine candidate rewards from both sides: as evaluators, by how closely they track the compositional benchmarks, and as RL rewards, by the models they train.</p>
+  <h2>A zero-shot ProbScore outperforms preference-trained rewards</h2>
+  <p>A reward must first track the target, and a good evaluator is not necessarily a good training signal. We therefore examine candidate rewards from both sides: as evaluators, by how closely they track the compositional benchmarks, and as RL rewards, by the models they train. Finally, we ask whether a larger reward backbone helps.</p>
 
   <h3>As an evaluator: does it track compositional capability?</h3>
-  <p>For each benchmark, we correlate a reward's mean score with the benchmark score across the 19 models. We compare four preference-trained rewards (HPSv3, PickScore, ImageReward, and UnifiedReward) with two zero-shot ones: CLIPScore and <b>PromptScore</b>, which asks Qwen3.5-9B to grade prompt–image alignment from 1 to 10. UnifiedReward shares PromptScore's Qwen3.5-9B backbone and differs mainly in preference tuning, so this pair isolates the effect of that tuning.</p>
+  <p>For each benchmark, we correlate a reward's mean score with the benchmark score across the 19 models. We compare four preference-trained rewards (HPSv3, PickScore, ImageReward, and UnifiedReward) with two zero-shot ones: CLIPScore and our <b>ProbScore</b>. Given an image <i>x</i>, a prompt <i>c</i>, and the template <i>q</i> below, ProbScore asks Qwen3.5-9B to rate their alignment from 1 to 10 and, rather than sampling one integer, takes the score weighted by the model's next-token distribution, in a single forward pass:</p>
+  <div class="math" data-tex="r_{\mathrm{prob}}(x,c)=\frac{1}{10}\sum_{s=1}^{10} s\,p_\theta(s\mid x,c,q),">r_prob(x, c) = (1/10) Σ s · p(s | x, c, q)</div>
+  <p>where <i>p</i><sub>θ</sub>(<i>s</i> | <i>x</i>, <i>c</i>, <i>q</i>) is the next-token probability of the score token <i>s</i>, normalized over the ten scores. UnifiedReward shares ProbScore's Qwen3.5-9B backbone and differs only in preference tuning, so this pair isolates the effect of that tuning.</p>
 
   <div class="template">
-    <div class="t-head">PromptScore prompt template</div>
+    <div class="t-head">ProbScore prompt template</div>
     <div class="t-body"><span class="role">System</span>You are an expert image evaluator. Please assess how accurately the provided image matches the text prompt. Apply maximum strictness. Score the alignment on a scale from 1 to 10, where 1 means completely mismatched and 10 means perfectly matched. Output your response strictly in the following JSON format: <code>{"score": &lt;integer_between_1_and_10&gt;}</code><br><span class="role">User</span><code>&lt;image&gt;</code> <code>Text Prompt: "&lt;prompt&gt;"</code></div>
   </div>
 
@@ -126,34 +128,34 @@
     </div>
     <div class="legend"></div>
     <div class="chart"></div>
-    <figcaption><b>PromptScore tracks every benchmark, and its correlation holds as prompts grow longer.</b> Top: the 19 models on each benchmark, by min–max normalized reward (x) and benchmark score (y), with a linear fit per reward. Bottom: the Pearson correlation between each reward and the benchmark score across the 19 models. Benchmarks are ordered by mean prompt length.</figcaption>
+    <figcaption><b>ProbScore tracks every benchmark, and its correlation holds as prompts grow longer.</b> Top: the 19 models on each benchmark, by min–max normalized reward (x) and benchmark score (y), with a linear fit per reward. Bottom: the Pearson correlation between each reward and the benchmark score across the 19 models. Benchmarks are ordered by mean prompt length.</figcaption>
   </figure>
 
-  <p>Preference tuning costs alignment: UnifiedReward trails PromptScore on every benchmark despite sharing its backbone, which suggests that preference fine-tuning biases a model toward broad perceptual preferences.</p>
-  <p>To find what makes PromptScore work, we ablate one component at a time: a binary criterion that credits only a complete match instead of the 1–10 grade, and Gemma-4-E4B in place of Qwen3.5-9B (<a class="ref" data-ref="fig-variants"></a>). Binary scoring loses correlation as prompts lengthen, since a single missed detail turns a partial match into a failure. Changing the backbone leaves the correlations nearly unchanged, so the graded format, not the choice of MLLM, drives them.</p>
+  <p>ProbScore correlates best with all seven benchmarks (<i>r</i> = 0.97–0.99) and keeps that correlation as prompts grow longer, whereas the other rewards degrade (<a class="ref" data-ref="fig-align"></a>). Preference tuning costs alignment: UnifiedReward trails ProbScore on every benchmark despite sharing its backbone, which suggests that preference fine-tuning biases a model toward broad perceptual preferences and weakens its ability to verify compositional constraints.</p>
+  <p>The high correlations are not specific to Qwen3.5. Substituting Qwen3.5-9B with Gemma-4-E4B-it or GLM-5.3-Flash under identical settings keeps the correlation at <i>r</i> ≥ 0.96 on all seven benchmarks, again holding as prompts lengthen (<a class="ref" data-ref="fig-variants"></a>). ProbScore's effectiveness thus stems from its probability-weighted rubric formulation rather than from a particular MLLM family.</p>
 
   <figure id="fig-variants" data-fig="rewardVariants">
     <div class="fig-head">
-      <h4 class="fig-title"><span class="fn"></span>PromptScore with another scoring format or backbone</h4>
+      <h4 class="fig-title"><span class="fn"></span>ProbScore with MLLM backbones from three families</h4>
       <div class="fig-tools"><button class="replay" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M9.2 4.45A3.7 3.7 0 1 1 6 2.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7.6 2.6L5.2 .85v3.5z" fill="currentColor"/></svg>Replay</button></div>
     </div>
     <div class="legend"></div>
     <div class="chart"></div>
-    <figcaption><b>Graded scoring, not the backbone, keeps the correlation high.</b> Starting from graded Qwen3.5-9B, one component is changed at a time: binary scoring, or Gemma-4-E4B as the backbone. Panels as in <a class="ref" data-ref="fig-align"></a>. On LongBench-T2I, binary scoring gives every image the same score, so its correlation is undefined there.</figcaption>
+    <figcaption><b>The correlation holds across MLLM families.</b> ProbScore instantiated with Qwen3.5-9B, Gemma-4-E4B-it, and GLM-5.3-Flash under identical evaluation settings. Panels as in <a class="ref" data-ref="fig-align"></a>, with the correlation axis zoomed to 0.955–1.</figcaption>
   </figure>
 
   <h3>As a training signal: does a better evaluator train a better model?</h3>
-  <p>We next use four of these rewards for RL and hold everything else fixed: DiffusionNFT fine-tunes FLUX.2-Klein-Base-4B for 500 steps and Z-Image for 300 steps, with neither classifier-free guidance (CFG) nor KL regularization during training. PromptScore trains the best model on all seven benchmarks for both base models (<a class="ref" data-ref="tab-reward"></a>), mirroring its correlations: the reward that tracks the benchmarks better also trains the better generator.</p>
+  <p>We next use four of these rewards for RL and hold everything else fixed: DiffusionNFT fine-tunes FLUX.2-Klein-Base-4B for 500 steps and Z-Image for 300 steps, with neither classifier-free guidance (CFG) nor KL regularization during training; at evaluation, each model uses its backbone's standard guidance configuration. ProbScore trains the best model on all seven benchmarks for both base models (<a class="ref" data-ref="tab-reward"></a>), mirroring its correlations: the reward that tracks the benchmarks better also trains the better model.</p>
 
   <figure id="tab-reward" data-fig="rewardTable" class="is-table">
     <div class="fig-head">
       <h4 class="fig-title"><span class="fn"></span>RL with each candidate reward</h4>
     </div>
     <div class="table-wrap"></div>
-    <figcaption><b>PromptScore trains the best model on every benchmark.</b> Compositional scores on each benchmark's native scale for the base models and their RL fine-tunes, all trained on the same corpus under a shared protocol; the last column is PickScore (×100) on DrawBench. Bold marks the best value per column within each base model.</figcaption>
+    <figcaption><b>ProbScore trains the best model on every benchmark.</b> Compositional scores on each benchmark's native scale for the base models and their RL fine-tunes, all trained on the same corpus under a shared protocol; the last column is PickScore (×100) on DrawBench. Bold marks the best value per column within each base model.</figcaption>
   </figure>
 
-  <p>PromptScore also keeps visual appeal on par with the preference-trained rewards. Those rewards are prone to reward hacking instead: HPSv3, for example, adds subjects the prompt never asked for to raise its aesthetic score (<a class="ref" data-ref="fig-hack"></a>). We attribute part of PromptScore's quality gain to training without CFG: because it scores unguided samples, the generator must produce images clear enough for the MLLM to recognize what they depict.</p>
+  <p>ProbScore also keeps visual appeal on par with the preference-trained rewards. Those rewards are prone to reward hacking instead: HPSv3, for example, adds subjects the prompt never asked for to raise its aesthetic score (<a class="ref" data-ref="fig-hack"></a>). We attribute part of ProbScore's quality gain to training without CFG: because it scores unguided samples, the T2I model must produce images clear enough for the MLLM to recognize and reward their semantic alignment.</p>
 
   <figure id="fig-hack" data-fig="rewardHacking">
     <div class="fig-head">
@@ -161,41 +163,41 @@
       <div class="fig-tools"><span class="hint">Click an image to enlarge</span></div>
     </div>
     <div class="imgrid"></div>
-    <figcaption><b>Preference-trained rewards can hack visual appeal; PromptScore keeps to the prompt.</b> HPSv3 adds an unprompted person to the empty street in the bottom row, while PromptScore preserves prompt fidelity and still improves overall visual quality.</figcaption>
+    <figcaption><b>Preference-trained rewards can hack visual appeal; ProbScore keeps to the prompt.</b> HPSv3 adds an unprompted person to the empty street in the bottom row, while ProbScore preserves prompt fidelity and still improves overall visual quality.</figcaption>
   </figure>
 
-  <p><b>Explicit scoring versus prompt likelihood.</b> SpectraReward is another training-free reward from a frozen MLLM; it measures how likely the MLLM is to reconstruct the prompt from the image. For an image <i>x</i>, a prompt <i>c</i> = (<i>c</i><sub>1</sub>, …, <i>c<sub>L</sub></i>), and the evaluation template <i>q</i>, the two rewards are</p>
-  <div class="math" data-tex="r_{\mathrm{PS}}(x,c)=\frac{s}{10},\quad s\sim p_\theta(\,\cdot\mid x,c,q),\qquad\qquad r_{\mathrm{SR}}(x,c)=\frac{1}{L}\sum_{l=1}^{L}\log p_\theta(c_l\mid x,c_{<l})." data-tex-narrow="\begin{gathered}r_{\mathrm{PS}}(x,c)=\frac{s}{10},\quad s\sim p_\theta(\,\cdot\mid x,c,q),\\[6pt] r_{\mathrm{SR}}(x,c)=\frac{1}{L}\sum_{l=1}^{L}\log p_\theta(c_l\mid x,c_{<l}).\end{gathered}">r_PS(x, c) = s / 10;  r_SR(x, c) = (1/L) Σ log p(c_l | x, c_&lt;l)</div>
-  <p>With the same frozen Qwen3.5-9B, PromptScore trails SpectraReward slightly on short prompts but leads on long ones for both base models (<a class="ref" data-ref="fig-spectra"></a>). Averaged over hundreds of tokens, an omitted entity or a wrong relation changes only a small part of the likelihood, whereas an explicit score penalizes it regardless of prompt length.</p>
+  <p><b>Probability-weighted rubric scoring versus prompt likelihood.</b> SpectraReward is another training-free reward that extracts continuous probabilities from a frozen MLLM: it measures the log-likelihood of reconstructing the prompt from the image. For a prompt <i>c</i> = (<i>c</i><sub>1</sub>, …, <i>c<sub>L</sub></i>) of <i>L</i> tokens, the two rewards are</p>
+  <div class="math" data-tex="r_{\mathrm{prob}}(x,c)=\frac{1}{10}\sum_{s=1}^{10} s\,p_\theta(s\mid x,c,q),\qquad\qquad r_{\mathrm{SR}}(x,c)=\frac{1}{L}\sum_{l=1}^{L}\log p_\theta(c_l\mid x,c_{<l})." data-tex-narrow="\begin{gathered}r_{\mathrm{prob}}(x,c)=\frac{1}{10}\sum_{s=1}^{10} s\,p_\theta(s\mid x,c,q),\\[6pt] r_{\mathrm{SR}}(x,c)=\frac{1}{L}\sum_{l=1}^{L}\log p_\theta(c_l\mid x,c_{<l}).\end{gathered}">r_prob(x, c) = (1/10) Σ s · p(s | x, c, q);  r_SR(x, c) = (1/L) Σ log p(c_l | x, c_&lt;l)</div>
+  <p>Both give a deterministic, continuous signal in a single forward pass, but ProbScore rates holistic alignment while SpectraReward averages token log-likelihoods under teacher forcing. With the same frozen Qwen3.5-9B, ProbScore outperforms SpectraReward in all three prompt-length regimes on both base models, by the widest margin on long prompts (<a class="ref" data-ref="fig-spectra"></a>). Averaged over hundreds of tokens, an omitted entity or a broken spatial relation changes only a small part of the likelihood, which is dominated by non-compositional syntax and function words, whereas ProbScore penalizes a missing element regardless of prompt length.</p>
 
   <figure id="fig-spectra" data-fig="spectra">
     <div class="fig-head">
-      <h4 class="fig-title"><span class="fn"></span>PromptScore versus SpectraReward across prompt lengths</h4>
+      <h4 class="fig-title"><span class="fn"></span>ProbScore versus SpectraReward across prompt lengths</h4>
       <div class="fig-tools"><button class="replay" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M9.2 4.45A3.7 3.7 0 1 1 6 2.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7.6 2.6L5.2 .85v3.5z" fill="currentColor"/></svg>Replay</button></div>
     </div>
     <div class="legend">
-      <span class="li"><span class="sw" style="color:var(--series-blue);border-top-width:3.5px"></span>PromptScore</span>
+      <span class="li"><span class="sw" style="color:var(--series-blue);border-top-width:3.5px"></span>ProbScore</span>
       <span class="li"><span class="sw" style="color:#73cbd6"></span>SpectraReward</span>
     </div>
     <div class="panels"></div>
-    <figcaption><b>PromptScore trails on short prompts and leads on long ones.</b> Mean relative gain over the base model in each prompt-length regime. Both rewards use the same frozen Qwen3.5-9B under identical optimization settings.</figcaption>
+    <figcaption><b>ProbScore leads in every regime, most on long prompts.</b> Mean relative gain over the base model in each prompt-length regime. Both rewards use the same frozen Qwen3.5-9B under identical optimization settings.</figcaption>
   </figure>
 
   <h3>Does a larger reward model help?</h3>
-  <p>Under the same settings, we vary PromptScore's backbone: Qwen3.5 at 4B, 9B, and 27B, plus Gemma-4-31B and GLM-5.3-Flash (320B total, 18B active). Every backbone improves both base models substantially, but larger ones do not help consistently. Gemma-4-31B gives the strongest overall results, the 320B GLM-5.3-Flash performs on par with or below it, and within Qwen3.5, scaling from 4B to 27B yields no consistent improvement (<a class="ref" data-ref="fig-scale"></a>). Benchmark correlation does not grow with size either: all five backbones reach a mean <i>r</i> between 0.972 and 0.987, and the 4B backbone already reaches 0.986.</p>
+  <p>Under the same settings, we vary ProbScore's backbone: Qwen3.5 at 4B, 9B, and 27B, plus Gemma-4-31B and GLM-5.3-Flash (320B total, 18B active parameters). All five backbones, from 4B to 320B parameters, improve both base models by comparable margins and cluster within a narrow band, without a monotonic scaling trend (<a class="ref" data-ref="fig-scale"></a>). Within Qwen3.5, scaling from 4B and 9B to 27B yields similar results, and neither Gemma-4-31B nor GLM-5.3-Flash improves systematically over the 9B backbone despite a much higher inference cost. Benchmark correlation does not grow with size either: all five backbones reach a mean <i>r</i> between 0.974 and 0.987, and the 4B backbone already reaches 0.983, matching or exceeding larger ones on benchmarks such as TIIF-Bench and LPD-Bench.</p>
 
   <figure id="fig-scale" data-fig="scaling">
     <div class="fig-head">
-      <h4 class="fig-title"><span class="fn"></span>Compositional performance across PromptScore backbones</h4>
+      <h4 class="fig-title"><span class="fn"></span>Compositional performance across ProbScore backbones</h4>
       <div class="fig-tools"><button class="replay" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M9.2 4.45A3.7 3.7 0 1 1 6 2.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7.6 2.6L5.2 .85v3.5z" fill="currentColor"/></svg>Replay</button></div>
     </div>
     <div class="panels"></div>
-    <figcaption><b>A larger reward model does not train a better generator.</b> Normalized scores on the seven benchmarks before RL (Base) and after RL with each PromptScore backbone, labeled by parameter count; boxes span the quartiles and whiskers the full range. The numbers below the axis give each backbone's mean Pearson correlation with the benchmarks across 19 models.</figcaption>
+    <figcaption><b>A larger reward model does not train a better model.</b> Normalized scores on the seven benchmarks before RL (Base) and after RL with each ProbScore backbone, labeled by parameter count; boxes span the quartiles and whiskers the full range. The numbers below the axis give each backbone's mean Pearson correlation with the benchmarks across 19 models.</figcaption>
   </figure>
 
   <aside class="insight">
     <p><b>Offline correlation predicts optimization efficacy.</b> Benchmark correlation reliably forecasts downstream training outcomes. Evaluating this alignment directly identifies effective rewards, eliminating the cost of exploratory training sweeps across candidate signals.</p>
-    <p><b>Small pretrained MLLMs can provide robust zero-shot rewards.</b> Graded scoring on a small frozen MLLM improves composition across prompt lengths without compromising visual appeal, avoiding preference reward hacking and the token dilution inherent to prompt likelihood.</p>
+    <p><b>Small pretrained MLLMs can provide robust zero-shot rewards.</b> ProbScore on a small frozen MLLM improves composition across prompt lengths without compromising visual appeal, avoiding preference reward hacking and the token dilution inherent to prompt likelihood.</p>
   </aside>
 </section>
 
@@ -223,7 +225,7 @@
   </figure>
 
   <h3>Effects of prompt design and prompt length</h3>
-  <p>We fine-tune both base models on each design with graded PromptScore, using the same RL setup as in the reward comparison. The balanced design delivers the most consistent gains on both base models (<a class="ref" data-ref="fig-design-gain"></a>). We attribute this to its symmetry: spreading detail evenly across entities, attributes, and relations encourages the model to acquire these skills jointly rather than favoring one axis. We adopt the balanced corpus as <b><i>Imago</i>-Long</b>.</p>
+  <p>We fine-tune both base models on each design with ProbScore, using the same RL setup as in the reward comparison. The balanced design delivers the most consistent gains on both base models (<a class="ref" data-ref="fig-design-gain"></a>). We attribute this to its symmetry: spreading detail evenly across entities, attributes, and relations encourages the model to acquire these skills jointly rather than favoring one axis. We adopt the balanced corpus as <b><i>Imago</i>-Long</b>.</p>
 
   <figure id="fig-design-gain" data-fig="designGain">
     <div class="fig-head">
@@ -261,7 +263,7 @@
 <section class="sec" id="imago" data-icon="image">
   <p class="kicker"><span>What does the combined recipe achieve?</span></p>
   <h2><i>Imago</i>: an online RL recipe for compositional generation</h2>
-  <p><i>Imago</i> combines these findings without modifying the generator's architecture. Graded PromptScore from Qwen3.5-9B is the only reward; prompts follow the sequential schedule from <i>Imago</i>-Short to <i>Imago</i>-Long; and DiffusionNFT optimizes LoRA adapters without CFG or KL regularization. Applied to FLUX.2-Klein-Base-4B and Z-Image, it produces <i>Imago</i>-4B and <i>Imago</i>-6B.</p>
+  <p><i>Imago</i> combines these findings without modifying the generator's architecture. ProbScore from Qwen3.5-9B is the only reward; prompts follow the sequential schedule from <i>Imago</i>-Short to <i>Imago</i>-Long; and DiffusionNFT optimizes LoRA adapters without CFG or KL regularization. Applied to FLUX.2-Klein-Base-4B and Z-Image, it produces <i>Imago</i>-4B and <i>Imago</i>-6B.</p>
 
   <figure id="fig-recipe" data-fig="recipe" class="recipe">
     <div class="fig-head">
@@ -269,7 +271,7 @@
       <div class="fig-tools"><button class="replay" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M9.2 4.45A3.7 3.7 0 1 1 6 2.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7.6 2.6L5.2 .85v3.5z" fill="currentColor"/></svg>Replay</button></div>
     </div>
     <div class="chart"></div>
-    <figcaption><b>One DiffusionNFT step with PromptScore.</b> The EMA policy π<sup>old</sup> samples <i>G</i> = 12 images for a prompt without guidance; PromptScore grades them, and the grades, standardized within the group, give each image an optimality reward <i>r<sub>k</sub></i>. Each image is noised along the forward process, and the trained velocity <i>v</i><sub>θ</sub> and the EMA velocity <i>v</i><sup>old</sup> form the implicit positive and negative velocities <i>v</i><span class="ss"><span>+</span><span>θ</span></span> and <i>v</i><span class="ss"><span>−</span><span>θ</span></span>, regressed toward <i>v</i> = ε − <i>x</i><span class="ss"><span><i>k</i></span><span>0</span></span> with weights <i>r<sub>k</sub></i> and 1 − <i>r<sub>k</sub></i>. Halfway through training, the prompts switch from <i>Imago</i>-Short to <i>Imago</i>-Long and the optimizer states and EMA weights are reset. Grades are illustrative, and the loss's per-residual normalization is omitted.</figcaption>
+    <figcaption><b>One DiffusionNFT step with ProbScore.</b> The EMA policy π<sup>old</sup> samples <i>G</i> = 12 images for a prompt without guidance; ProbScore scores them, and the scores, standardized within the group, give each image an optimality reward <i>r<sub>k</sub></i>. Each image is noised along the forward process, and the trained velocity <i>v</i><sub>θ</sub> and the EMA velocity <i>v</i><sup>old</sup> form the implicit positive and negative velocities <i>v</i><span class="ss"><span>+</span><span>θ</span></span> and <i>v</i><span class="ss"><span>−</span><span>θ</span></span>, regressed toward <i>v</i> = ε − <i>x</i><span class="ss"><span><i>k</i></span><span>0</span></span> with weights <i>r<sub>k</sub></i> and 1 − <i>r<sub>k</sub></i>. Halfway through training, the prompts switch from <i>Imago</i>-Short to <i>Imago</i>-Long and the optimizer states and EMA weights are reset. Scores are illustrative, and the loss's per-residual normalization is omitted.</figcaption>
   </figure>
 
   <p>We compare <i>Imago</i> with 19 competitive models: proprietary systems, unified multimodal models, and diffusion and flow-matching models (<a class="ref" data-ref="tab-main"></a>). <i>Imago</i>-4B and <i>Imago</i>-6B achieve the highest scores across all five compositional benchmarks within their size classes, and both raise PickScore over their base models. Z-Image-Turbo, an RL-fine-tuned variant of Z-Image, also raises PickScore but drops on every compositional benchmark, showing that preference optimization can compromise prompt adherence, whereas <i>Imago</i> improves composition and visual quality together.</p>

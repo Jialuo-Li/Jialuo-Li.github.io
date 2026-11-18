@@ -16,7 +16,7 @@
     const n = rows[0].items.length;
     grid.style.gridTemplateColumns = `22px repeat(${n}, minmax(0, 1fr))`;
     const brk = (t) => t.replace(/([a-z])(Reward|Score|model)/g, "$1<wbr>$2").replace(/^CLIP/, "CLIP<wbr>");
-    let h = `<div></div>` + rows[0].items.map((it) => `<div class="colhead${it.reward === "PromptScore" ? " ours" : ""}">${brk(it.reward)}</div>`).join("");
+    let h = `<div></div>` + rows[0].items.map((it) => `<div class="colhead${it.reward === "ProbScore" ? " ours" : ""}">${brk(it.reward)}</div>`).join("");
     rows.forEach((r, ri) => {
       h += `<div class="rowhead">${r.model}</div>`;
       r.items.forEach((it, ci) => {
@@ -39,7 +39,7 @@
         const pick = (c === 0 ? [0, n - 1] : [0, c]).map((k) => r.items[k]);
         I.lightbox.open({
           title: `<b>${r.model}</b>`,
-          items: pick.map((it) => ({ src: it.img, cap: it.reward === "Base model" ? "Base model (no RL)" : `RL with ${it.reward}` })),
+          items: pick.map((it) => ({ src: it.img, cap: it.reward === "Base model" ? "Base model (w/o RL)" : `RL with ${it.reward}` })),
           note: `“${I.esc(r.prompt)}”`,
         });
       });

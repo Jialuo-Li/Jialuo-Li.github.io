@@ -1,23 +1,26 @@
 /* One Imago training step, drawn after DiffusionNFT's own diagram (Zheng et al., Fig. 4) and animated while in view.
-   Notation follows Appendix C. The EMA generator pi_old samples G = 12 images for a prompt; PromptScore grades them and
-   the grades, normalized in the group, become optimality rewards r_k. A sample is noised along the forward process; the
+   Notation follows Appendix C. The EMA generator pi_old samples G = 12 images for a prompt; ProbScore scores them and
+   the scores, normalized in the group, become optimality rewards r_k. A sample is noised along the forward process; the
    trained velocity v_theta and the EMA velocity v_old give the implicit positive and negative velocities v_theta^+ and
    v_theta^-, regressed to v with weights r_k and 1 - r_k; the EMA weights then follow theta. Halfway, the prompts switch from Imago-Short to Imago-Long and
-   the optimizer and EMA are reset (Appendix C). Grades are illustrative. Hovering pauses the animation. */
+   the optimizer and EMA are reset (Appendix C). Scores are illustrative. Hovering pauses the animation. */
 (function () {
   "use strict";
   const I = window.Imago, Q = I.P.qual;
   const G = 12, STEPS = 8;
-  // illustrative grades for the 8 animated steps, 12 rollouts each, and the sample followed through the update
-  const GRADES = [
+  // illustrative scores for the 8 animated steps, 12 rollouts each, and the sample followed through the update: a coarse
+  // 1-10 level per rollout, made continuous like a ProbScore (the probability-weighted rating, / 10, in [0.1, 1])
+  const LEVELS = [
     [5, 7, 4, 6, 8, 3, 6, 5, 7, 4, 6, 5], [6, 4, 7, 5, 8, 6, 3, 7, 5, 6, 7, 4], [6, 8, 5, 7, 4, 7, 6, 8, 5, 6, 7, 6], [7, 5, 8, 6, 7, 4, 8, 6, 7, 5, 8, 6],
     [4, 6, 3, 5, 7, 5, 4, 6, 3, 5, 6, 4], [5, 7, 4, 6, 5, 8, 6, 4, 7, 5, 6, 5], [6, 5, 7, 8, 6, 4, 7, 6, 8, 5, 6, 7], [7, 6, 8, 5, 7, 8, 6, 7, 5, 8, 7, 6],
   ];
+  const NUDGE = [0.31, -0.22, 0.14, -0.37, 0.05, 0.28, -0.11, 0.36, -0.29, 0.19, -0.04, 0.24];
+  const SCORES = LEVELS.map((row, s) => row.map((v, i) => Math.round((v + NUDGE[(i + 5 * s) % G]) * 10) / 100));
   const PICK = [4, 6, 1, 6, 4, 5, 3, 1];
   const HUE = [212, 28, 140, 265, 190, 340, 48, 160, 230, 10, 95, 300];
   const plain = (key) => Q.designs.find((d) => d.key === key).segments.map((s) => s.t).join("");
   const tex = (s) => (window.katex ? window.katex.renderToString(s, { throwOnError: false }) : s);
-  /* optimality reward of each sample: 1/2 + clip(z, -5, 5) / 10, z the grade standardized within the group */
+  /* optimality reward of each sample: 1/2 + clip(z, -5, 5) / 10, z the score standardized within the group */
   const rewards = (g) => {
     const mu = g.reduce((a, b) => a + b, 0) / g.length, sd = Math.sqrt(g.reduce((a, b) => a + (b - mu) ** 2, 0) / g.length) || 1;
     return g.map((v) => 0.5 + Math.max(-5, Math.min(5, (v - mu) / sd)) / 10);
@@ -55,7 +58,7 @@
             <p class="nf-text"></p>
           </div>
           <div class="nb nb-roll" data-b="roll"><div class="nf-h">${tex("\\{x_0^k\\}_{k=1}^{G}\\sim\\pi^{\\mathrm{old}}(\\cdot\\mid c)")}</div><div class="nf-tiles">${Array.from({ length: G }, (_, i) => tile(i)).join("")}</div></div>
-          <div class="nb nb-score" data-b="score"><div class="nf-h"><span class="nf-lab">PromptScore</span>${tex("r^{\\mathrm{raw}}_k\\in\\{1,\\dots,10\\}")}</div><div class="nf-bars">${Array.from({ length: G }, () => "<span><i></i></span>").join("")}<em class="nf-mean"></em></div></div>
+          <div class="nb nb-score" data-b="score"><div class="nf-h"><span class="nf-lab">ProbScore</span>${tex("r^{\\mathrm{raw}}_k\\in[0.1,1]")}</div><div class="nf-bars">${Array.from({ length: G }, () => "<span><i></i></span>").join("")}<em class="nf-mean"></em></div></div>
           <div class="nb nb-rk" data-b="rk">${tex("r_k=\\tfrac12+\\tfrac1{10}\\,\\mathrm{clip}\\big(\\tfrac{r^{\\mathrm{raw}}_k-\\mu_R}{\\sigma_R},-5,5\\big)")}</div>
           <div class="nb nb-xt" data-b="xt"><div class="nf-xtile"><i></i><u></u></div>${tex("x_t=(1-t)\\,x_0^k+t\\epsilon")}</div>
           <div class="nb nb-net nb-vth" data-b="vth">${tex("v_\\theta")}</div>
@@ -129,11 +132,11 @@
     /* the state at the end of a step, without animation (first paint, reduced motion) */
     function still(step) {
       reset(step);
-      const g = GRADES[step], mu = g.reduce((a, b) => a + b, 0) / G, r = rewards(g), k = PICK[step];
-      tiles.forEach((t, i) => { t.classList.add("in", "scored", g[i] > mu ? "pos" : "neg"); t.querySelector("b").textContent = g[i]; });
+      const g = SCORES[step], mu = g.reduce((a, b) => a + b, 0) / G, r = rewards(g), k = PICK[step];
+      tiles.forEach((t, i) => { t.classList.add("in", "scored", g[i] > mu ? "pos" : "neg"); t.querySelector("b").textContent = g[i].toFixed(2); });
       tiles[k].classList.add("pick");
-      bars.forEach((b, i) => { b.querySelector("i").style.height = g[i] * 10 + "%"; b.classList.add(g[i] > mu ? "pos" : "neg"); });
-      mean.style.bottom = mu * 10 + "%"; mean.style.opacity = 1;
+      bars.forEach((b, i) => { b.querySelector("i").style.height = g[i] * 100 + "%"; b.classList.add(g[i] > mu ? "pos" : "neg"); });
+      mean.style.bottom = mu * 100 + "%"; mean.style.opacity = 1;
       $(".nf-xtile").style.setProperty("--h", HUE[k]);
       $(".nf-xtile").classList.add("in");
       weights(r[k]);
@@ -152,18 +155,18 @@
         }
         if (step === 0) await nap(400);
         if (!alive()) return;
-        const g = GRADES[step], mu = g.reduce((a, b) => a + b, 0) / G, r = rewards(g), k = PICK[step];
+        const g = SCORES[step], mu = g.reduce((a, b) => a + b, 0) / G, r = rewards(g), k = PICK[step];
         // rollouts from pi_old
         on("prompt", "w:prompt", "roll");
         for (let i = 0; i < G; i++) { tiles[i].classList.add("in"); await nap(50); }
         await nap(200);
         if (!alive()) return;
-        // PromptScore grades, then rewards normalized within the group
+        // ProbScore scores, then rewards normalized within the group
         on("score");
-        for (let i = 0; i < G; i++) { tiles[i].querySelector("b").textContent = g[i]; tiles[i].classList.add("scored"); await nap(40); }
-        bars.forEach((b, i) => { b.querySelector("i").style.height = g[i] * 10 + "%"; });
+        for (let i = 0; i < G; i++) { tiles[i].querySelector("b").textContent = g[i].toFixed(2); tiles[i].classList.add("scored"); await nap(40); }
+        bars.forEach((b, i) => { b.querySelector("i").style.height = g[i] * 100 + "%"; });
         await nap(450);
-        mean.style.bottom = mu * 10 + "%";
+        mean.style.bottom = mu * 100 + "%";
         mean.style.opacity = 1;
         await nap(300);
         bars.forEach((b, i) => b.classList.add(g[i] > mu ? "pos" : g[i] < mu ? "neg" : "mid"));

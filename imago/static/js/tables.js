@@ -45,7 +45,7 @@
       const top = cols.map((_, j) => best(rows.map((r) => r.scores[j])));
       const topPick = best(rows.map((r) => r.pick));
       rows.forEach((r) => {
-        h += `<tr class="${r.reward === "PromptScore" ? "ours" : ""}" data-m="${I.esc(model)}" data-r="${I.esc(r.reward)}"><td class="l">${r.reward === "Base" ? "Base (no RL)" : r.reward}</td>`;
+        h += `<tr class="${r.reward === "ProbScore" ? "ours" : ""}" data-m="${I.esc(model)}" data-r="${I.esc(r.reward)}"><td class="l">${r.reward === "Base" ? "Base (w/o RL)" : r.reward}</td>`;
         r.scores.forEach((v, j) => (h += `<td class="${v === top[j] ? "best" : ""}">${I.fmt(v, DEC7[j])}</td>`));
         h += `<td class="${r.pick === topPick ? "best" : ""}">${I.fmt(r.pick, 2)}</td></tr>`;
       });
@@ -60,8 +60,8 @@
       const val = (q) => (col < cols.length ? q.scores[col] : q.pick);
       const v = val(r), d = r === base ? null : rel(v, val(base));
       const ranked = rows.slice().sort((a, b) => val(b) - val(a));
-      return I.card({ title: r.reward === "Base" ? "Base (no RL)" : r.reward, color: r.reward === "PromptScore" ? "#3b82f6" : null, sub: `${model} · ${COLS[col]}`,
-        rows: ranked.map((q) => ({ k: q.reward === "Base" ? "Base (no RL)" : q.reward, v: I.fmt(val(q), col < cols.length ? DEC7[col] : 2) + (q === base || rel(val(q), val(base)) == null ? "" : ` <span class="tc-d ${rel(val(q), val(base)) >= 0 ? "up" : "dn"}">${I.pct(rel(val(q), val(base)), 1)}</span>`), on: q === r })),
+      return I.card({ title: r.reward === "Base" ? "Base (w/o RL)" : r.reward, color: r.reward === "ProbScore" ? "#3b82f6" : null, sub: `${model} · ${COLS[col]}`,
+        rows: ranked.map((q) => ({ k: q.reward === "Base" ? "Base (w/o RL)" : q.reward, v: I.fmt(val(q), col < cols.length ? DEC7[col] : 2) + (q === base || rel(val(q), val(base)) == null ? "" : ` <span class="tc-d ${rel(val(q), val(base)) >= 0 ? "up" : "dn"}">${I.pct(rel(val(q), val(base)), 1)}</span>`), on: q === r })),
         note: d == null ? "The base model before RL." : `${I.pct(d, 1)} over the base model.` });
     });
     return {};
